@@ -1,47 +1,415 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI Travel Planner</title>
+  <title>Atlas — AI Travel Planner</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
-    body { font-family: sans-serif; max-width: 700px; margin: 60px auto; padding: 0 20px; }
-    h1 { font-size: 24px; margin-bottom: 8px; }
-    p.sub { color: #888; margin-bottom: 32px; }
-    label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 6px; }
-    input { width: 100%; padding: 10px; font-size: 15px; border: 1px solid #ddd;
-            border-radius: 6px; margin-bottom: 16px; box-sizing: border-box; }
-    button { background: #000; color: #fff; border: none; padding: 12px 28px;
-             font-size: 15px; border-radius: 6px; cursor: pointer; }
-    button:hover { background: #333; }
-    #result { margin-top: 40px; border-top: 1px solid #eee; padding-top: 24px; line-height: 1.7; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #080D1A;
+      --surface: #0F1729;
+      --border: #1E2D4A;
+      --accent: #E8924A;
+      --accent-dim: rgba(232, 146, 74, 0.12);
+      --text: #F0EDE8;
+      --text-muted: #6B7F9E;
+      --text-secondary: #A8B8D0;
+      --radius: 10px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      padding: 0 20px;
+    }
+
+    header {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 64px 0 48px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .eyebrow {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(34px, 6vw, 52px);
+      font-weight: 600;
+      line-height: 1.1;
+      margin-bottom: 16px;
+    }
+
+    h1 em { font-style: italic; color: var(--accent); }
+
+    .subtitle {
+      font-size: 16px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      font-weight: 300;
+    }
+
+    main {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 48px 0;
+    }
+
+    .error-box {
+      background: rgba(220, 80, 80, 0.08);
+      border: 1px solid rgba(220, 80, 80, 0.25);
+      border-radius: var(--radius);
+      padding: 14px 18px;
+      color: #F08080;
+      font-size: 14px;
+      margin-bottom: 24px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .form-full { grid-column: 1 / -1; }
+
+    .field { display: flex; flex-direction: column; gap: 8px; }
+
+    label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    input {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      padding: 13px 16px;
+      width: 100%;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    input::placeholder { color: var(--text-muted); }
+
+    input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-dim);
+    }
+
+    .style-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin: 24px 0 10px;
+    }
+
+    .style-pills {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 28px;
+    }
+
+    .pill {
+      padding: 8px 16px;
+      border-radius: 100px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      user-select: none;
+    }
+
+    .pill:hover { border-color: var(--accent); color: var(--text); }
+
+    .pill.active {
+      background: var(--accent-dim);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    input[name="style"] { display: none; }
+
+    .btn {
+      width: 100%;
+      padding: 16px;
+      background: var(--accent);
+      color: #080D1A;
+      border: none;
+      border-radius: var(--radius);
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+
+    .btn:hover { opacity: 0.88; }
+    .btn:active { transform: scale(0.99); }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .loading {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      padding: 52px 0;
+      text-align: center;
+    }
+
+    .loading.visible { display: flex; }
+
+    .spinner {
+      width: 32px;
+      height: 32px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.75s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .loading p {
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+
+    .loading span { color: var(--accent); font-weight: 500; }
+
+    .result {
+      margin-top: 52px;
+      padding-top: 52px;
+      border-top: 1px solid var(--border);
+    }
+
+    .result-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .result-eyebrow {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    .result-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .result-body {
+      color: var(--text-secondary);
+      line-height: 1.85;
+      font-size: 15px;
+    }
+
+    .result-body h1, .result-body h2 {
+      font-family: 'Playfair Display', serif;
+      color: var(--text);
+      font-size: 22px;
+      margin: 36px 0 12px;
+      font-weight: 600;
+    }
+
+    .result-body h3 {
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin: 24px 0 8px;
+    }
+
+    .result-body p { margin-bottom: 12px; }
+
+    .result-body ul, .result-body ol {
+      padding-left: 20px;
+      margin-bottom: 12px;
+    }
+
+    .result-body li { margin-bottom: 5px; }
+    .result-body strong { color: var(--text); }
+
+    .result-body hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 28px 0;
+    }
+
+    .result-body blockquote {
+      border-left: 2px solid var(--accent);
+      padding-left: 16px;
+      color: var(--text-muted);
+      font-style: italic;
+      margin: 16px 0;
+    }
+
+    .result-body table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      margin: 16px 0;
+    }
+
+    .result-body th {
+      text-align: left;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+    }
+
+    .result-body td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    footer {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 32px 0 52px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    footer span {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    footer a { color: var(--accent); text-decoration: none; }
+
+    @media (max-width: 500px) {
+      .form-grid { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
-  <h1>AI Travel Planner</h1>
-  <p class="sub">Enter your trip details and get a full itinerary in seconds.</p>
 
-  <form action="/plan" method="POST">
-    <label>Destination</label>
-    <input type="text" name="destination" placeholder="e.g. Lost City" required>
+<header>
+  <div class="eyebrow">AI Travel Planner</div>
+  <h1>Where do you want<br>to go <em>next?</em></h1>
+  <p class="subtitle">Tell us your destination, budget, and travel style — and get a practical, day-by-day plan built around how you actually travel.</p>
+</header>
 
-    <label>Number of days</label>
-    <input type="number" name="days" placeholder="e.g. 5" required>
+<main>
 
-    <label>Budget (USD)</label>
-    <input type="number" name="budget" placeholder="e.g. 2000" required>
+  {% if error %}
+  <div class="error-box">{{ error }}</div>
+  {% endif %}
 
-    <button type="submit">Plan my trip</button>
+  <form id="planForm" action="/plan" method="POST" onsubmit="handleSubmit(event)">
+
+    <div class="form-grid">
+      <div class="field form-full">
+        <label>Destination</label>
+        <input type="text" name="destination" placeholder="e.g. Rio de Janeiro, Tokyo, Lisbon..." required value="{{ destination or '' }}">
+      </div>
+      <div class="field">
+        <label>Number of days</label>
+        <input type="number" name="days" placeholder="e.g. 5" min="1" max="30" required value="{{ days or '' }}">
+      </div>
+      <div class="field">
+        <label>Total budget (USD)</label>
+        <input type="number" name="budget" placeholder="e.g. 2000" min="100" required value="{{ budget or '' }}">
+      </div>
+    </div>
+
+    <div class="style-label">Travel style</div>
+    <div class="style-pills">
+      <div class="pill active" onclick="selectStyle('backpacker', this)">🎒 Backpacker</div>
+      <div class="pill" onclick="selectStyle('balanced', this)">🌍 Balanced</div>
+      <div class="pill" onclick="selectStyle('comfort', this)">✨ Comfort</div>
+      <div class="pill" onclick="selectStyle('luxury', this)">💎 Luxury</div>
+      <div class="pill" onclick="selectStyle('family', this)">👨‍👩‍👧 Family</div>
+    </div>
+    <input type="hidden" name="style" id="styleInput" value="backpacker">
+
+    <button class="btn" type="submit" id="submitBtn">Plan my trip →</button>
   </form>
 
-  {% if itinerary %}
-  <div id="result">
-    <script>
-      document.getElementById("result").innerHTML = marked.parse(`{{ itinerary | safe }}`);
-    </script>
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <p>Planning your trip to <span id="loadingDest">your destination</span>...</p>
   </div>
+
+  {% if itinerary %}
+  <div class="result">
+    <div class="result-header">
+      <div class="result-eyebrow">Your itinerary</div>
+      <div class="result-meta">{{ days }} days · ${{ budget }} · {{ style }}</div>
+    </div>
+    <div class="result-body" id="itineraryContent"></div>
+  </div>
+  <script>
+    const raw = {{ itinerary | tojson }};
+    document.getElementById('itineraryContent').innerHTML = marked.parse(raw);
+  </script>
   {% endif %}
+
+</main>
+
+<footer>
+  <span>Powered by Claude AI</span>
+  <span>Built by <a href="https://github.com/maargas" target="_blank">maargas</a></span>
+</footer>
+
+<script>
+  function selectStyle(style, el) {
+    document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('styleInput').value = style;
+  }
+
+  function handleSubmit(e) {
+    const dest = document.querySelector('input[name="destination"]').value;
+    document.getElementById('loadingDest').textContent = dest;
+    document.getElementById('loading').classList.add('visible');
+    document.getElementById('submitBtn').disabled = true;
+    document.getElementById('planForm').style.opacity = '0.4';
+    document.getElementById('planForm').style.pointerEvents = 'none';
+  }
+</script>
+
 </body>
 </html>

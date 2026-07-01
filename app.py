@@ -1,12 +1,5 @@
-
 from dotenv import load_dotenv
 load_dotenv()
-import anthropic
-import os
-from flask import Flask, request, render_template
-
-
-
 import anthropic
 import os
 from flask import Flask, request, render_template
@@ -19,19 +12,24 @@ def index():
 
 @app.route("/plan", methods=["POST"])
 def plan():
-    destination = request.form["destination"]
-    days = request.form["days"]
-    budget = request.form["budget"]
+    destination = request.form.get("destination", "").strip()
+    days = request.form.get("days", "").strip()
+    budget = request.form.get("budget", "").strip()
+    style = request.form.get("style", "balanced").strip()
 
-    client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
+    if not destination or not days or not budget:
+        return render_template("index.html", error="Please fill in all fields.")
 
-    response = client.messages.create(
-        model="claude-haiku-4-5-20251001",
-        max_tokens=4000,
-        messages=[{
-            "role": "user",
-            "content": f"""You are a practical travel planner.
-Create a {days}-day trip to {destination} for someone with a ${budget} total budget.
+    try:
+        client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
+
+        response = client.messages.create(
+            model="claude-haiku-4-5-20251001",
+            max_tokens=4000,
+            messages=[{
+                "role": "user",
+                "content": f"""You are a practical travel planner.
+Create a {days}-day trip to {destination} for someone with a ${budget} total budget and a {style} travel style.
 
 For each day, pick ONE main activity that anchors the day. Then suggest at most ONE other activity that realistically fits given travel time and energy.
 
@@ -41,11 +39,25 @@ For each day include:
 - Realistic daily cost breakdown
 - One nearby restaurant with price range
 - One thing most tourists get wrong about that day"""
-        }]
-    )
+            }]
+        )
 
-    itinerary = response.content[0].text
-    return render_template("index.html", itinerary=itinerary)
+        itinerary = response.content[0].text
+        return render_template("index.html",
+            itinerary=itinerary,
+            destination=destination,
+            days=days,
+            budget=budget,
+            style=style
+        )
+
+    except Exception as e:
+        return render_template("index.html",
+            error="Something went wrong. Please try again.",
+            destination=destination,
+            days=days,
+            budget=budget
+        )
 
 if __name__ == "__main__":
     app.run(debug=True)
