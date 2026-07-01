@@ -1,0 +1,47 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Travel Planner</title>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    body { font-family: sans-serif; max-width: 700px; margin: 60px auto; padding: 0 20px; }
+    h1 { font-size: 24px; margin-bottom: 8px; }
+    p.sub { color: #888; margin-bottom: 32px; }
+    label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 6px; }
+    input { width: 100%; padding: 10px; font-size: 15px; border: 1px solid #ddd;
+            border-radius: 6px; margin-bottom: 16px; box-sizing: border-box; }
+    button { background: #000; color: #fff; border: none; padding: 12px 28px;
+             font-size: 15px; border-radius: 6px; cursor: pointer; }
+    button:hover { background: #333; }
+    #result { margin-top: 40px; border-top: 1px solid #eee; padding-top: 24px; line-height: 1.7; }
+  </style>
+</head>
+<body>
+  <h1>AI Travel Planner</h1>
+  <p class="sub">Enter your trip details and get a full itinerary in seconds.</p>
+
+  <form action="/plan" method="POST">
+    <label>Destination</label>
+    <input type="text" name="destination" placeholder="e.g. Lost City" required>
+
+    <label>Number of days</label>
+    <input type="number" name="days" placeholder="e.g. 5" required>
+
+    <label>Budget (USD)</label>
+    <input type="number" name="budget" placeholder="e.g. 2000" required>
+
+    <button type="submit">Plan my trip</button>
+  </form>
+
+  {% if itinerary %}
+  <div id="result">
+    <script>
+      document.getElementById("result").innerHTML = marked.parse(`{{ itinerary | safe }}`);
+    </script>
+  </div>
+  {% endif %}
+</body>
+</html>
