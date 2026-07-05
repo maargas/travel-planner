@@ -53,11 +53,12 @@ For each day include:
 
     except Exception as e:
         return render_template("index.html",
-            error="Something went wrong. Please try again.",
-            destination=destination,
-            days=days,
-            budget=budget
-        )
+    itinerary=itinerary,
+    destination=destination,
+    days=days,
+    budget=budget,
+    style=style
+)
 
 if __name__ == "__main__":
     app.run(debug=True)
