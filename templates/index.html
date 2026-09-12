@@ -419,6 +419,46 @@
     }
 
     .body p { margin-bottom: 0.6875rem; }
+
+    /* Timeline: each stop is a node, each leg the thread between them.
+       Seeing the chain is the point — it is what stops dead time. */
+    .body p.stop {
+      position: relative;
+      padding-left: 1.125rem;
+      margin-bottom: 0.375rem;
+      color: var(--ink);
+    }
+
+    .body p.stop::before {
+      content: "";
+      position: absolute;
+      left: 0; top: 0.52em;
+      width: 0.5rem; height: 0.5rem;
+      border-radius: 50%;
+      background: var(--ocean);
+      box-shadow: 0 0 0 3px var(--ocean-soft);
+    }
+
+    .body p.stop strong { color: var(--ocean); }
+    .body p.stop em { color: var(--ink-faint); font-style: normal; font-size: 0.8125rem; }
+
+    .body p.leg {
+      position: relative;
+      margin: 0.5rem 0 0.75rem;
+      padding: 0 0 0 1.125rem;
+      font-size: 0.8125rem;
+      color: var(--ink-faint);
+    }
+
+    .body p.leg::before {
+      content: "";
+      position: absolute;
+      left: 0.21875rem; top: -0.375rem; bottom: -0.25rem;
+      width: 2px;
+      background: repeating-linear-gradient(var(--rule) 0 3px, transparent 3px 6px);
+    }
+
+    .body p.leg em { font-style: normal; }
     .body ul, .body ol { padding-left: 1.125rem; margin-bottom: 0.75rem; }
     .body li { margin-bottom: 0.25rem; }
     .body strong { color: var(--ink); font-weight: 700; }
@@ -748,6 +788,13 @@
   if (rawEl) {
     const body = document.getElementById('body');
     body.innerHTML = marked.parse(JSON.parse(rawEl.textContent));
+
+    // Tag timeline pieces so the CSS can draw the chain
+    body.querySelectorAll('p').forEach(p => {
+      const t = p.textContent.trim();
+      if (t.startsWith('↓')) p.classList.add('leg');
+      else if (/^\d{1,2}:\d{2}\s*·/.test(t)) p.classList.add('stop');
+    });
 
     body.querySelectorAll('table').forEach(tbl => {
       const box = document.createElement('div');

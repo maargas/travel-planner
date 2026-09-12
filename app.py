@@ -57,7 +57,21 @@ Search for the specific place or event, never broad queries like "things to do".
 Then write the itinerary. Rules:
 - ONE anchor activity per day, plus at most one secondary that realistically fits.
 - Open with a "Heads up" section ONLY if you actually confirmed something date-specific that changes the plan. Say what it is, the date, and why it matters. If you confirmed nothing, skip the section entirely.
-- Give real duration including queues and transit, and the best time to arrive.
+
+THE READER HAS NEVER BEEN TO THIS CITY. Write each day as a clock timeline they can follow without knowing anything:
+
+**09:00 · Name of the place** (abre 09:00)
+What to do there and how long it really takes, queue included.
+↓ *18 min a pé* — or *25 min de metrô, linha azul, 4 paradas*
+**11:30 · Next place** (abre 10:00)
+
+Rules for the timeline:
+- Every jump between two places gets its own line with the mode of transport and the minutes. Never let two stops touch without saying how you get from one to the other.
+- Never schedule an arrival before the place opens or too close to when it closes. State the opening hour next to the time so the reader can see it lines up.
+- Dead time is a planning failure. If the maths leaves an awkward gap, either fill it with something specific within walking distance, or move the stop to another day and say why.
+- Say where lunch fits in the timeline, not as an afterthought.
+- Warn about anything time-critical: last entry, last cable car, last train back, kitchen closing.
+- Keep the pace human. Account for the walk from the metro, for getting lost, for a coffee. A day with three museums in it is a lie.
 
 MONEY — the reader may plan a real trip around these numbers, so:
 - Prices come in exactly two flavours and you must always say which: "confirmado" (you read it on a page this session) or "estimativa" (anything else). Never present an estimate as a fact.
@@ -77,27 +91,59 @@ Write in Brazilian Portuguese. Be specific and concrete, never generic."""
 # The demo has to feel like the real thing without asserting invented facts about a
 # real city, so days are described by shape (what the plan looks like) rather than by
 # naming places and hours nobody verified. The banner marks it as an example.
+# Each day is a list of stops and the legs between them, so the demo shows the same
+# clock-and-transport shape the real itinerary uses.
 DEMO_DAYS = [
-    ("Centro histórico a pé",
-     "A caminhada clássica do centro, começando cedo para pegar as ruas antes dos ônibus de excursão. "
-     "No roteiro real, aqui entraria o nome da praça, o horário de abertura conferido e onde a fila começa a crescer.",
-     "Chegar até 9h00 · cerca de 3h"),
-    ("O museu principal",
-     "Reservado para um dia útil, porque o roteiro real checa o dia de fechamento semanal antes de encaixar. "
-     "Entraria aqui o preço atual do ingresso e se precisa comprar com antecedência.",
-     "Abertura às 10h00 · cerca de 2h30"),
-    ("Mercado e bairro local",
-     "Meio período sem hora marcada, para equilibrar os dias de atração pesada. "
-     "O roteiro real indicaria o dia de maior movimento do mercado e uma opção de almoço com faixa de preço.",
-     "Melhor de manhã · cerca de 2h"),
-    ("Bate e volta nos arredores",
-     "Um dia fora da cidade, com o transporte já pensado na ida e na volta. "
-     "O roteiro real traria o horário do trem ou ônibus e quanto tempo se perde no deslocamento.",
-     "Sair até 8h00 · dia inteiro"),
-    ("Mirante e fim de tarde",
-     "Dia mais leve, encaixado depois dos dias puxados. "
-     "O roteiro real usaria o horário real do pôr do sol na sua data.",
-     "Fim de tarde · cerca de 2h"),
+    ("Centro histórico", [
+        ("stop", "08:45", "A praça principal do centro", "abre sempre",
+         "Começa cedo porque às 10h os ônibus de excursão chegam. Cerca de 1h caminhando sem pressa."),
+        ("leg", "12 min a pé, ladeira leve"),
+        ("stop", "10:00", "A catedral", "abre 10:00",
+         "Chega na abertura, junto com o destrancar da porta. 45 min por dentro."),
+        ("leg", "8 min a pé"),
+        ("stop", "11:15", "O miradouro do bairro alto", "aberto",
+         "Meia hora, e é onde dá pra entender a geografia da cidade — útil para os outros dias."),
+        ("leg", "6 min a pé"),
+        ("stop", "12:15", "Almoço no bairro", "cozinhas fecham 15:00",
+         "Faixa de preço de restaurante de bairro, não de praça turística."),
+    ]),
+    ("O museu principal", [
+        ("stop", "10:00", "O museu principal", "abre 10:00 · fecha às segundas",
+         "Encaixado num dia útil justamente porque fecha um dia da semana. 2h30 com a fila."),
+        ("leg", "4 min a pé"),
+        ("stop", "12:45", "Café ao lado do museu", "aberto",
+         "Parada curta, porque a próxima atração só abre 14:00 — sem isso, sobrava tempo morto."),
+        ("leg", "20 min de metrô, 5 paradas"),
+        ("stop", "14:15", "O jardim ou parque da cidade", "abre 14:00",
+         "Tarde leve depois da manhã pesada. Fica até o fim da tarde."),
+    ]),
+    ("Mercado e bairro local", [
+        ("stop", "09:30", "O mercado municipal", "mais movimentado de manhã",
+         "Vai cedo porque depois das 12h as bancas boas começam a fechar."),
+        ("leg", "15 min a pé pelo bairro"),
+        ("stop", "11:30", "A rua de comércio local", "aberto",
+         "Sem hora marcada. É o trecho do dia em que dá pra se perder de propósito."),
+        ("leg", "10 min de bonde ou ônibus"),
+        ("stop", "13:30", "Almoço fora do circuito turístico", "aberto",
+         "Metade do preço da região central, mesma comida."),
+    ]),
+    ("Bate e volta nos arredores", [
+        ("stop", "07:50", "Estação central", "primeiro trem 08:00",
+         "Sai cedo de propósito: o último trem de volta costuma ser antes das 20h."),
+        ("leg", "50 min de trem"),
+        ("stop", "09:00", "A cidade vizinha", "atrações abrem 09:30",
+         "Chega antes de abrir, com café na praça enquanto isso — de novo, tempo morto evitado de propósito."),
+        ("leg", "trem de volta, 50 min"),
+        ("stop", "18:30", "De volta à cidade", "—",
+         "Volta antes do escuro e com folga em relação ao último trem."),
+    ]),
+    ("Fim de tarde e pôr do sol", [
+        ("stop", "15:00", "Bairro que ficou faltando", "aberto",
+         "Dia mais leve, encaixado depois dos puxados. Nenhum roteiro aguenta cinco dias intensos seguidos."),
+        ("leg", "18 min a pé subindo"),
+        ("stop", "17:20", "O mirante do pôr do sol", "melhor 40 min antes",
+         "No roteiro real, esse horário vem do pôr do sol calculado para a sua data exata — que muda mês a mês."),
+    ]),
 ]
 
 
@@ -130,6 +176,10 @@ def demo_itinerary(destination, start_date, days, budget, interests):
         "É aqui que aparece o aviso que muda a viagem: um festival que lota a cidade, "
         "um museu fechado justamente no seu dia, uma obra que fechou a atração principal.",
         "",
+        "Repare no formato dos dias abaixo: **cada pulo entre dois lugares tem o meio de transporte "
+        "e os minutos**, e cada chegada bate com o horário de abertura. Ninguém deveria descobrir na "
+        "porta que o lugar abre só daqui a uma hora.",
+        "",
         "---",
         "",
     ]
@@ -141,20 +191,18 @@ def demo_itinerary(destination, start_date, days, budget, interests):
         d0 = None
 
     for i in range(total_days):
-        title, text, timing = DEMO_DAYS[i % len(DEMO_DAYS)]
+        title, schedule = DEMO_DAYS[i % len(DEMO_DAYS)]
         if d0:
             d = d0 + timedelta(days=i)
             weekday = f" — {d.strftime('%d/%m')}"
-        parts += [
-            f"## Dia {i + 1}{weekday}",
-            "",
-            f"**Âncora: {title}**",
-            "",
-            text,
-            "",
-            f"*{timing}*",
-            "",
-        ]
+        parts += [f"## Dia {i + 1}{weekday} · {title}", ""]
+
+        for entry in schedule:
+            if entry[0] == "leg":
+                parts += [f"↓ *{entry[1]}*", ""]
+            else:
+                _, hour, place, opening, text = entry
+                parts += [f"**{hour} · {place}** *({opening})*", "", text, ""]
         if per_day:
             parts += [
                 f"Seu orçamento dividido por dia dá **US$ {per_day:,.0f}** — isso é uma referência sua, "
