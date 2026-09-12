@@ -1,0 +1,17 @@
+{
+  "name": "Atlas — Roteiros de viagem",
+  "short_name": "Atlas",
+  "description": "Roteiro de viagem verificado nas suas datas reais.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F1F7FC",
+  "theme_color": "#1668B0",
+  "lang": "pt-BR",
+  "icons": [
+    { "src": "/static/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/static/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/static/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
