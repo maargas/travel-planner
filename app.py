@@ -57,8 +57,16 @@ Search for the specific place or event, never broad queries like "things to do".
 Then write the itinerary. Rules:
 - ONE anchor activity per day, plus at most one secondary that realistically fits.
 - Open with a "Heads up" section ONLY if you actually confirmed something date-specific that changes the plan. Say what it is, the date, and why it matters. If you confirmed nothing, skip the section entirely.
-- Mark any unconfirmed hour, price or date with "(não verificado)" right next to it.
-- Give real duration including queues and transit, best arrival time, daily cost breakdown, one nearby food option with price range.
+- Give real duration including queues and transit, and the best time to arrive.
+
+MONEY — the reader may plan a real trip around these numbers, so:
+- Prices come in exactly two flavours and you must always say which: "confirmado" (you read it on a page this session) or "estimativa" (anything else). Never present an estimate as a fact.
+- Quote prices in the destination's local currency. Convert to USD only as a rough parallel, marked "aprox.".
+- NEVER state a flight price. You cannot know it — it moves by the hour and depends on the origin city. If flights matter, say what the trip costs on the ground and note that airfare is separate.
+- The budget given is what the traveller has for the whole trip. Add up what you are proposing. If your plan does not fit the budget, say so plainly in one line at the top and adjust the plan down — never quietly invent lower numbers to make it fit, and never pad numbers to use up the budget.
+- Round honestly. "cerca de €15-20" beats a fake-precise "€17,40" you did not read anywhere.
+- If you confirmed no prices at all, give a short daily range labelled "estimativa" and say the traveller should check before booking — do not build a detailed fake budget table.
+
 - Do NOT write a sources list at the end — the app shows the pages you searched, with links, on its own.
 
 Write only the itinerary. Never mention searches, tools, limits or what you could or could not do — the reader is a traveller, not a developer. No preamble, no apologies, no meta-commentary. Start directly with the "Heads up" section or "## Dia 1". Keep it tight: no filler, no restating the request.
@@ -141,18 +149,33 @@ def demo_itinerary(destination, start_date, days, budget, interests):
             f"## Dia {i + 1}{weekday}",
             "",
             f"**Âncora: {title}**",
+            "",
             text,
             "",
             f"*{timing}*",
             "",
         ]
         if per_day:
-            parts += [f"Custo previsto do dia: cerca de **US$ {per_day:,.0f}**".replace(",", "."), ""]
+            parts += [
+                f"Seu orçamento dividido por dia dá **US$ {per_day:,.0f}** — isso é uma referência sua, "
+                "não uma previsão do Atlas.".replace(",", "."),
+                "",
+            ]
         parts += ["---", ""]
 
     parts += [
-        "> No roteiro real, cada horário e preço acima vem de uma página que o Atlas consultou "
-        "na hora, e os links aparecem logo abaixo para você conferir um por um.",
+        "## Como o dinheiro aparece no roteiro real",
+        "",
+        "Todo preço vem com uma etiqueta, e as duas significam coisas diferentes:",
+        "",
+        "- **confirmado** — o Atlas leu esse valor numa página oficial nesta consulta, e o link está aqui embaixo.",
+        "- **estimativa** — é uma faixa de preço, não um valor exato. Confira antes de reservar.",
+        "",
+        "**Passagem aérea nunca entra na conta.** O preço muda de hora em hora e depende de onde você sai — "
+        "qualquer número que o Atlas desse ali seria chute. Os custos são do que você gasta no destino.",
+        "",
+        "> Se o plano não couber no seu orçamento, o Atlas diz isso na cara e enxuga o roteiro — "
+        "em vez de inventar números menores para fingir que coube.",
     ]
 
     return "\n".join(parts)
