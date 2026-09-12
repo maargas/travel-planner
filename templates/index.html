@@ -537,11 +537,39 @@
     @media (max-width: 26rem) {
       .row { grid-template-columns: 1fr; }
     }
+
+    /* On a wide screen the phone layout leaves half the window empty,
+       so the hero and the form sit side by side instead. */
+    @media (min-width: 58rem) {
+      .wrap { max-width: 66rem; }
+
+      .top {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 3.5rem;
+        align-items: center;
+        min-height: 80vh;
+        padding: 1rem 0 2rem;
+      }
+
+      header { text-align: left; padding: 0; }
+      .globe-holder { width: min(16rem, 100%); margin: 0 0 1.75rem; }
+      h1 { font-size: 3.25rem; }
+      .lede { font-size: 1rem; margin: 0; max-width: 28rem; }
+
+      .form-col { display: flex; flex-direction: column; }
+      .card { margin-bottom: 0; padding: 1.5rem; }
+
+      main { max-width: 44rem; margin: 0 auto; }
+      footer { max-width: 44rem; margin: 0 auto; }
+    }
   </style>
 </head>
 <body>
 
 <div class="wrap">
+
+  <div class="top">
 
   <header>
     <div class="globe-holder">
@@ -552,12 +580,12 @@
     <p class="lede">Um museu abre todo dia. Um Grande Prêmio acontece uma vez por ano. O Atlas <strong>procura o que está rolando nas suas datas exatas</strong> antes de montar o roteiro.</p>
   </header>
 
-  <main>
+  <div class="form-col">
 
     {% if demo %}
     <div class="demo-banner">
       <span aria-hidden="true">🧪</span>
-      <span><strong>Modo demonstração.</strong> Roteiro de exemplo fixo, sem busca real na web. Nenhum crédito é gasto.</span>
+      <span><strong>Modo demonstração.</strong> Mostra o formato do roteiro, sem busca real na web.</span>
     </div>
     {% endif %}
 
@@ -623,6 +651,11 @@
         Cada horário e preço vem de uma fonte que você pode conferir
       </p>
     </form>
+
+  </div>
+  </div>
+
+  <main>
 
     <div class="loading" id="loading">
       <div class="orbit"></div>

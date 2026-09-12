@@ -66,47 +66,102 @@ Write only the itinerary. Never mention searches, tools, limits or what you coul
 Write in Brazilian Portuguese. Be specific and concrete, never generic."""
 
 
-MOCK_ITINERARY = """## Heads up
+# The demo has to feel like the real thing without asserting invented facts about a
+# real city, so days are described by shape (what the plan looks like) rather than by
+# naming places and hours nobody verified. The banner marks it as an example.
+DEMO_DAYS = [
+    ("Centro histórico a pé",
+     "A caminhada clássica do centro, começando cedo para pegar as ruas antes dos ônibus de excursão. "
+     "No roteiro real, aqui entraria o nome da praça, o horário de abertura conferido e onde a fila começa a crescer.",
+     "Chegar até 9h00 · cerca de 3h"),
+    ("O museu principal",
+     "Reservado para um dia útil, porque o roteiro real checa o dia de fechamento semanal antes de encaixar. "
+     "Entraria aqui o preço atual do ingresso e se precisa comprar com antecedência.",
+     "Abertura às 10h00 · cerca de 2h30"),
+    ("Mercado e bairro local",
+     "Meio período sem hora marcada, para equilibrar os dias de atração pesada. "
+     "O roteiro real indicaria o dia de maior movimento do mercado e uma opção de almoço com faixa de preço.",
+     "Melhor de manhã · cerca de 2h"),
+    ("Bate e volta nos arredores",
+     "Um dia fora da cidade, com o transporte já pensado na ida e na volta. "
+     "O roteiro real traria o horário do trem ou ônibus e quanto tempo se perde no deslocamento.",
+     "Sair até 8h00 · dia inteiro"),
+    ("Mirante e fim de tarde",
+     "Dia mais leve, encaixado depois dos dias puxados. "
+     "O roteiro real usaria o horário real do pôr do sol na sua data.",
+     "Fim de tarde · cerca de 2h"),
+]
 
-**Uma grande feira internacional ocupa a cidade nas suas datas.**
-Hotéis no centro sobem de preço e o metrô lota entre 8h e 10h. Vale reservar hospedagem fora do eixo central e começar os passeios mais cedo.
 
-**O museu principal fecha às segundas.** Seu dia 3 cai numa segunda, então ele foi movido para o dia 4.
+def demo_itinerary(destination, start_date, days, budget, interests):
+    try:
+        total_days = max(1, min(int(days), 10))
+    except (ValueError, TypeError):
+        total_days = 3
 
----
+    try:
+        per_day = int(budget) / total_days
+    except (ValueError, TypeError, ZeroDivisionError):
+        per_day = 0
 
-## Dia 1 — Belém
+    topic = (interests.split(",")[0].strip() if interests else "").lower()
+    interest_line = (
+        f"Você marcou interesse em **{topic}** — no roteiro real, o Atlas procuraria eventos de {topic} "
+        f"acontecendo em {destination} exatamente nessas datas, e reorganizaria os dias se achasse algum."
+        if topic else
+        f"No roteiro real, o Atlas procuraria eventos acontecendo em {destination} exatamente nessas datas "
+        f"e reorganizaria os dias se achasse algum que valesse a pena."
+    )
 
-**Âncora: Mosteiro dos Jerónimos**
-Chegue às 9h00, na abertura. Leva 2h30 no total contando a fila (que passa de 40 min depois das 10h30).
-Entrada: €12. Grátis no primeiro domingo do mês.
+    parts = [
+        "## Heads up",
+        "",
+        f"**Este é um roteiro de demonstração para {destination}.**",
+        interest_line,
+        "",
+        "É aqui que aparece o aviso que muda a viagem: um festival que lota a cidade, "
+        "um museu fechado justamente no seu dia, uma obra que fechou a atração principal.",
+        "",
+        "---",
+        "",
+    ]
 
-**Secundária: Pastéis de Belém**, 4 min a pé. €1,40 cada.
+    weekday = ""
+    try:
+        d0 = date.fromisoformat(start_date)
+    except (ValueError, TypeError):
+        d0 = None
 
-Custo do dia: €12 entrada + €18 alimentação + €6 transporte = **€36**
+    for i in range(total_days):
+        title, text, timing = DEMO_DAYS[i % len(DEMO_DAYS)]
+        if d0:
+            d = d0 + timedelta(days=i)
+            weekday = f" — {d.strftime('%d/%m')}"
+        parts += [
+            f"## Dia {i + 1}{weekday}",
+            "",
+            f"**Âncora: {title}**",
+            text,
+            "",
+            f"*{timing}*",
+            "",
+        ]
+        if per_day:
+            parts += [f"Custo previsto do dia: cerca de **US$ {per_day:,.0f}**".replace(",", "."), ""]
+        parts += ["---", ""]
 
-**O que a maioria erra:** comprar ingresso na hora. Online sai o mesmo preço e pula a fila inteira.
+    parts += [
+        "> No roteiro real, cada horário e preço acima vem de uma página que o Atlas consultou "
+        "na hora, e os links aparecem logo abaixo para você conferir um por um.",
+    ]
 
----
+    return "\n".join(parts)
 
-## Dia 2 — Sintra
-
-**Âncora: Palácio da Pena**
-Trem da Estação do Rossio, 40 min, €2,90 cada trecho. Saia às 8h00 — depois das 11h o palácio lota.
-Entrada: €14. Reserve com 2 dias de antecedência.
-
-Custo do dia: €14 + €5,80 transporte + €20 alimentação = **€39,80**
-
-**O que a maioria erra:** ir sem reservar. A Pena tem cota diária e esgota na alta temporada.
-
-**Não verificado:** preço do trem pode ter reajustado em setembro — confira na CP no dia.
-"""
 
 MOCK_SOURCES = [
-    {"title": "Mosteiro dos Jerónimos — horários e bilhetes", "url": "https://www.patrimoniocultural.gov.pt"},
-    {"title": "Parques de Sintra — Palácio da Pena", "url": "https://www.parquesdesintra.pt"},
-    {"title": "FIA — calendário oficial de Fórmula 1", "url": "https://www.fia.com"},
-    {"title": "Museu Nacional do Azulejo", "url": "https://www.museudoazulejo.gov.pt"},
+    {"title": "Exemplo — site oficial de turismo da cidade", "url": "https://exemplo-turismo.gov"},
+    {"title": "Exemplo — agenda de eventos do período", "url": "https://exemplo-agenda-eventos.com"},
+    {"title": "Exemplo — página de horários do museu", "url": "https://exemplo-museu.org/horarios"},
 ]
 
 
@@ -184,7 +239,12 @@ def plan():
         return render_template("index.html", error="Preencha destino, data de ida, duração e orçamento.", **form_values)
 
     if MOCK_MODE:
-        return render_template("index.html", itinerary=MOCK_ITINERARY, sources=MOCK_SOURCES, **form_values)
+        return render_template(
+            "index.html",
+            itinerary=demo_itinerary(destination, start_date, days, budget, interests),
+            sources=MOCK_SOURCES,
+            **form_values,
+        )
 
     try:
         client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
