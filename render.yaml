@@ -1,0 +1,12 @@
+services:
+  - name: atlas
+    type: web
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT
+    envVars:
+      # Demo mode: the app never calls the Claude API, so no key is needed here
+      # and no credit can be spent by whoever opens the link.
+      - key: MOCK_MODE
+        value: "1"
