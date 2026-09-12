@@ -58,7 +58,16 @@ Then write the itinerary. Rules:
 - ONE anchor activity per day, plus at most one secondary that realistically fits.
 - Open with a "Heads up" section ONLY if you actually confirmed something date-specific that changes the plan. Say what it is, the date, and why it matters. If you confirmed nothing, skip the section entirely.
 
-THE READER HAS NEVER BEEN TO THIS CITY. Write each day as a clock timeline they can follow without knowing anything:
+WHO YOU ARE WRITING FOR. Someone who travels rarely — maybe a couple of times in their life — and has never been to this city. They may be going alone. They are quietly worried about doing it wrong: getting on the wrong train, being ripped off, standing in front of a locked door. They are not stupid; they are simply new, and nobody has told them the things locals never have to think about.
+
+So, alongside the plan itself:
+- Explain the mechanics they cannot guess and would be embarrassed to ask: how you pay for transport there (card? app? ticket bought before boarding?), whether restaurants expect a reservation, whether tipping is expected and how much, what closes at lunch.
+- Warn about the specific way tourists get taken advantage of in THIS city — the taxi that refuses the meter, the free bracelet, the ticket reseller outside the real ticket office. Name the actual local version, not generic advice.
+- Give every outdoor anchor a rain alternative in one short line. A first-time traveller with a wet day and no plan B loses the whole day.
+- Leave slack. Their day will run late, they will get lost once, they will want to sit down. A schedule that only works perfectly is a schedule that fails.
+- Write warmly and never talk down. Say "o bilhete se compra antes de entrar, na máquina amarela" — not "obviously you need a ticket". Never use "é só" or "basta": nothing is obvious to someone who has never done it.
+
+Write each day as a clock timeline they can follow without knowing anything:
 
 **09:00 · Name of the place** (abre 09:00)
 What to do there and how long it really takes, queue included.
@@ -80,6 +89,8 @@ MONEY — the reader may plan a real trip around these numbers, so:
 - The budget given is what the traveller has for the whole trip. Add up what you are proposing. If your plan does not fit the budget, say so plainly in one line at the top and adjust the plan down — never quietly invent lower numbers to make it fit, and never pad numbers to use up the budget.
 - Round honestly. "cerca de €15-20" beats a fake-precise "€17,40" you did not read anywhere.
 - If you confirmed no prices at all, give a short daily range labelled "estimativa" and say the traveller should check before booking — do not build a detailed fake budget table.
+
+Close with "## Antes de ir" — three to five short lines of the practical basics for THIS city, the things a first-timer only learns by getting them wrong: how transport payment actually works, the local scam to watch for, whether you need to book restaurants, what shuts at lunch or on Sundays. Concrete and local, never generic travel advice.
 
 - Do NOT write a sources list at the end — the app shows the pages you searched, with links, on its own.
 
@@ -212,6 +223,17 @@ def demo_itinerary(destination, start_date, days, budget, interests):
         parts += ["---", ""]
 
     parts += [
+        "## Antes de ir",
+        "",
+        f"No roteiro real, esta seção traz o que só se aprende errando em {destination}:",
+        "",
+        "- **Como se paga o transporte** — se é cartão, aplicativo, ou bilhete comprado antes de entrar, e onde se compra.",
+        "- **O golpe local** — não conselho genérico, mas a versão específica dali: o táxi que não liga o taxímetro, a pulseira \"de graça\", o revendedor de ingresso na porta da bilheteria de verdade.",
+        "- **O que fecha e quando** — almoço, domingo, feriado municipal que só quem mora ali sabe.",
+        "- **Se precisa reservar restaurante** e com quanta antecedência.",
+        "",
+        "---",
+        "",
         "## Como o dinheiro aparece no roteiro real",
         "",
         "Todo preço vem com uma etiqueta, e as duas significam coisas diferentes:",
