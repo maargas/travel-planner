@@ -4,7 +4,9 @@ services:
     runtime: python
     plan: free
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT
+    # A real itinerary runs several web searches and takes minutes; gunicorn kills
+    # a worker after 30s by default, which surfaced as a blank 500 page.
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --timeout 300 --workers 1 --threads 4
     envVars:
       # Demo mode: the app never calls the Claude API, so no key is needed here
       # and no credit can be spent by whoever opens the link.
