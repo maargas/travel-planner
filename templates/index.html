@@ -583,7 +583,9 @@
 
         <div class="row">
           <div class="field">
-            <label for="start_date">Data de ida</label>
+            <!-- iOS renders an empty date input as a blank box with no hint at all,
+                 so the format has to live in the label. -->
+            <label for="start_date">Data de ida <span class="hint">dia/mês/ano</span></label>
             <input type="date" id="start_date" name="start_date" required
                    min="{{ today }}" max="{{ max_date }}" value="{{ start_date or '' }}">
             <span class="field-msg" id="msg-start_date"></span>
