@@ -16,7 +16,12 @@ limiter = Limiter(
 )
 
 MODEL = os.environ.get("PLANNER_MODEL", "claude-sonnet-5")
-MOCK_MODE = os.environ.get("MOCK_MODE") == "1"
+
+# Without a key there is nothing to call, so serve the demo rather than hanging on a
+# request that cannot succeed. This is also the safe default for a public deploy:
+# forgetting to set MOCK_MODE can't turn into a broken page or a surprise bill.
+HAS_API_KEY = bool(os.environ.get("ANTHROPIC_API_KEY", "").strip())
+MOCK_MODE = os.environ.get("MOCK_MODE") == "1" or not HAS_API_KEY
 
 # Each search injects the page contents into the prompt, so this is the main cost dial:
 # measured ~US$0.29/itinerary at 5 searches on Sonnet 5.
@@ -393,7 +398,12 @@ def plan():
         )
 
     try:
-        client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
+        # A hosted request that never returns just spins the browser forever, so cap it.
+        client = anthropic.Anthropic(
+            api_key=os.environ.get("ANTHROPIC_API_KEY"),
+            timeout=150.0,
+            max_retries=1,
+        )
 
         response = client.messages.create(
             model=MODEL,
@@ -408,6 +418,10 @@ def plan():
         log_cost(response)
         return render_template("index.html", itinerary=itinerary, sources=sources, **form_values)
 
+    except anthropic.APITimeoutError:
+        return render_template("index.html",
+            error="A busca demorou demais e foi interrompida. Tente de novo, ou reduza o número de dias.",
+            **form_values)
     except anthropic.RateLimitError:
         return render_template("index.html", error="Muitos pedidos ao mesmo tempo. Tente de novo em um minuto.", **form_values)
     except anthropic.AuthenticationError:
