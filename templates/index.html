@@ -216,6 +216,25 @@
       font-variant-numeric: tabular-nums;
     }
 
+    /* The spinner arrows invite clicking one day at a time — useless here,
+       and they crowd the field on mobile. */
+    input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+    input[aria-invalid="true"] { border-color: var(--coral); }
+    input[aria-invalid="true"]:focus-visible { box-shadow: 0 0 0 3.5px var(--coral-soft); }
+
+    .field-msg {
+      display: none;
+      font-size: 0.75rem;
+      color: var(--coral);
+      font-weight: 500;
+      line-height: 1.35;
+    }
+
+    .field-msg[data-on="1"] { display: block; }
+
     input::placeholder { color: var(--ink-faint); }
 
     input:focus-visible {
@@ -647,19 +666,22 @@
           <div class="field">
             <label for="start_date">Data de ida</label>
             <input type="date" id="start_date" name="start_date" required
-                   min="{{ today }}" value="{{ start_date or '' }}">
+                   min="{{ today }}" max="{{ max_date }}" value="{{ start_date or '' }}">
+            <span class="field-msg" id="msg-start_date"></span>
           </div>
           <div class="field">
             <label for="days">Dias</label>
             <input type="number" id="days" name="days" required min="1" max="30"
-                   placeholder="4" value="{{ days or '' }}">
+                   inputmode="numeric" placeholder="4" value="{{ days or '' }}">
+            <span class="field-msg" id="msg-days"></span>
           </div>
         </div>
 
         <div class="field">
-          <label for="budget">Orçamento total <span class="hint">em dólares</span></label>
-          <input type="number" id="budget" name="budget" required min="50"
-                 placeholder="1200" value="{{ budget or '' }}">
+          <label for="budget">Orçamento total <span class="hint">em dólares, sem a passagem</span></label>
+          <input type="number" id="budget" name="budget" required min="50" max="100000"
+                 inputmode="numeric" placeholder="1200" value="{{ budget or '' }}">
+          <span class="field-msg" id="msg-budget"></span>
         </div>
 
         <div class="field">
@@ -772,7 +794,74 @@
     'montando os dias...',
   ];
 
-  document.getElementById('form').addEventListener('submit', () => {
+  // --- Field limits ---
+  // The browser lets you type anything into these; min/max only bite on submit,
+  // and a date field will happily accept the year 231231. So check as they type
+  // and say what the limit is, instead of failing silently at the end.
+  const LIMITS = {
+    days: {
+      min: 1, max: 30,
+      msg: (v) => v > 30
+        ? 'Trinta dias é o máximo. Para viagens mais longas, monte um roteiro por trecho.'
+        : 'Precisa ser pelo menos 1 dia.',
+    },
+    budget: {
+      min: 50, max: 100000,
+      msg: (v) => v > 100000
+        ? 'Esse valor passa do limite do app. Tente algo até 100.000.'
+        : 'O mínimo é 50 dólares — abaixo disso não dá para montar nada realista.',
+    },
+  };
+
+  function setMsg(field, text) {
+    const el = document.getElementById('msg-' + field.id);
+    const bad = Boolean(text);
+    el.textContent = text || '';
+    el.dataset.on = bad ? '1' : '0';
+    field.setAttribute('aria-invalid', String(bad));
+    return !bad;
+  }
+
+  function checkNumber(field) {
+    const rule = LIMITS[field.id];
+    const raw = field.value.trim();
+    if (!raw) return setMsg(field, '');
+    const v = Number(raw);
+    if (!Number.isFinite(v) || v < rule.min || v > rule.max) return setMsg(field, rule.msg(v));
+    return setMsg(field, '');
+  }
+
+  const dateField = document.getElementById('start_date');
+
+  function checkDate() {
+    const raw = dateField.value;
+    if (!raw) return setMsg(dateField, '');
+    const chosen = new Date(raw + 'T00:00:00');
+    const min = new Date(dateField.min + 'T00:00:00');
+    const max = new Date(dateField.max + 'T00:00:00');
+    if (Number.isNaN(chosen.getTime())) return setMsg(dateField, 'Data inválida.');
+    if (chosen < min) return setMsg(dateField, 'A data já passou. Escolha de hoje em diante.');
+    if (chosen > max) return setMsg(dateField, 'Só dá para planejar até dois anos à frente — depois disso nada é confiável.');
+    return setMsg(dateField, '');
+  }
+
+  ['days', 'budget'].forEach((id) => {
+    const field = document.getElementById(id);
+    field.addEventListener('input', () => checkNumber(field));
+    field.addEventListener('blur', () => checkNumber(field));
+  });
+  dateField.addEventListener('input', checkDate);
+  dateField.addEventListener('blur', checkDate);
+
+  document.getElementById('form').addEventListener('submit', (e) => {
+    const ok = [checkNumber(document.getElementById('days')),
+                checkNumber(document.getElementById('budget')),
+                checkDate()].every(Boolean);
+    if (!ok) {
+      e.preventDefault();
+      document.querySelector('[aria-invalid="true"]').focus();
+      return;
+    }
     document.getElementById('loading-place').textContent =
       document.getElementById('destination').value || 'seu destino';
     document.getElementById('loading').dataset.on = '1';

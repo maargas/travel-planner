@@ -307,9 +307,57 @@ def extract(response):
     return "".join(parts), [{"title": t, "url": u} for u, t in sources.items()]
 
 
+MAX_DAYS = 30
+MAX_BUDGET = 100_000
+MIN_BUDGET = 50
+MAX_YEARS_AHEAD = 2
+
+
+def date_bounds():
+    today = date.today()
+    return today, today.replace(year=today.year + MAX_YEARS_AHEAD)
+
+
+def validate(start_date, days, budget):
+    """The browser checks these too, but anyone can POST straight past the form,
+    so the server has to be the one that actually decides."""
+    today, latest = date_bounds()
+
+    try:
+        d = date.fromisoformat(start_date)
+    except (ValueError, TypeError):
+        return "Data de ida inválida."
+    if d < today:
+        return "A data de ida já passou. Escolha uma data de hoje em diante."
+    if d > latest:
+        return f"Só dá para planejar até {MAX_YEARS_AHEAD} anos à frente — nada é confiável tão longe."
+
+    try:
+        n = int(days)
+    except (ValueError, TypeError):
+        return "Número de dias inválido."
+    if not 1 <= n <= MAX_DAYS:
+        return f"A duração precisa ficar entre 1 e {MAX_DAYS} dias."
+
+    try:
+        b = float(budget)
+    except (ValueError, TypeError):
+        return "Orçamento inválido."
+    if not MIN_BUDGET <= b <= MAX_BUDGET:
+        return f"O orçamento precisa ficar entre {MIN_BUDGET} e {MAX_BUDGET:,} dólares.".replace(",", ".")
+
+    return None
+
+
 @app.route("/", methods=["GET"])
 def index():
-    return render_template("index.html", today=date.today().isoformat(), demo=MOCK_MODE)
+    today, latest = date_bounds()
+    return render_template(
+        "index.html",
+        today=today.isoformat(),
+        max_date=latest.isoformat(),
+        demo=MOCK_MODE,
+    )
 
 
 @app.route("/plan", methods=["POST"])
@@ -322,14 +370,19 @@ def plan():
     style = request.form.get("style", "balanced").strip()
     interests = request.form.get("interests", "").strip()
 
+    today, latest = date_bounds()
     form_values = dict(
         destination=destination, start_date=start_date, days=days,
         budget=budget, style=style, interests=interests,
-        today=date.today().isoformat(), demo=MOCK_MODE,
+        today=today.isoformat(), max_date=latest.isoformat(), demo=MOCK_MODE,
     )
 
     if not destination or not start_date or not days or not budget:
         return render_template("index.html", error="Preencha destino, data de ida, duração e orçamento.", **form_values)
+
+    problem = validate(start_date, days, budget)
+    if problem:
+        return render_template("index.html", error=problem, **form_values)
 
     if MOCK_MODE:
         return render_template(
@@ -367,9 +420,10 @@ def plan():
 
 @app.errorhandler(429)
 def rate_limit_exceeded(e):
+    today, latest = date_bounds()
     return render_template("index.html",
         error="Você usou seus roteiros gratuitos de hoje. Volte amanhã.",
-        today=date.today().isoformat(), demo=MOCK_MODE,
+        today=today.isoformat(), max_date=latest.isoformat(), demo=MOCK_MODE,
     ), 429
 
 
