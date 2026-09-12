@@ -1,543 +1,245 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Atlas — Roteiros de viagem</title>
-  <meta name="description" content="Roteiro de viagem verificado nas suas datas reais.">
-
-  <link rel="manifest" href="/static/manifest.json">
-  <meta name="theme-color" content="#0b1f24">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Atlas">
-  <link rel="apple-touch-icon" href="/static/icon-192.png">
-  <link rel="icon" href="/static/icon-192.png">
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Caprasimo&family=Figtree:wght@400;600;700&display=swap" rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
-
-  <style>
-    /* Tokens lifted from the Organic design system, in the dark tuning the
-       app design uses. Single theme on purpose: the design has no light variant,
-       so every colour is painted rather than inherited. */
-    :root {
-      --bg:            #0b1f24;
-      --surface:       #12292d;
-      --text:          #eef6f5;
-      --divider:       color-mix(in srgb, #eef6f5 14%, transparent);
-
-      --accent:        #4fb3c9;
-      --accent-100:    #0f2b32;
-      --accent-200:    #123640;
-      --accent-600:    #3d92a6;
-      --accent-700:    #7fd4e6;
-      --accent-800:    #bfe8f0;
-
-      --accent-2:      #7fae95;
-      --accent-2-100:  #12302b;
-      --accent-2-300:  #1c4a40;
-      --accent-2-700:  #9fd9c0;
-      --accent-2-800:  #c9ecdf;
-
-      --neutral-100:   #132a2f;
-      --neutral-300:   #1f4650;
-      --neutral-600:   #5f8792;
-      --neutral-900:   #081619;
-
-      --warn:          #e0a45c;
-      --warn-bg:       #2e2415;
-      --danger:        #e8806f;
-      --danger-bg:     #33201d;
-
-      --font-heading: "Caprasimo", Georgia, serif;
-      --font-body:    "Figtree", system-ui, -apple-system, sans-serif;
-
-      --radius-md: 16px;
-      --radius-lg: 32px;
-      --pill: 999px;
-
-      --shadow-md: 0 3px 10px rgba(0,0,0,0.4);
-      --shadow-lg: 0 12px 32px rgba(0,0,0,0.45);
-    }
-
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: var(--font-body);
-      font-size: 15px;
-      line-height: 1.55;
-      -webkit-font-smoothing: antialiased;
-      padding: 0 max(1rem, env(safe-area-inset-left)) env(safe-area-inset-bottom);
-      overflow-x: hidden;
-    }
-
-    h1, h2, h3 { font-family: var(--font-heading); font-weight: 400; line-height: 1.12; letter-spacing: -0.015em; }
-
-    .wrap { max-width: 38rem; margin: 0 auto; }
-
-    /* ---------- Hero ---------- */
-
-    header { position: relative; padding: 2rem 0 1.5rem; text-align: center; }
-
-    .ridges {
-      position: absolute;
-      top: -1.5rem; left: 50%; transform: translateX(-50%);
-      width: 100vw; height: 15rem;
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    .hero-inner { position: relative; z-index: 1; }
-
-    .badge {
-      width: 6.5rem; height: 6.5rem;
-      margin: 0 auto 1.25rem;
-      border-radius: 50%;
-      background: radial-gradient(circle at 35% 30%, var(--accent-200), var(--accent) 75%);
-      box-shadow: var(--shadow-lg);
-      display: flex; align-items: center; justify-content: center;
-    }
-
-    .badge svg { display: block; }
-
-    .kicker {
-      display: inline-flex; align-items: center; gap: 0.4375rem;
-      background: var(--accent-2-100);
-      color: var(--accent-2-700);
-      border-radius: var(--pill);
-      padding: 0.3125rem 0.8125rem;
-      font-size: 0.6875rem;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      margin-bottom: 0.875rem;
-    }
-
-    .kicker::before {
-      content: ""; width: 0.375rem; height: 0.375rem;
-      border-radius: 50%; background: var(--accent-2);
-    }
-
-    h1 {
-      font-size: clamp(2rem, 8vw, 2.75rem);
-      margin-bottom: 0.75rem;
-      text-wrap: balance;
-    }
-
-    h1 em { font-style: normal; color: var(--accent-700); }
-
-    .lede {
-      color: var(--text);
-      opacity: 0.75;
-      font-size: 0.9375rem;
-      max-width: 26rem;
-      margin: 0 auto;
-    }
-
-    .lede strong { opacity: 1; font-weight: 700; }
-
-    /* ---------- Card ---------- */
-
-    /* The ridges are full-bleed and absolutely positioned, so everything that
-       must stay legible on top of them needs its own stacking context. */
-    .form-col, main, footer { position: relative; z-index: 1; }
-
-    .card {
-      background: var(--surface);
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-md);
-      padding: 1.375rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .fields { display: flex; flex-direction: column; gap: 0.9375rem; }
-    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
-    .field { display: flex; flex-direction: column; gap: 0.375rem; min-width: 0; }
-
-    label {
-      font-size: 0.75rem;
-      font-weight: 700;
-      color: var(--text);
-      opacity: 0.85;
-      display: flex; align-items: baseline; gap: 0.375rem; flex-wrap: wrap;
-    }
-
-    .hint { font-weight: 400; opacity: 0.6; font-size: 0.6875rem; }
-
-    input {
-      width: 100%;
-      background: var(--neutral-100);
-      border: 1px solid var(--divider);
-      border-radius: var(--pill);
-      color: var(--text);
-      font-family: inherit;
-      font-size: 1rem; /* 16px keeps iOS from zooming on focus */
-      padding: 0.75rem 1rem;
-      caret-color: var(--accent);
-      transition: border-color 0.15s, box-shadow 0.15s;
-    }
-
-    input[type="number"], input[type="date"] { font-variant-numeric: tabular-nums; }
-
-    /* The spinner arrows invite clicking one day at a time — useless here. */
-    input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
-    input[type="number"]::-webkit-outer-spin-button,
-    input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-
-    input::placeholder { color: var(--neutral-600); }
-    input:hover { border-color: color-mix(in srgb, var(--text) 35%, transparent); }
-
-    input:focus-visible {
-      outline: none;
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px var(--accent-100);
-    }
-
-    input[aria-invalid="true"] { border-color: var(--danger); }
-
-    .field-msg {
-      display: none;
-      font-size: 0.75rem;
-      color: var(--danger);
-      font-weight: 600;
-      line-height: 1.35;
-      padding-left: 0.875rem;
-    }
-
-    .field-msg[data-on="1"] { display: block; }
-
-    .pills { display: flex; flex-wrap: wrap; gap: 0.375rem; }
-
-    .pill {
-      appearance: none;
-      background: transparent;
-      border: 1px solid var(--divider);
-      border-radius: var(--pill);
-      color: var(--text);
-      cursor: pointer;
-      font-family: inherit;
-      font-size: 0.8125rem;
-      padding: 0.4375rem 0.875rem;
-      transition: all 0.15s;
-    }
-
-    .pill:hover { border-color: var(--accent); color: var(--accent-700); }
-
-    .pill[aria-pressed="true"] {
-      background: var(--accent);
-      border-color: var(--accent);
-      color: var(--bg);
-      font-weight: 700;
-    }
-
-    .pill:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-
-    .submit {
-      width: 100%;
-      margin-top: 1.25rem;
-      padding: 0.9375rem;
-      background: var(--accent);
-      color: var(--bg);
-      border: none;
-      border-radius: var(--pill);
-      font-family: var(--font-heading);
-      font-size: 1rem;
-      cursor: pointer;
-      transition: background 0.15s, transform 0.1s;
-    }
-
-    .submit:hover { background: var(--accent-600); }
-    .submit:active { transform: scale(0.995); }
-    .submit:disabled { opacity: 0.45; cursor: not-allowed; }
-    .submit:focus-visible { outline: 2px solid var(--accent-700); outline-offset: 2px; }
-
-    .promise {
-      margin-top: 0.75rem;
-      font-size: 0.75rem;
-      opacity: 0.6;
-      text-align: center;
-      display: flex; align-items: center; justify-content: center; gap: 0.375rem;
-    }
-
-    .promise svg { flex-shrink: 0; color: var(--accent-2); }
-
-    /* ---------- Notices ---------- */
-
-    .demo-banner, .error {
-      display: flex; align-items: center; gap: 0.5rem;
-      border-radius: var(--radius-md);
-      padding: 0.75rem 0.9375rem;
-      margin-bottom: 1rem;
-      font-size: 0.8125rem;
-      line-height: 1.4;
-    }
-
-    .demo-banner { background: var(--warn-bg); border: 1px solid var(--warn); }
-    .demo-banner strong { color: var(--warn); }
-
-    .error { background: var(--danger-bg); border: 1px solid var(--danger); color: var(--danger); font-weight: 600; }
-
-    .loading { display: none; padding: 2.5rem 0; text-align: center; }
-    .loading[data-on="1"] { display: block; }
-
-    .orbit {
-      width: 2.75rem; height: 2.75rem;
-      margin: 0 auto 1rem;
-      border: 2.5px solid var(--neutral-300);
-      border-top-color: var(--accent);
-      border-right-color: var(--accent-2);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    .loading p { font-size: 0.9375rem; opacity: 0.8; }
-    .loading .step { font-size: 0.75rem; opacity: 0.55; margin-top: 0.375rem; }
-
-    @media (prefers-reduced-motion: reduce) {
-      .orbit { animation-duration: 3s; }
-      *, *::before, *::after { transition-duration: 0.01ms !important; }
-    }
-
-    /* ---------- Result ---------- */
-
-    .result { padding-bottom: 2.5rem; }
-
-    .result-head {
-      display: flex; align-items: center; justify-content: space-between;
-      gap: 0.75rem; flex-wrap: wrap;
-      background: var(--accent);
-      color: var(--bg);
-      border-radius: var(--radius-lg);
-      padding: 1.125rem 1.375rem;
-      margin-bottom: 1rem;
-      box-shadow: var(--shadow-md);
-    }
-
-    .result-place { font-family: var(--font-heading); font-size: 1.5rem; }
-    .result-meta { font-size: 0.75rem; font-weight: 600; opacity: 0.85; font-variant-numeric: tabular-nums; }
-
-    .body {
-      background: var(--surface);
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-md);
-      padding: 0.5rem 1.375rem 1.5rem;
-      font-size: 0.9375rem;
-      line-height: 1.65;
-    }
-
-    .body h2 {
-      font-size: 1.25rem;
-      margin: 1.75rem 0 0.75rem;
-      color: var(--text);
-      text-wrap: balance;
-    }
-
-    .body h3 {
-      font-family: var(--font-body);
-      color: var(--accent-700);
-      font-size: 0.75rem;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      margin: 1.25rem 0 0.375rem;
-    }
-
-    .body p { margin-bottom: 0.6875rem; opacity: 0.85; }
-    .body ul, .body ol { padding-left: 1.125rem; margin-bottom: 0.75rem; opacity: 0.85; }
-    .body li { margin-bottom: 0.3125rem; }
-    .body strong { opacity: 1; font-weight: 700; color: var(--text); }
-    .body a { color: var(--accent-700); text-underline-offset: 3px; }
-    .body hr { border: none; border-top: 1px solid var(--divider); margin: 1.5rem 0; }
-
-    .body blockquote {
-      border-left: 3px solid var(--accent-2);
-      background: var(--accent-2-100);
-      border-radius: 0 var(--radius-md) var(--radius-md) 0;
-      padding: 0.75rem 1rem;
-      margin: 1rem 0;
-      opacity: 0.9;
-    }
-
-    .table-scroll { overflow-x: auto; margin: 1rem 0; }
-    .body table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
-    .body th {
-      text-align: left; padding: 0.5rem 0.625rem;
-      border-bottom: 1px solid var(--divider);
-      font-size: 0.6875rem; font-weight: 700;
-      letter-spacing: 0.08em; text-transform: uppercase;
-      opacity: 0.6; white-space: nowrap;
-    }
-    .body td {
-      padding: 0.5rem 0.625rem;
-      border-bottom: 1px solid color-mix(in srgb, var(--text) 7%, transparent);
-      font-variant-numeric: tabular-nums;
-    }
-
-    /* Timeline: each stop is a node, each leg the thread between them. */
-    .body p.stop {
-      position: relative;
-      padding-left: 1.25rem;
-      margin-bottom: 0.375rem;
-      opacity: 1;
-    }
-
-    .body p.stop::before {
-      content: "";
-      position: absolute;
-      left: 0; top: 0.52em;
-      width: 0.5rem; height: 0.5rem;
-      border-radius: 50%;
-      background: var(--accent);
-      box-shadow: 0 0 0 3px var(--accent-100);
-    }
-
-    .body p.stop strong { color: var(--accent-700); }
-    .body p.stop em { opacity: 0.6; font-style: normal; font-size: 0.8125rem; }
-
-    .body p.leg {
-      position: relative;
-      margin: 0.5rem 0 0.875rem;
-      padding-left: 1.25rem;
-      font-size: 0.8125rem;
-      opacity: 0.55;
-    }
-
-    .body p.leg::before {
-      content: "";
-      position: absolute;
-      left: 0.21875rem; top: -0.375rem; bottom: -0.3125rem;
-      width: 2px;
-      background: repeating-linear-gradient(var(--neutral-300) 0 3px, transparent 3px 6px);
-    }
-
-    .body p.leg em { font-style: normal; }
-
-    /* The date-conflict callout — the reason this app exists */
-    .body .headsup {
-      background: var(--warn-bg);
-      border: 1px solid var(--warn);
-      border-radius: var(--radius-lg);
-      padding: 1rem 1.25rem 0.5rem;
-      margin: 1.25rem 0 1.75rem;
-    }
-
-    .body .headsup h2 {
-      margin: 0 0 0.5rem;
-      font-size: 1.125rem;
-      color: var(--warn);
-      padding-left: 1.75rem;
-      position: relative;
-    }
-
-    .body .headsup h2::before {
-      content: "!";
-      position: absolute;
-      left: 0; top: 0.12em;
-      width: 1.25rem; height: 1.25rem;
-      border-radius: 50%;
-      background: var(--warn);
-      color: var(--bg);
-      font-family: var(--font-body);
-      font-size: 0.8125rem;
-      font-weight: 700;
-      display: flex; align-items: center; justify-content: center;
-    }
-
-    /* ---------- Sources ---------- */
-
-    .sources {
-      background: var(--accent-2-100);
-      border: 1px solid var(--accent-2-300);
-      border-radius: var(--radius-lg);
-      padding: 1.125rem 1.375rem;
-      margin-top: 1rem;
-    }
-
-    .sources h3 {
-      display: flex; align-items: center; gap: 0.4375rem;
-      color: var(--accent-2-700);
-      font-size: 0.75rem; font-weight: 700;
-      letter-spacing: 0.08em; text-transform: uppercase;
-      margin-bottom: 0.875rem;
-      font-family: var(--font-body);
-    }
-
-    .sources ol { list-style: none; display: flex; flex-direction: column; gap: 0.625rem; }
-    .sources li { display: flex; gap: 0.625rem; font-size: 0.8125rem; line-height: 1.4; }
-
-    .sources .n {
-      font-size: 0.6875rem;
-      color: var(--accent-2);
-      font-weight: 700;
-      padding-top: 0.0625rem;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .sources a { color: var(--text); text-decoration: none; font-weight: 600; }
-    .sources a:hover { text-decoration: underline; }
-    .sources .host {
-      display: block;
-      font-size: 0.6875rem;
-      opacity: 0.55;
-      font-weight: 400;
-      word-break: break-all;
-    }
-
-    footer {
-      padding: 1.25rem 0 2rem;
-      display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
-      font-size: 0.75rem;
-      opacity: 0.5;
-    }
-
-    footer a { color: var(--accent-700); text-decoration: none; font-weight: 600; }
-
-    /* The date field needs its full width before the calendar icon crowds it */
-    @media (max-width: 26rem) {
-      .row { grid-template-columns: 1fr; }
-    }
-
-    /* On a wide screen the phone layout leaves half the window empty,
-       so the hero and the form sit side by side instead. */
-    @media (min-width: 58rem) {
-      .wrap { max-width: 66rem; }
-
-      .top {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 3.5rem;
-        align-items: center;
-        min-height: 80vh;
-        padding: 1rem 0 2rem;
-      }
-
-      header { text-align: left; padding: 0; }
-      /* Full-bleed, or the silhouette ends in a hard vertical edge mid-screen.
-         The form card sits on a solid surface, so the ridges can pass behind it. */
-      .ridges { height: 22rem; top: -4rem; opacity: 0.55; }
-      .badge { margin: 0 0 1.75rem; width: 7.5rem; height: 7.5rem; }
-      h1 { font-size: 3.25rem; }
-      .lede { font-size: 1rem; margin: 0; max-width: 28rem; }
-
-      .form-col { display: flex; flex-direction: column; }
-      .card { margin-bottom: 0; padding: 1.75rem; }
-
-      main, footer { max-width: 44rem; margin: 0 auto; }
-    }
-  </style>
-</head>
-<body>
-
-<div class="wrap">
-
-  <div class="top">
+{% extends "base.html" %}
+{% set page = 'planejar' %}
+
+{% block head_extra %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+<style>
+  /* ---------- Hero ---------- */
+  header { position: relative; padding: 1.5rem 0 1.5rem; text-align: center; }
+
+  .ridges {
+    position: absolute; top: -1.5rem; left: 50%; transform: translateX(-50%);
+    width: 100vw; height: 15rem; pointer-events: none; z-index: 0;
+  }
+
+  .hero-inner { position: relative; z-index: 1; }
+
+  .badge {
+    width: 6.5rem; height: 6.5rem; margin: 0 auto 1.25rem;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, var(--accent-200), var(--accent) 75%);
+    box-shadow: var(--shadow-lg);
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .kicker {
+    display: inline-flex; align-items: center; gap: 0.4375rem;
+    background: var(--accent-2-100); color: var(--accent-2-700);
+    border-radius: var(--pill); padding: 0.3125rem 0.8125rem;
+    font-size: 0.6875rem; font-weight: 700; letter-spacing: 0.08em;
+    text-transform: uppercase; margin-bottom: 0.875rem;
+  }
+  .kicker::before { content: ""; width: 0.375rem; height: 0.375rem; border-radius: 50%; background: var(--accent-2); }
+
+  header h1 { font-size: clamp(2rem, 8vw, 2.75rem); margin-bottom: 0.75rem; text-wrap: balance; }
+  header h1 em { font-style: normal; color: var(--accent-700); }
+
+  .lede { opacity: 0.75; font-size: 0.9375rem; max-width: 26rem; margin: 0 auto; }
+  .lede strong { opacity: 1; font-weight: 700; }
+
+  /* ---------- Form ---------- */
+  .form-col, main, footer { position: relative; z-index: 1; }
+  .card.form { margin-bottom: 1.5rem; }
+
+  .fields { display: flex; flex-direction: column; gap: 0.9375rem; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+  .field { display: flex; flex-direction: column; gap: 0.375rem; min-width: 0; }
+
+  label {
+    font-size: 0.75rem; font-weight: 700; opacity: 0.85;
+    display: flex; align-items: baseline; gap: 0.375rem; flex-wrap: wrap;
+  }
+  .hint { font-weight: 400; opacity: 0.6; font-size: 0.6875rem; }
+
+  input {
+    width: 100%; background: var(--neutral-100);
+    border: 1px solid var(--divider); border-radius: var(--pill);
+    color: var(--text); font-family: inherit; font-size: 1rem;
+    padding: 0.75rem 1rem; caret-color: var(--accent);
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  input[type="number"], input[type="date"] { font-variant-numeric: tabular-nums; }
+  input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  input::placeholder { color: var(--neutral-600); }
+  input:hover { border-color: color-mix(in srgb, var(--text) 35%, transparent); }
+  input:focus-visible { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-100); }
+  input[aria-invalid="true"] { border-color: var(--danger); }
+
+  .field-msg { display: none; font-size: 0.75rem; color: var(--danger); font-weight: 600; line-height: 1.35; padding-left: 0.875rem; }
+  .field-msg[data-on="1"] { display: block; }
+
+  .pills { display: flex; flex-wrap: wrap; gap: 0.375rem; }
+  .pill {
+    appearance: none; background: transparent;
+    border: 1px solid var(--divider); border-radius: var(--pill);
+    color: var(--text); cursor: pointer; font-family: inherit;
+    font-size: 0.8125rem; padding: 0.4375rem 0.875rem; transition: all 0.15s;
+  }
+  .pill:hover { border-color: var(--accent); color: var(--accent-700); }
+  .pill[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--bg); font-weight: 700; }
+  .pill:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .submit {
+    width: 100%; margin-top: 1.25rem; padding: 0.9375rem;
+    background: var(--accent); color: var(--bg); border: none; border-radius: var(--pill);
+    font-family: var(--font-heading); font-size: 1rem; cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+  }
+  .submit:hover { background: var(--accent-600); }
+  .submit:active { transform: scale(0.995); }
+  .submit:disabled { opacity: 0.45; cursor: not-allowed; }
+  .submit:focus-visible { outline: 2px solid var(--accent-700); outline-offset: 2px; }
+
+  .promise {
+    margin-top: 0.75rem; font-size: 0.75rem; opacity: 0.6; text-align: center;
+    display: flex; align-items: center; justify-content: center; gap: 0.375rem;
+  }
+  .promise svg { flex-shrink: 0; color: var(--accent-2); }
+
+  .demo-banner, .error {
+    display: flex; align-items: center; gap: 0.5rem;
+    border-radius: var(--radius-md); padding: 0.75rem 0.9375rem;
+    margin-bottom: 1rem; font-size: 0.8125rem; line-height: 1.4;
+  }
+  .demo-banner { background: var(--warn-bg); border: 1px solid var(--warn); }
+  .demo-banner strong { color: var(--warn); }
+  .error { background: var(--danger-bg); border: 1px solid var(--danger); color: var(--danger); font-weight: 600; }
+
+  .loading { display: none; padding: 2.5rem 0; text-align: center; }
+  .loading[data-on="1"] { display: block; }
+  .orbit {
+    width: 2.75rem; height: 2.75rem; margin: 0 auto 1rem;
+    border: 2.5px solid var(--neutral-300);
+    border-top-color: var(--accent); border-right-color: var(--accent-2);
+    border-radius: 50%; animation: spin 1s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading p { font-size: 0.9375rem; opacity: 0.8; }
+  .loading .step { font-size: 0.75rem; opacity: 0.55; margin-top: 0.375rem; }
+
+  /* ---------- Result ---------- */
+  .result { padding-bottom: 2.5rem; }
+  .result-head {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 0.75rem; flex-wrap: wrap;
+    background: var(--accent); color: var(--bg);
+    border-radius: var(--radius-lg); padding: 1.125rem 1.375rem;
+    margin-bottom: 1rem; box-shadow: var(--shadow-md);
+  }
+  .result-place { font-family: var(--font-heading); font-size: 1.5rem; }
+  .result-meta { font-size: 0.75rem; font-weight: 600; opacity: 0.85; font-variant-numeric: tabular-nums; }
+
+  .body {
+    background: var(--surface); border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md); padding: 0.5rem 1.375rem 1.5rem;
+    font-size: 0.9375rem; line-height: 1.65;
+  }
+  .body h2 { font-size: 1.25rem; margin: 1.75rem 0 0.75rem; text-wrap: balance; }
+  .body h3 {
+    font-family: var(--font-body); color: var(--accent-700);
+    font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em;
+    text-transform: uppercase; margin: 1.25rem 0 0.375rem;
+  }
+  .body p { margin-bottom: 0.6875rem; opacity: 0.85; }
+  .body ul, .body ol { padding-left: 1.125rem; margin-bottom: 0.75rem; opacity: 0.85; }
+  .body li { margin-bottom: 0.3125rem; }
+  .body strong { opacity: 1; font-weight: 700; color: var(--text); }
+  .body a { color: var(--accent-700); text-underline-offset: 3px; }
+  .body hr { border: none; border-top: 1px solid var(--divider); margin: 1.5rem 0; }
+  .body blockquote {
+    border-left: 3px solid var(--accent-2); background: var(--accent-2-100);
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    padding: 0.75rem 1rem; margin: 1rem 0; opacity: 0.9;
+  }
+  .table-scroll { overflow-x: auto; margin: 1rem 0; }
+  .body table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+  .body th {
+    text-align: left; padding: 0.5rem 0.625rem; border-bottom: 1px solid var(--divider);
+    font-size: 0.6875rem; font-weight: 700; letter-spacing: 0.08em;
+    text-transform: uppercase; opacity: 0.6; white-space: nowrap;
+  }
+  .body td {
+    padding: 0.5rem 0.625rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--text) 7%, transparent);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Timeline */
+  .body p.stop { position: relative; padding-left: 1.25rem; margin-bottom: 0.375rem; opacity: 1; }
+  .body p.stop::before {
+    content: ""; position: absolute; left: 0; top: 0.52em;
+    width: 0.5rem; height: 0.5rem; border-radius: 50%;
+    background: var(--accent); box-shadow: 0 0 0 3px var(--accent-100);
+  }
+  .body p.stop strong { color: var(--accent-700); }
+  .body p.stop em { opacity: 0.6; font-style: normal; font-size: 0.8125rem; }
+
+  .body p.leg {
+    position: relative; margin: 0.5rem 0 0.875rem; padding-left: 1.25rem;
+    font-size: 0.8125rem; opacity: 0.55;
+  }
+  .body p.leg::before {
+    content: ""; position: absolute; left: 0.21875rem; top: -0.375rem; bottom: -0.3125rem;
+    width: 2px; background: repeating-linear-gradient(var(--neutral-300) 0 3px, transparent 3px 6px);
+  }
+  .body p.leg em { font-style: normal; }
+
+  .body .headsup {
+    background: var(--warn-bg); border: 1px solid var(--warn);
+    border-radius: var(--radius-lg); padding: 1rem 1.25rem 0.5rem; margin: 1.25rem 0 1.75rem;
+  }
+  .body .headsup h2 {
+    margin: 0 0 0.5rem; font-size: 1.125rem; color: var(--warn);
+    padding-left: 1.75rem; position: relative;
+  }
+  .body .headsup h2::before {
+    content: "!"; position: absolute; left: 0; top: 0.12em;
+    width: 1.25rem; height: 1.25rem; border-radius: 50%;
+    background: var(--warn); color: var(--bg);
+    font-family: var(--font-body); font-size: 0.8125rem; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .sources {
+    background: var(--accent-2-100); border: 1px solid var(--accent-2-300);
+    border-radius: var(--radius-lg); padding: 1.125rem 1.375rem; margin-top: 1rem;
+  }
+  .sources h3 {
+    display: flex; align-items: center; gap: 0.4375rem; color: var(--accent-2-700);
+    font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em;
+    text-transform: uppercase; margin-bottom: 0.875rem; font-family: var(--font-body);
+  }
+  .sources ol { list-style: none; display: flex; flex-direction: column; gap: 0.625rem; }
+  .sources li { display: flex; gap: 0.625rem; font-size: 0.8125rem; line-height: 1.4; }
+  .sources .n { font-size: 0.6875rem; color: var(--accent-2); font-weight: 700; padding-top: 0.0625rem; font-variant-numeric: tabular-nums; }
+  .sources a { color: var(--text); text-decoration: none; font-weight: 600; }
+  .sources a:hover { text-decoration: underline; }
+  .sources .host { display: block; font-size: 0.6875rem; opacity: 0.55; font-weight: 400; word-break: break-all; }
+
+  footer { padding: 1.25rem 0 2rem; display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; font-size: 0.75rem; opacity: 0.5; }
+  footer a { color: var(--accent-700); text-decoration: none; font-weight: 600; }
+
+  @media (max-width: 26rem) { .row { grid-template-columns: 1fr; } }
+
+  @media (min-width: 58rem) {
+    .top { display: grid; grid-template-columns: 1fr 1fr; gap: 3.5rem; align-items: center; min-height: 70vh; padding: 1rem 0 2rem; }
+    header { text-align: left; padding: 0; }
+    .ridges { height: 22rem; top: -4rem; opacity: 0.55; }
+    .badge { margin: 0 0 1.75rem; width: 7.5rem; height: 7.5rem; }
+    header h1 { font-size: 3.25rem; }
+    .lede { font-size: 1rem; margin: 0; max-width: 28rem; }
+    .form-col { display: flex; flex-direction: column; }
+    .card.form { margin-bottom: 0; padding: 1.75rem; }
+    main, footer { max-width: 44rem; margin: 0 auto; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="top">
 
   <header>
     <svg class="ridges" viewBox="0 0 402 340" preserveAspectRatio="none" aria-hidden="true">
@@ -553,8 +255,8 @@
         </svg>
       </div>
       <div class="kicker">Busca ao vivo</div>
-      <h1>O mundo muda <em>conforme a data</em></h1>
-      <p class="lede">Um museu abre todo dia. Um Grande Prêmio acontece uma vez por ano. O Atlas <strong>procura o que está rolando nas suas datas exatas</strong> antes de montar o roteiro.</p>
+      <h1>Explore <em>com um plano</em></h1>
+      <p class="lede">Diga para onde e quando. O Atlas confere <strong>horários, fechamentos e o que está acontecendo nas suas datas</strong> — e monta o dia hora a hora, com o tempo de deslocamento entre cada lugar.</p>
     </div>
   </header>
 
@@ -571,14 +273,13 @@
     <div class="error" role="alert">{{ error }}</div>
     {% endif %}
 
-    <form id="form" action="/plan" method="POST" class="card">
+    <form id="form" action="/plan" method="POST" class="card form" autocomplete="off">
       <div class="fields">
 
         <div class="field">
           <label for="destination">Destino</label>
-          <input type="text" id="destination" name="destination" required
-                 placeholder="Paris, Buenos Aires, Tóquio..."
-                 value="{{ destination or '' }}">
+          <input type="text" id="destination" name="destination" required autocomplete="off"
+                 placeholder="Paris, Buenos Aires, Tóquio..." value="{{ destination or '' }}">
         </div>
 
         <div class="row">
@@ -586,13 +287,13 @@
             <!-- iOS renders an empty date input as a blank box with no hint at all,
                  so the format has to live in the label. -->
             <label for="start_date">Data de ida <span class="hint">dia/mês/ano</span></label>
-            <input type="date" id="start_date" name="start_date" required
+            <input type="date" id="start_date" name="start_date" required autocomplete="off"
                    min="{{ today }}" max="{{ max_date }}" value="{{ start_date or '' }}">
             <span class="field-msg" id="msg-start_date"></span>
           </div>
           <div class="field">
             <label for="days">Dias</label>
-            <input type="number" id="days" name="days" required min="1" max="30"
+            <input type="number" id="days" name="days" required min="1" max="30" autocomplete="off"
                    inputmode="numeric" placeholder="4" value="{{ days or '' }}">
             <span class="field-msg" id="msg-days"></span>
           </div>
@@ -600,16 +301,15 @@
 
         <div class="field">
           <label for="budget">Orçamento total <span class="hint">em dólares, sem a passagem</span></label>
-          <input type="number" id="budget" name="budget" required min="50" max="100000"
+          <input type="number" id="budget" name="budget" required min="50" max="100000" autocomplete="off"
                  inputmode="numeric" placeholder="1200" value="{{ budget or '' }}">
           <span class="field-msg" id="msg-budget"></span>
         </div>
 
         <div class="field">
           <label for="interests">Seus interesses <span class="hint">o que faria a viagem valer a pena</span></label>
-          <input type="text" id="interests" name="interests"
-                 placeholder="comida local, museus, praia, história, esportes..."
-                 value="{{ interests or '' }}">
+          <input type="text" id="interests" name="interests" autocomplete="off"
+                 placeholder="comida local, museus, praia, história, esportes..." value="{{ interests or '' }}">
         </div>
 
         <div class="field">
@@ -636,62 +336,62 @@
     </form>
 
   </div>
-  </div>
-
-  <main>
-
-    <div class="loading" id="loading">
-      <div class="orbit"></div>
-      <p>Procurando o que acontece em <strong id="loading-place">seu destino</strong></p>
-      <p class="step" id="loading-step">consultando fontes...</p>
-    </div>
-
-    {% if itinerary %}
-    <section class="result">
-      <div class="result-head">
-        <div class="result-place">{{ destination }}</div>
-        <div class="result-meta">{{ start_date }} · {{ days }}D · ${{ budget }}</div>
-      </div>
-
-      <div class="body" id="body"></div>
-
-      {% if sources %}
-      <div class="sources">
-        <h3>
-          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <circle cx="8" cy="8" r="6.5"/><path d="M1.5 8h13M8 1.5a12 12 0 010 13M8 1.5a12 12 0 000 13" stroke-linecap="round"/>
-          </svg>
-          Verificado nestas fontes
-        </h3>
-        <ol>
-          {% for s in sources %}
-          <li>
-            <span class="n">{{ "%02d"|format(loop.index) }}</span>
-            <span>
-              <a href="{{ s.url }}" target="_blank" rel="noopener noreferrer">{{ s.title }}</a>
-              <span class="host">{{ s.url | replace('https://', '') | replace('http://', '') | truncate(46, true, '…') }}</span>
-            </span>
-          </li>
-          {% endfor %}
-        </ol>
-      </div>
-      {% endif %}
-    </section>
-
-    <script id="raw" type="application/json">{{ itinerary | tojson }}</script>
-    {% endif %}
-
-  </main>
-
-  <footer>
-    <span>Atlas · roteiros verificados</span>
-    <span>por <a href="https://github.com/maargas" target="_blank" rel="noopener">maargas</a></span>
-  </footer>
-
 </div>
 
+<main>
+
+  <div class="loading" id="loading">
+    <div class="orbit"></div>
+    <p>Procurando o que acontece em <strong id="loading-place">seu destino</strong></p>
+    <p class="step" id="loading-step">consultando fontes...</p>
+  </div>
+
+  {% if itinerary %}
+  <section class="result">
+    <div class="result-head">
+      <div class="result-place">{{ destination }}</div>
+      <div class="result-meta">{{ start_date }} · {{ days }}D · ${{ budget }}</div>
+    </div>
+
+    <div class="body" id="body"></div>
+
+    {% if sources %}
+    <div class="sources">
+      <h3>
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <circle cx="8" cy="8" r="6.5"/><path d="M1.5 8h13M8 1.5a12 12 0 010 13M8 1.5a12 12 0 000 13" stroke-linecap="round"/>
+        </svg>
+        Verificado nestas fontes
+      </h3>
+      <ol>
+        {% for s in sources %}
+        <li>
+          <span class="n">{{ "%02d"|format(loop.index) }}</span>
+          <span>
+            <a href="{{ s.url }}" target="_blank" rel="noopener noreferrer">{{ s.title }}</a>
+            <span class="host">{{ s.url | replace('https://', '') | replace('http://', '') | truncate(46, true, '…') }}</span>
+          </span>
+        </li>
+        {% endfor %}
+      </ol>
+    </div>
+    {% endif %}
+  </section>
+
+  <script id="raw" type="application/json">{{ itinerary | tojson }}</script>
+  {% endif %}
+
+</main>
+
+<footer>
+  <span>Atlas · roteiros verificados</span>
+  <span>por <a href="https://github.com/maargas" target="_blank" rel="noopener">maargas</a></span>
+</footer>
+
+{% endblock %}
+
+{% block scripts %}
 <script>
-  // --- Style pills ---
   const styleInput = document.getElementById('style');
   const pills = document.querySelectorAll('.pill');
 
@@ -702,7 +402,6 @@
   pills.forEach(p => p.addEventListener('click', () => setStyle(p.dataset.style)));
   setStyle(styleInput.value);
 
-  // --- Field limits ---
   // The browser lets you type anything into these; min/max only bite on submit,
   // and a date field will happily accept the year 231231. So check as they type
   // and say what the limit is, instead of failing silently at the end.
@@ -761,7 +460,6 @@
   dateField.addEventListener('input', checkDate);
   dateField.addEventListener('blur', checkDate);
 
-  // --- Submit state ---
   const STEPS = [
     'consultando fontes...',
     'checando eventos nas suas datas...',
@@ -789,13 +487,11 @@
     setInterval(() => { i = (i + 1) % STEPS.length; stepEl.textContent = STEPS[i]; }, 3500);
   });
 
-  // --- Render the itinerary ---
   const rawEl = document.getElementById('raw');
   if (rawEl) {
     const body = document.getElementById('body');
     body.innerHTML = marked.parse(JSON.parse(rawEl.textContent));
 
-    // Tag timeline pieces so the CSS can draw the chain
     body.querySelectorAll('p').forEach(p => {
       const t = p.textContent.trim();
       if (t.startsWith('↓')) p.classList.add('leg');
@@ -809,7 +505,6 @@
       box.appendChild(tbl);
     });
 
-    // Lift the date-conflict warning out of the ordinary flow of days
     const flagged = [...body.querySelectorAll('h2')].find(h =>
       /heads\s*up|aten[çc][ãa]o|avisos?|alerta/i.test(h.textContent)
     );
@@ -834,6 +529,4 @@
     window.addEventListener('load', () => navigator.serviceWorker.register('/static/sw.js'));
   }
 </script>
-
-</body>
-</html>
+{% endblock %}

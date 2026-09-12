@@ -110,7 +110,7 @@ Write in Brazilian Portuguese. Be specific and concrete, never generic."""
 # Each day is a list of stops and the legs between them, so the demo shows the same
 # clock-and-transport shape the real itinerary uses.
 DEMO_DAYS = [
-    ("Centro histórico", [
+    ("Centro histórico", 0.65, "dia barato: quase tudo é caminhada e rua.", [
         ("stop", "08:45", "A praça principal do centro", "abre sempre",
          "Começa cedo porque às 10h os ônibus de excursão chegam. Cerca de 1h caminhando sem pressa."),
         ("leg", "12 min a pé, ladeira leve"),
@@ -123,7 +123,7 @@ DEMO_DAYS = [
         ("stop", "12:15", "Almoço no bairro", "cozinhas fecham 15:00",
          "Faixa de preço de restaurante de bairro, não de praça turística."),
     ]),
-    ("O museu principal", [
+    ("O museu principal", 1.35, "o ingresso do museu pesa neste dia.", [
         ("stop", "10:00", "O museu principal", "abre 10:00 · fecha às segundas",
          "Encaixado num dia útil justamente porque fecha um dia da semana. 2h30 com a fila."),
         ("leg", "4 min a pé"),
@@ -133,7 +133,7 @@ DEMO_DAYS = [
         ("stop", "14:15", "O jardim ou parque da cidade", "abre 14:00",
          "Tarde leve depois da manhã pesada. Fica até o fim da tarde."),
     ]),
-    ("Mercado e bairro local", [
+    ("Mercado e bairro local", 0.75, "sem ingresso; o gasto é comida e transporte.", [
         ("stop", "09:30", "O mercado municipal", "mais movimentado de manhã",
          "Vai cedo porque depois das 12h as bancas boas começam a fechar."),
         ("leg", "15 min a pé pelo bairro"),
@@ -143,7 +143,7 @@ DEMO_DAYS = [
         ("stop", "13:30", "Almoço fora do circuito turístico", "aberto",
          "Metade do preço da região central, mesma comida."),
     ]),
-    ("Bate e volta nos arredores", [
+    ("Bate e volta nos arredores", 1.5, "o trem de ida e volta é o maior custo do dia.", [
         ("stop", "07:50", "Estação central", "primeiro trem 08:00",
          "Sai cedo de propósito: o último trem de volta costuma ser antes das 20h."),
         ("leg", "50 min de trem"),
@@ -153,7 +153,7 @@ DEMO_DAYS = [
         ("stop", "18:30", "De volta à cidade", "—",
          "Volta antes do escuro e com folga em relação ao último trem."),
     ]),
-    ("Fim de tarde e pôr do sol", [
+    ("Fim de tarde e pôr do sol", 0.55, "dia leve de propósito, para o orçamento respirar.", [
         ("stop", "15:00", "Bairro que ficou faltando", "aberto",
          "Dia mais leve, encaixado depois dos puxados. Nenhum roteiro aguenta cinco dias intensos seguidos."),
         ("leg", "18 min a pé subindo"),
@@ -207,7 +207,7 @@ def demo_itinerary(destination, start_date, days, budget, interests):
         d0 = None
 
     for i in range(total_days):
-        title, schedule = DEMO_DAYS[i % len(DEMO_DAYS)]
+        title, weight, cost_note, schedule = DEMO_DAYS[i % len(DEMO_DAYS)]
         if d0:
             d = d0 + timedelta(days=i)
             weekday = f" — {d.strftime('%d/%m')}"
@@ -220,9 +220,11 @@ def demo_itinerary(destination, start_date, days, budget, interests):
                 _, hour, place, opening, text = entry
                 parts += [f"**{hour} · {place}** *({opening})*", "", text, ""]
         if per_day:
+            # Days cost different amounts — a museum day is not a market day — so the
+            # demo varies them instead of dividing the budget into equal slices.
+            cost = per_day * weight
             parts += [
-                f"Seu orçamento dividido por dia dá **US$ {per_day:,.0f}** — isso é uma referência sua, "
-                "não uma previsão do Atlas.".replace(",", "."),
+                f"**Custo deste dia: cerca de US$ {cost:,.0f}** — {cost_note}".replace(",", "."),
                 "",
             ]
         parts += ["---", ""]
@@ -430,6 +432,23 @@ def plan():
         return render_template("index.html", error=f"O serviço de IA retornou um erro ({e.status_code}). Tente de novo.", **form_values)
     except anthropic.APIConnectionError:
         return render_template("index.html", error="Não foi possível conectar ao serviço de IA. Verifique sua internet.", **form_values)
+
+
+# Prototype screens: static sample data, no account and no database behind them.
+# They exist so testers can see the shape of the finished product before it is built.
+@app.route("/painel")
+def painel():
+    return render_template("painel.html")
+
+
+@app.route("/orcamento")
+def orcamento():
+    return render_template("orcamento.html")
+
+
+@app.route("/viagem")
+def viagem():
+    return render_template("viagem.html")
 
 
 @app.errorhandler(429)

@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>{% block title %}Atlas — Roteiros de viagem{% endblock %}</title>
+  <meta name="description" content="Roteiro de viagem verificado nas suas datas reais.">
+
+  <link rel="manifest" href="/static/manifest.json">
+  <meta name="theme-color" content="#0b1f24">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Atlas">
+  <link rel="apple-touch-icon" href="/static/icon-192.png">
+  <link rel="icon" href="/static/icon-192.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caprasimo&family=Figtree:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* Tokens lifted from the Organic design system, in the dark tuning the
+       app design uses. Single theme on purpose: the design has no light variant,
+       so every colour is painted rather than inherited. */
+    :root {
+      --bg:            #0b1f24;
+      --surface:       #12292d;
+      --text:          #eef6f5;
+      --divider:       color-mix(in srgb, #eef6f5 14%, transparent);
+
+      --accent:        #4fb3c9;
+      --accent-100:    #0f2b32;
+      --accent-200:    #123640;
+      --accent-600:    #3d92a6;
+      --accent-700:    #7fd4e6;
+      --accent-800:    #bfe8f0;
+
+      --accent-2:      #7fae95;
+      --accent-2-100:  #12302b;
+      --accent-2-300:  #1c4a40;
+      --accent-2-700:  #9fd9c0;
+      --accent-2-800:  #c9ecdf;
+
+      --neutral-100:   #132a2f;
+      --neutral-300:   #1f4650;
+      --neutral-600:   #5f8792;
+      --neutral-900:   #081619;
+
+      --warn:          #e0a45c;
+      --warn-bg:       #2e2415;
+      --danger:        #e8806f;
+      --danger-bg:     #33201d;
+
+      --font-heading: "Caprasimo", Georgia, serif;
+      --font-body:    "Figtree", system-ui, -apple-system, sans-serif;
+
+      --radius-md: 16px;
+      --radius-lg: 32px;
+      --pill: 999px;
+
+      --shadow-md: 0 3px 10px rgba(0,0,0,0.4);
+      --shadow-lg: 0 12px 32px rgba(0,0,0,0.45);
+
+      --nav-h: 4.5rem;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 15px;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+      padding: 0 max(1rem, env(safe-area-inset-left));
+      padding-bottom: calc(var(--nav-h) + env(safe-area-inset-bottom));
+      overflow-x: hidden;
+    }
+
+    h1, h2, h3 { font-family: var(--font-heading); font-weight: 400; line-height: 1.12; letter-spacing: -0.015em; }
+
+    .wrap { max-width: 38rem; margin: 0 auto; }
+
+    a { color: var(--accent-700); }
+
+    /* ---------- Shared pieces ---------- */
+
+    .card {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+      padding: 1.375rem;
+    }
+
+    .page-head { padding: 1.75rem 0 1.25rem; }
+    .page-head h1 { font-size: 1.75rem; margin-bottom: 0.25rem; }
+    .page-head .sub { font-size: 0.8125rem; opacity: 0.6; }
+
+    .section-head {
+      display: flex; align-items: baseline; justify-content: space-between;
+      gap: 0.75rem; margin: 1.5rem 0 0.75rem;
+    }
+    .section-head h2 { font-size: 1rem; }
+    .section-head .more { font-size: 0.75rem; color: var(--accent-700); font-weight: 700; }
+
+    /* A row of icon + text, used on every prototype screen */
+    .row-item {
+      display: flex; gap: 0.75rem; align-items: center;
+      background: var(--neutral-100);
+      border-radius: var(--radius-md);
+      padding: 0.75rem;
+    }
+    .row-icon {
+      width: 2.75rem; height: 2.75rem; flex: none;
+      border-radius: 0.875rem;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .row-icon.cyan { background: var(--accent-200); color: var(--accent-700); }
+    .row-icon.sage { background: var(--accent-2-100); color: var(--accent-2-700); }
+    .row-main { flex: 1; min-width: 0; }
+    .row-title { font-size: 0.875rem; font-weight: 700; }
+    .row-sub { font-size: 0.75rem; opacity: 0.6; }
+    .row-value { font-size: 0.875rem; font-weight: 700; }
+
+    .stack { display: flex; flex-direction: column; gap: 0.625rem; }
+
+    .tag {
+      display: inline-flex; align-items: center;
+      font-size: 0.6875rem; font-weight: 700;
+      padding: 0.1875rem 0.625rem; border-radius: var(--pill);
+    }
+    .tag-sage { background: var(--accent-2-100); color: var(--accent-2-700); }
+    .tag-outline { border: 1px solid var(--accent); color: var(--accent-700); }
+
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 0.375rem;
+      width: 100%; padding: 0.875rem;
+      border: 1px solid transparent; border-radius: var(--pill);
+      font-family: var(--font-heading); font-size: 0.9375rem;
+      cursor: pointer; text-decoration: none;
+    }
+    .btn-primary { background: var(--accent); color: var(--bg); }
+    .btn-primary:hover { background: var(--accent-600); }
+    .btn-outline { border-color: var(--accent-200); color: var(--accent-700); background: transparent; }
+    .btn-outline:hover { background: var(--accent-100); }
+    .btn:focus-visible { outline: 2px solid var(--accent-700); outline-offset: 2px; }
+
+    /* Sample-data screens must never be mistaken for the real thing */
+    .sample-note {
+      display: flex; align-items: center; gap: 0.5rem;
+      background: var(--warn-bg); border: 1px solid var(--warn);
+      border-radius: var(--radius-md);
+      padding: 0.625rem 0.875rem;
+      margin: 0.5rem 0 1rem;
+      font-size: 0.75rem; line-height: 1.4;
+    }
+    .sample-note strong { color: var(--warn); }
+
+    /* ---------- Bottom navigation ---------- */
+
+    .tabbar {
+      position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
+      display: flex; justify-content: space-around; align-items: center;
+      background: var(--surface);
+      border-top: 1px solid var(--divider);
+      padding: 0.625rem 0 calc(0.625rem + env(safe-area-inset-bottom));
+    }
+
+    .tab {
+      display: flex; flex-direction: column; align-items: center; gap: 0.1875rem;
+      color: var(--neutral-600); text-decoration: none;
+      font-size: 0.625rem; font-weight: 600;
+      padding: 0.125rem 0.75rem;
+      min-width: 3.5rem;
+    }
+    .tab[aria-current="page"] { color: var(--accent-700); }
+    .tab svg { display: block; }
+    .tab:focus-visible { outline: 2px solid var(--accent-700); outline-offset: 2px; border-radius: 0.5rem; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 3s !important; }
+    }
+
+    /* On a wide screen a fixed bottom bar looks like a stranded phone UI,
+       so the same links become a top bar instead. */
+    @media (min-width: 58rem) {
+      :root { --nav-h: 0rem; }
+      body { padding-bottom: 2rem; }
+
+      .tabbar {
+        position: sticky; top: 0; bottom: auto;
+        max-width: 66rem; margin: 0 auto 1rem;
+        justify-content: flex-start; gap: 0.5rem;
+        border-top: none; border-bottom: 1px solid var(--divider);
+        border-radius: 0 0 var(--radius-md) var(--radius-md);
+        padding: 0.5rem 0.75rem;
+        background: color-mix(in srgb, var(--surface) 92%, transparent);
+        backdrop-filter: blur(8px);
+      }
+
+      .tab {
+        flex-direction: row; gap: 0.4375rem;
+        font-size: 0.8125rem;
+        padding: 0.4375rem 0.875rem;
+        border-radius: var(--pill);
+      }
+      .tab[aria-current="page"] { background: var(--accent-100); }
+
+      .wrap { max-width: 66rem; }
+    }
+  </style>
+  {% block head_extra %}{% endblock %}
+</head>
+<body>
+
+<nav class="tabbar" aria-label="Navegação principal">
+  <a class="tab" href="/painel" {% if page == 'painel' %}aria-current="page"{% endif %}>
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8"></path><path d="M5 10v9a1 1 0 001 1h4v-6h4v6h4a1 1 0 001-1v-9"></path></svg>
+    <span>Início</span>
+  </a>
+  <a class="tab" href="/" {% if page == 'planejar' %}aria-current="page"{% endif %}>
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M16 8l-5 3-3 5 5-3 3-5z"></path></svg>
+    <span>Planejar</span>
+  </a>
+  <a class="tab" href="/orcamento" {% if page == 'orcamento' %}aria-current="page"{% endif %}>
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"></rect><path d="M3 11h18M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2"></path></svg>
+    <span>Orçamento</span>
+  </a>
+  <a class="tab" href="/viagem" {% if page == 'viagem' %}aria-current="page"{% endif %}>
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 20c0-4 3.6-6 8-6s8 2 8 6"></path></svg>
+    <span>Viagem</span>
+  </a>
+</nav>
+
+<div class="wrap">
+{% block content %}{% endblock %}
+</div>
+
+<script>
+  // Prototype controls: they react so the interaction reads as real, but nothing
+  // is stored — there is no account yet to store it against.
+  document.querySelectorAll('[data-soon]').forEach((el) => {
+    const original = el.textContent;
+    el.addEventListener('click', () => {
+      el.textContent = 'Ainda não funciona — tela de exemplo';
+      setTimeout(() => { el.textContent = original; }, 2200);
+    });
+  });
+
+  document.querySelectorAll('.switch').forEach((sw) => {
+    sw.addEventListener('click', () => {
+      sw.setAttribute('aria-checked', sw.getAttribute('aria-checked') === 'true' ? 'false' : 'true');
+    });
+  });
+</script>
+
+{% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% set page = 'orcamento' %}
+{% block title %}Orçamento — Atlas{% endblock %}
+
+{% block head_extra %}
+<style>
+  .total { display: flex; flex-direction: row; align-items: center; gap: 1.125rem; padding: 1.125rem; margin-bottom: 1.125rem; }
+  .total .figures .k { font-size: 0.6875rem; opacity: 0.6; }
+  .total .figures .v { font-family: var(--font-heading); font-size: 1.5rem; }
+  .total .figures .left { font-size: 0.75rem; color: var(--accent-2-700); font-weight: 700; }
+
+  .cat-bar { height: 5px; border-radius: var(--pill); background: var(--neutral-300); margin-top: 0.3125rem; overflow: hidden; }
+  .cat-bar span { display: block; height: 100%; }
+
+  .split-row { display: flex; align-items: center; gap: 0.625rem; padding: 0.5rem 0; }
+  .split-dot { width: 1.875rem; height: 1.875rem; border-radius: 50%; flex: none; }
+  .split-name { flex: 1; font-size: 0.8125rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-head">
+  <h1>Orçamento de Lisboa</h1>
+  <div class="sub">2 a 9 de outubro · 4 viajantes</div>
+</div>
+
+<div class="sample-note">
+  <span aria-hidden="true">🧪</span>
+  <span><strong>Tela de exemplo.</strong> Nada aqui é real — é a ideia de como o controle de gastos vai funcionar.</span>
+</div>
+
+<div class="card total">
+  <svg width="88" height="88" viewBox="0 0 100 100" style="flex:none;" aria-hidden="true">
+    <circle cx="50" cy="50" r="42" fill="none" stroke="var(--neutral-300)" stroke-width="10"></circle>
+    <circle cx="50" cy="50" r="42" fill="none" stroke="var(--accent)" stroke-width="10"
+            stroke-dasharray="162 264" stroke-linecap="round" transform="rotate(-90 50 50)"></circle>
+    <svg x="34" y="34" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--accent-700)" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M11 20A7 7 0 019.8 6.1C15.5 5 17 9.5 15 12.5c-2 3-5.7 3.3-4.3 7.5z"></path>
+    </svg>
+  </svg>
+  <div class="figures">
+    <div class="k">Gasto de $3.200</div>
+    <div class="v">$1.960</div>
+    <div class="left">Restam $1.240</div>
+  </div>
+</div>
+
+<div class="section-head"><h2>Por categoria</h2></div>
+
+<div class="stack">
+  <div class="row-item">
+    <div class="row-icon cyan" style="width:2.25rem;height:2.25rem;border-radius:0.75rem;" aria-hidden="true">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="3"></rect><path d="M3 10h18M8 2v4M16 2v4"></path></svg>
+    </div>
+    <div class="row-main">
+      <div class="row-title">Hospedagem</div>
+      <div class="cat-bar"><span style="width:70%; background:var(--accent);"></span></div>
+    </div>
+    <div class="row-value">$980</div>
+  </div>
+
+  <div class="row-item">
+    <div class="row-icon sage" style="width:2.25rem;height:2.25rem;border-radius:0.75rem;" aria-hidden="true">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2 16l20-8-8 20-2-9-10-3z"></path></svg>
+    </div>
+    <div class="row-main">
+      <div class="row-title">Voos</div>
+      <div class="cat-bar"><span style="width:45%; background:var(--accent-2);"></span></div>
+    </div>
+    <div class="row-value">$620</div>
+  </div>
+
+  <div class="row-item">
+    <div class="row-icon cyan" style="width:2.25rem;height:2.25rem;border-radius:0.75rem;" aria-hidden="true">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 010 8h-1M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"></path><path d="M6 1v3M10 1v3M14 1v3"></path></svg>
+    </div>
+    <div class="row-main">
+      <div class="row-title">Comida</div>
+      <div class="cat-bar"><span style="width:28%; background:var(--accent);"></span></div>
+    </div>
+    <div class="row-value">$360</div>
+  </div>
+</div>
+
+<div class="section-head"><h2>Dividir com o grupo</h2></div>
+
+<div>
+  <div class="split-row">
+    <div class="split-dot" style="background:var(--accent-2);"></div>
+    <div class="split-name">Maya te deve</div>
+    <div class="tag tag-sage">$140</div>
+  </div>
+  <div class="split-row">
+    <div class="split-dot" style="background:var(--accent);"></div>
+    <div class="split-name">Você deve ao Diego</div>
+    <div class="tag tag-outline">$65</div>
+  </div>
+</div>
+
+<div style="margin-top:1.5rem;">
+  <button class="btn btn-primary" type="button" data-soon>Lançar um gasto</button>
+</div>
+
+{% endblock %}

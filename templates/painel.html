@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+{% set page = 'painel' %}
+{% block title %}Início — Atlas{% endblock %}
+
+{% block head_extra %}
+<style>
+  .greet { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1.75rem 0 1.25rem; }
+  .greet .hi { font-size: 0.8125rem; opacity: 0.6; }
+  .greet h1 { font-size: 1.5rem; margin-top: 0.125rem; }
+  .avatar {
+    width: 2.5rem; height: 2.5rem; border-radius: 50%; flex: none;
+    background: var(--accent-2); color: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .next-trip {
+    position: relative; overflow: hidden;
+    background: var(--accent); color: var(--bg);
+    border-radius: var(--radius-lg); padding: 1.25rem;
+    box-shadow: var(--shadow-md); margin-bottom: 1rem;
+  }
+  .next-trip .peaks { position: absolute; right: -0.625rem; bottom: -0.875rem; opacity: 0.25; }
+  .next-trip .kicker-sm { font-size: 0.6875rem; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.85; font-weight: 700; }
+  .next-trip .count { font-family: var(--font-heading); font-size: 2.625rem; margin: 0.25rem 0 0.125rem; line-height: 1; }
+  .next-trip .where { font-size: 0.875rem; opacity: 0.9; margin-bottom: 0.875rem; }
+  .next-trip .actions { display: flex; gap: 0.5rem; align-items: center; position: relative; }
+  .chip {
+    background: color-mix(in srgb, #fff 18%, transparent);
+    border: none; color: inherit; font-family: inherit;
+    border-radius: var(--pill); padding: 0.4375rem 0.875rem;
+    font-size: 0.75rem; font-weight: 700; cursor: pointer; text-decoration: none;
+  }
+  .chip:hover { background: color-mix(in srgb, #fff 28%, transparent); }
+  .chip-round {
+    background: color-mix(in srgb, #fff 12%, transparent);
+    border-radius: 50%; width: 2.125rem; height: 2.125rem;
+    display: flex; align-items: center; justify-content: center;
+    border: none; color: inherit; cursor: pointer;
+  }
+
+  .stat-row { display: flex; gap: 0.75rem; margin-bottom: 0.5rem; }
+  .stat { flex: 1; background: var(--surface); border-radius: var(--radius-lg); padding: 0.875rem 1rem; }
+  .stat .v { font-family: var(--font-heading); font-size: 1.125rem; margin-top: 0.5rem; }
+  .stat .k { font-size: 0.6875rem; opacity: 0.6; }
+
+  .upcoming { display: flex; gap: 0.75rem; overflow-x: auto; padding-bottom: 0.5rem; }
+  .trip-card {
+    flex: none; width: 9.5rem; height: 6.25rem;
+    border-radius: 1.25rem; padding: 0.625rem; position: relative; overflow: hidden;
+    color: #fff; text-decoration: none;
+  }
+  .trip-card .n { font-size: 0.75rem; font-weight: 700; position: relative; }
+  .trip-card .d { font-size: 0.625rem; opacity: 0.85; position: relative; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="greet">
+  <div>
+    <div class="hi">Boa noite, Sam</div>
+    <h1>Suas viagens</h1>
+  </div>
+  <div class="avatar" aria-hidden="true">
+    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 20c0-4 3.6-6 8-6s8 2 8 6"></path></svg>
+  </div>
+</div>
+
+<div class="sample-note">
+  <span aria-hidden="true">🧪</span>
+  <span><strong>Tela de exemplo.</strong> Os números são fictícios — serve para mostrar como o app vai funcionar quando guardar suas viagens.</span>
+</div>
+
+<div class="next-trip">
+  <svg class="peaks" width="120" height="90" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" aria-hidden="true"><path d="M2 20l6-10 4 5 4-8 6 13z"></path></svg>
+  <div class="kicker-sm">Próxima viagem em</div>
+  <div class="count">12 dias</div>
+  <div class="where">Lisboa, Portugal · 2 a 9 de outubro</div>
+  <div class="actions">
+    <a class="chip" href="/">Ver roteiro</a>
+    <a class="chip-round" href="/viagem" aria-label="Detalhes da viagem">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"></path></svg>
+    </a>
+  </div>
+</div>
+
+<div class="stat-row">
+  <a class="stat" href="/orcamento" style="text-decoration:none; color:inherit;">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-700)" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"></rect><path d="M3 11h18M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2"></path></svg>
+    <div class="v">$1.240</div>
+    <div class="k">Restante do orçamento</div>
+  </a>
+  <div class="stat">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-2-700)" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="4"></circle><path d="M2 21c0-3.5 3-5.5 7-5.5s7 2 7 5.5"></path><path d="M17 7a3 3 0 110 6"></path><path d="M23 21c0-2.8-2-4.5-4.5-5"></path></svg>
+    <div class="v">4 amigos</div>
+    <div class="k">Planejando junto</div>
+  </div>
+</div>
+
+<div class="section-head">
+  <h2>Hoje em Lisboa</h2>
+  <a class="more" href="/">Ver tudo</a>
+</div>
+
+<div class="stack">
+  <div class="row-item">
+    <div class="row-icon cyan" aria-hidden="true">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2 16l20-8-8 20-2-9-10-3z"></path></svg>
+    </div>
+    <div class="row-main">
+      <div class="row-title">Voo para Lisboa</div>
+      <div class="row-sub">09:40 · TAP Air Portugal</div>
+    </div>
+  </div>
+  <div class="row-item">
+    <div class="row-icon sage" aria-hidden="true">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 019.8 6.1C15.5 5 17 9.5 15 12.5c-2 3-5.7 3.3-4.3 7.5z"></path><path d="M9.9 11.1c1.5-3.5 4.5-4.5 7-3.5"></path></svg>
+    </div>
+    <div class="row-main">
+      <div class="row-title">Caminhada pelas colinas de Sintra</div>
+      <div class="row-sub">15:00 · trilha guiada</div>
+    </div>
+  </div>
+</div>
+
+<div class="section-head"><h2>Próximas</h2></div>
+
+<div class="upcoming">
+  <a class="trip-card" href="/viagem" style="background:linear-gradient(160deg,#cdd6bb,var(--accent-2)); filter:saturate(0.7) brightness(1.05);">
+    <div class="n">Quioto, Japão</div>
+    <div class="d">3 a 12 de março</div>
+  </a>
+  <a class="trip-card" href="/viagem" style="background:linear-gradient(160deg,#f0c19a,var(--accent)); filter:saturate(0.7) brightness(1.05);">
+    <div class="n">Oaxaca, México</div>
+    <div class="d">14 a 21 de junho</div>
+  </a>
+</div>
+
+<div style="margin-top:1.5rem;">
+  <a class="btn btn-primary" href="/">Planejar uma viagem nova</a>
+</div>
+
+{% endblock %}
