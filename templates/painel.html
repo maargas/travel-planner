@@ -51,6 +51,18 @@
   }
   .trip-card .n { font-size: 0.75rem; font-weight: 700; position: relative; }
   .trip-card .d { font-size: 0.625rem; opacity: 0.85; position: relative; }
+
+  .soon-box {
+    margin-top: 1.75rem; padding: 1rem 1.125rem;
+    border: 1px dashed var(--t-border); border-radius: var(--t-radius);
+    font-size: 0.8125rem;
+  }
+  .soon-title {
+    font-size: 0.6875rem; letter-spacing: 0.09em; text-transform: uppercase;
+    color: var(--t-muted); font-weight: 700; margin-bottom: 0.375rem;
+  }
+  .soon-box p { opacity: 0.85; margin: 0; }
+  .soon-box .soon-why { margin-top: 0.4375rem; font-size: 0.75rem; color: var(--t-muted); }
 </style>
 {% endblock %}
 
@@ -138,6 +150,17 @@
 
 <div style="margin-top:1.5rem;">
   <a class="btn btn-primary" href="/">Planejar uma viagem nova</a>
+</div>
+
+<!-- One grouped note beats scattering "em breve" markers through the menu. -->
+<div class="soon-box">
+  <div class="soon-title">Em breve</div>
+  <p>
+    <strong>Lugares</strong> para salvar o que alguém do grupo indicou,
+    <strong>Documentos</strong> para guardar passagem e reserva, e
+    <strong>convidar amigos</strong> para planejar junto.
+  </p>
+  <p class="soon-why">Essas dependem de o app ter conta e guardar seus dados — ainda não tem.</p>
 </div>
 
 {% endblock %}

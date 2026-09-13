@@ -174,13 +174,21 @@ def demo_itinerary(destination, start_date, days, budget, interests):
     except (ValueError, TypeError, ZeroDivisionError):
         per_day = 0
 
-    topic = (interests.split(",")[0].strip() if interests else "").lower()
+    # Every interest counts, not just the first one — someone who writes
+    # "comida local, esportes" means both.
+    topics = [t.strip().lower() for t in interests.split(",") if t.strip()]
+    if len(topics) > 1:
+        listed = ", ".join(topics[:-1]) + " e " + topics[-1]
+    else:
+        listed = topics[0] if topics else ""
+
     interest_line = (
-        f"Você marcou interesse em **{topic}** — no roteiro real, o Atlas procuraria eventos de {topic} "
-        f"acontecendo em {destination} exatamente nessas datas, e reorganizaria os dias se achasse algum."
-        if topic else
-        f"No roteiro real, o Atlas procuraria eventos acontecendo em {destination} exatamente nessas datas "
-        f"e reorganizaria os dias se achasse algum que valesse a pena."
+        f"Você marcou interesse em **{listed}** — no roteiro real, o Compass procuraria eventos "
+        f"de {listed} acontecendo em {destination} exatamente nessas datas, e reorganizaria os "
+        f"dias se achasse algum."
+        if listed else
+        f"No roteiro real, o Compass procuraria eventos acontecendo em {destination} exatamente "
+        f"nessas datas e reorganizaria os dias se achasse algum que valesse a pena."
     )
 
     parts = [
