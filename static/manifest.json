@@ -1,13 +1,13 @@
 {
-  "name": "Atlas — Roteiros de viagem",
-  "short_name": "Atlas",
+  "name": "Compass — Roteiros de viagem",
+  "short_name": "Compass",
   "description": "Roteiro de viagem verificado nas suas datas reais.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#0b1f24",
-  "theme_color": "#0b1f24",
+  "background_color": "#1a1020",
+  "theme_color": "#1a1020",
   "lang": "pt-BR",
   "icons": [
     {

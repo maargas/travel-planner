@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% set page = 'painel' %}
-{% block title %}Início — Atlas{% endblock %}
+{% block title %}Início — Compass{% endblock %}
 
 {% block head_extra %}
 <style>
@@ -9,14 +9,14 @@
   .greet h1 { font-size: 1.5rem; margin-top: 0.125rem; }
   .avatar {
     width: 2.5rem; height: 2.5rem; border-radius: 50%; flex: none;
-    background: var(--accent-2); color: var(--bg);
+    background: var(--t-accent-soft); color: var(--t-accent-ink);
     display: flex; align-items: center; justify-content: center;
   }
 
   .next-trip {
     position: relative; overflow: hidden;
-    background: var(--accent); color: var(--bg);
-    border-radius: var(--radius-lg); padding: 1.25rem;
+    background: var(--t-accent); color: var(--t-accent-ink);
+    border-radius: var(--t-radius-lg); padding: 1.25rem;
     box-shadow: var(--shadow-md); margin-bottom: 1rem;
   }
   .next-trip .peaks { position: absolute; right: -0.625rem; bottom: -0.875rem; opacity: 0.25; }
@@ -27,7 +27,7 @@
   .chip {
     background: color-mix(in srgb, #fff 18%, transparent);
     border: none; color: inherit; font-family: inherit;
-    border-radius: var(--pill); padding: 0.4375rem 0.875rem;
+    border-radius: var(--t-pill); padding: 0.4375rem 0.875rem;
     font-size: 0.75rem; font-weight: 700; cursor: pointer; text-decoration: none;
   }
   .chip:hover { background: color-mix(in srgb, #fff 28%, transparent); }
@@ -39,7 +39,7 @@
   }
 
   .stat-row { display: flex; gap: 0.75rem; margin-bottom: 0.5rem; }
-  .stat { flex: 1; background: var(--surface); border-radius: var(--radius-lg); padding: 0.875rem 1rem; }
+  .stat { flex: 1; background: var(--t-surface); border-radius: var(--t-radius-lg); padding: 0.875rem 1rem; }
   .stat .v { font-family: var(--font-heading); font-size: 1.125rem; margin-top: 0.5rem; }
   .stat .k { font-size: 0.6875rem; opacity: 0.6; }
 
@@ -86,12 +86,12 @@
 
 <div class="stat-row">
   <a class="stat" href="/orcamento" style="text-decoration:none; color:inherit;">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-700)" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"></rect><path d="M3 11h18M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2"></path></svg>
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--t-accent)" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"></rect><path d="M3 11h18M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2"></path></svg>
     <div class="v">$1.240</div>
     <div class="k">Restante do orçamento</div>
   </a>
   <div class="stat">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-2-700)" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="4"></circle><path d="M2 21c0-3.5 3-5.5 7-5.5s7 2 7 5.5"></path><path d="M17 7a3 3 0 110 6"></path><path d="M23 21c0-2.8-2-4.5-4.5-5"></path></svg>
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--t-accent-soft)" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="4"></circle><path d="M2 21c0-3.5 3-5.5 7-5.5s7 2 7 5.5"></path><path d="M17 7a3 3 0 110 6"></path><path d="M23 21c0-2.8-2-4.5-4.5-5"></path></svg>
     <div class="v">4 amigos</div>
     <div class="k">Planejando junto</div>
   </div>
@@ -126,11 +126,11 @@
 <div class="section-head"><h2>Próximas</h2></div>
 
 <div class="upcoming">
-  <a class="trip-card" href="/viagem" style="background:linear-gradient(160deg,#cdd6bb,var(--accent-2)); filter:saturate(0.7) brightness(1.05);">
+  <a class="trip-card" href="/viagem" style="background:linear-gradient(160deg,#cdd6bb,var(--t-accent-soft)); filter:saturate(0.7) brightness(1.05);">
     <div class="n">Quioto, Japão</div>
     <div class="d">3 a 12 de março</div>
   </a>
-  <a class="trip-card" href="/viagem" style="background:linear-gradient(160deg,#f0c19a,var(--accent)); filter:saturate(0.7) brightness(1.05);">
+  <a class="trip-card" href="/viagem" style="background:linear-gradient(160deg,#f0c19a,var(--t-accent)); filter:saturate(0.7) brightness(1.05);">
     <div class="n">Oaxaca, México</div>
     <div class="d">14 a 21 de junho</div>
   </a>

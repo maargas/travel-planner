@@ -1,15 +1,15 @@
 {% extends "base.html" %}
 {% set page = 'orcamento' %}
-{% block title %}Orçamento — Atlas{% endblock %}
+{% block title %}Orçamento — Compass{% endblock %}
 
 {% block head_extra %}
 <style>
   .total { display: flex; flex-direction: row; align-items: center; gap: 1.125rem; padding: 1.125rem; margin-bottom: 1.125rem; }
   .total .figures .k { font-size: 0.6875rem; opacity: 0.6; }
   .total .figures .v { font-family: var(--font-heading); font-size: 1.5rem; }
-  .total .figures .left { font-size: 0.75rem; color: var(--accent-2-700); font-weight: 700; }
+  .total .figures .left { font-size: 0.75rem; color: var(--t-accent-soft); font-weight: 700; }
 
-  .cat-bar { height: 5px; border-radius: var(--pill); background: var(--neutral-300); margin-top: 0.3125rem; overflow: hidden; }
+  .cat-bar { height: 5px; border-radius: var(--t-pill); background: var(--t-border); margin-top: 0.3125rem; overflow: hidden; }
   .cat-bar span { display: block; height: 100%; }
 
   .split-row { display: flex; align-items: center; gap: 0.625rem; padding: 0.5rem 0; }
@@ -32,10 +32,10 @@
 
 <div class="card total">
   <svg width="88" height="88" viewBox="0 0 100 100" style="flex:none;" aria-hidden="true">
-    <circle cx="50" cy="50" r="42" fill="none" stroke="var(--neutral-300)" stroke-width="10"></circle>
-    <circle cx="50" cy="50" r="42" fill="none" stroke="var(--accent)" stroke-width="10"
+    <circle cx="50" cy="50" r="42" fill="none" stroke="var(--t-border)" stroke-width="10"></circle>
+    <circle cx="50" cy="50" r="42" fill="none" stroke="var(--t-accent)" stroke-width="10"
             stroke-dasharray="162 264" stroke-linecap="round" transform="rotate(-90 50 50)"></circle>
-    <svg x="34" y="34" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--accent-700)" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round">
+    <svg x="34" y="34" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--t-accent)" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round">
       <path d="M11 20A7 7 0 019.8 6.1C15.5 5 17 9.5 15 12.5c-2 3-5.7 3.3-4.3 7.5z"></path>
     </svg>
   </svg>
@@ -55,7 +55,7 @@
     </div>
     <div class="row-main">
       <div class="row-title">Hospedagem</div>
-      <div class="cat-bar"><span style="width:70%; background:var(--accent);"></span></div>
+      <div class="cat-bar"><span style="width:70%; background:var(--t-accent);"></span></div>
     </div>
     <div class="row-value">$980</div>
   </div>
@@ -66,7 +66,7 @@
     </div>
     <div class="row-main">
       <div class="row-title">Voos</div>
-      <div class="cat-bar"><span style="width:45%; background:var(--accent-2);"></span></div>
+      <div class="cat-bar"><span style="width:45%; background:var(--t-accent-soft);"></span></div>
     </div>
     <div class="row-value">$620</div>
   </div>
@@ -77,7 +77,7 @@
     </div>
     <div class="row-main">
       <div class="row-title">Comida</div>
-      <div class="cat-bar"><span style="width:28%; background:var(--accent);"></span></div>
+      <div class="cat-bar"><span style="width:28%; background:var(--t-accent);"></span></div>
     </div>
     <div class="row-value">$360</div>
   </div>
@@ -87,12 +87,12 @@
 
 <div>
   <div class="split-row">
-    <div class="split-dot" style="background:var(--accent-2);"></div>
+    <div class="split-dot" style="background:var(--t-accent-soft);"></div>
     <div class="split-name">Maya te deve</div>
     <div class="tag tag-sage">$140</div>
   </div>
   <div class="split-row">
-    <div class="split-dot" style="background:var(--accent);"></div>
+    <div class="split-dot" style="background:var(--t-accent);"></div>
     <div class="split-name">Você deve ao Diego</div>
     <div class="tag tag-outline">$65</div>
   </div>
