@@ -26,31 +26,31 @@
     [data-theme="plum"] {
       --t-bg:#1a1020; --t-surface:#251630; --t-surface-2:#35213f; --t-text:#f6edf6; --t-muted:#b49bb8;
       --t-chrome:#120a17; --t-border:rgba(246,237,246,0.11);
-      --t-accent:#eb9a5c; --t-accent-soft:#f7c294; --t-accent-deep:#8a4a22; --t-accent-ink:#1a1020;
+      --t-accent:#eb9a5c; --t-accent-soft:#f7c294; --t-accent-deep:#8a4a22; --t-accent-ink:#1a1020; --t-accent-text:#f7c294;
       --t-ink-wash:rgba(255,255,255,0.045);
     }
     [data-theme="ember"] {
       --t-bg:#14110f; --t-surface:#1d1917; --t-surface-2:#2b2421; --t-text:#f7f1ea; --t-muted:#ab9d90;
       --t-chrome:#0e0c0b; --t-border:rgba(247,241,234,0.10);
-      --t-accent:#e0a32e; --t-accent-soft:#f3c96a; --t-accent-deep:#8a5f10; --t-accent-ink:#171310;
+      --t-accent:#e0a32e; --t-accent-soft:#f3c96a; --t-accent-deep:#8a5f10; --t-accent-ink:#171310; --t-accent-text:#f3c96a;
       --t-ink-wash:rgba(255,255,255,0.045);
     }
     [data-theme="blueprint"] {
       --t-bg:#10172e; --t-surface:#182142; --t-surface-2:#24305c; --t-text:#edf1ff; --t-muted:#9aa7cf;
       --t-chrome:#0b1122; --t-border:rgba(237,241,255,0.11);
-      --t-accent:#59c1f5; --t-accent-soft:#9adcff; --t-accent-deep:#1d5c85; --t-accent-ink:#0a1020;
+      --t-accent:#59c1f5; --t-accent-soft:#9adcff; --t-accent-deep:#1d5c85; --t-accent-ink:#0a1020; --t-accent-text:#9adcff;
       --t-ink-wash:rgba(255,255,255,0.045);
     }
     [data-theme="terracotta"] {
       --t-bg:#f6ece0; --t-surface:#fffaf2; --t-surface-2:#ecdcc7; --t-text:#241c16; --t-muted:#6b5a4a;
       --t-chrome:#efe2d1; --t-border:rgba(36,28,22,0.14);
-      --t-accent:#b4552b; --t-accent-soft:#e39a63; --t-accent-deep:#7d3616; --t-accent-ink:#fff6ec;
+      --t-accent:#b4552b; --t-accent-soft:#e39a63; --t-accent-deep:#7d3616; --t-accent-ink:#fff6ec; --t-accent-text:#7d3616;
       --t-ink-wash:rgba(0,0,0,0.045);
     }
     [data-theme="seaglass"] {
       --t-bg:#eef3ee; --t-surface:#ffffff; --t-surface-2:#dbe7e0; --t-text:#10201c; --t-muted:#4b5f58;
       --t-chrome:#e3ede7; --t-border:rgba(16,32,28,0.13);
-      --t-accent:#14655a; --t-accent-soft:#6fb3a4; --t-accent-deep:#0b453d; --t-accent-ink:#f2fbf8;
+      --t-accent:#14655a; --t-accent-soft:#6fb3a4; --t-accent-deep:#0b453d; --t-accent-ink:#f2fbf8; --t-accent-text:#0b453d;
       --t-ink-wash:rgba(0,0,0,0.045);
     }
 
@@ -96,7 +96,7 @@
     }
 
     h1, h2, h3 { font-family: var(--font-heading); font-weight: 400; line-height: 1.12; letter-spacing: -0.015em; }
-    a { color: var(--t-accent); }
+    a { color: var(--t-accent-text); }
 
     .wrap { max-width: 38rem; margin: 0 auto; }
 
@@ -119,7 +119,7 @@
       gap: 0.75rem; margin: 1.5rem 0 0.75rem;
     }
     .section-head h2 { font-size: 1rem; }
-    .section-head .more { font-size: 0.75rem; color: var(--t-accent); font-weight: 700; text-decoration: none; }
+    .section-head .more { font-size: 0.75rem; color: var(--t-accent-text); font-weight: 700; text-decoration: none; }
 
     .row-item {
       display: flex; gap: 0.75rem; align-items: center;
@@ -136,16 +136,63 @@
     .row-title { font-size: 0.875rem; font-weight: 700; }
     .row-sub { font-size: 0.75rem; color: var(--t-muted); }
     .row-value { font-size: 0.875rem; font-weight: 700; }
+    .row-icon.tint-1 { color: var(--t-accent); }
+    .row-icon.tint-2 { color: var(--t-accent-soft); }
+    .row-time { font-size: 0.75rem; color: var(--t-muted); font-variant-numeric: tabular-nums; }
 
     .stack { display: flex; flex-direction: column; gap: 0.625rem; }
+
+    /* The design lays the dashboard out on a 4-column grid at desktop width.
+       On a phone there is only ever one column, so the spans below do nothing
+       until the 60rem rule turns the grid on. */
+    .dash-grid { display: grid; grid-template-columns: 1fr; gap: 0.875rem; }
 
     .tag {
       display: inline-flex; align-items: center;
       font-size: 0.6875rem; font-weight: 700;
       padding: 0.1875rem 0.625rem; border-radius: var(--t-pill);
     }
-    .tag-soft { background: var(--t-surface-2); color: var(--t-accent); }
-    .tag-outline { border: 1px solid var(--t-accent); color: var(--t-accent); }
+    .tag-soft { background: var(--t-surface-2); color: var(--t-accent-text); }
+    .tag-outline { border: 1px solid var(--t-accent); color: var(--t-accent-text); }
+
+
+    /* ── Hero panel (design: "Departs in / 12 days") ─────────────────────
+       A gradient from the accent to its deep end, with a ridge silhouette
+       running out of the bottom-right corner. The phone gets the tighter
+       version; the desktop rule further down opens it up. */
+    .hero {
+      position: relative; overflow: hidden;
+      background: linear-gradient(150deg, var(--t-accent), var(--t-accent-deep));
+      color: var(--t-accent-ink);
+      border-radius: 1.625rem; padding: 1.25rem;
+      box-shadow: var(--shadow-md);
+    }
+    .hero > .ridge {
+      position: absolute; right: -0.875rem; bottom: -1.125rem;
+      width: 11.25rem; height: 7.5rem; opacity: 0.22; pointer-events: none;
+    }
+    .hero > .inner { position: relative; }
+    .hero .kicker-sm {
+      font-size: 0.6875rem; letter-spacing: 0.09em; text-transform: uppercase;
+      opacity: 0.85; font-weight: 700;
+    }
+    .hero .count { font-family: var(--font-heading); font-size: 2.625rem; line-height: 1; margin: 0.3125rem 0 0.1875rem; }
+    .hero .where { font-size: 0.875rem; opacity: 0.9; margin-bottom: 0.9375rem; }
+    .hero .actions { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+
+    /* The design inverts the button inside the hero: ink ground, accent type. */
+    .hero-btn {
+      background: var(--t-accent-ink); color: var(--t-accent);
+      border: none; font-family: inherit; text-decoration: none;
+      border-radius: var(--t-pill); padding: 0.5rem 0.9375rem;
+      font-size: 0.75rem; font-weight: 700; cursor: pointer;
+    }
+    .hero-btn.ghost { background: transparent; color: inherit; border: 1px solid currentColor; opacity: 0.9; font-weight: 600; }
+
+    /* ── Meter ───────────────────────────────────────────────────────────
+       The design's budget bar: a 7px track with a flat accent fill. */
+    .meter { height: 7px; border-radius: var(--t-pill); background: var(--t-surface-2); overflow: hidden; }
+    .meter > span { display: block; height: 100%; background: var(--t-accent); }
 
     .btn {
       display: inline-flex; align-items: center; justify-content: center; gap: 0.375rem;
@@ -183,7 +230,7 @@
       font-size: 0.625rem; font-weight: 600;
       padding: 0.125rem 0.75rem; min-width: 3.5rem;
     }
-    .tab[aria-current="page"] { color: var(--t-accent); }
+    .tab[aria-current="page"] { color: var(--t-accent-text); }
     .tab svg { display: block; }
     .tab:focus-visible { outline: 2px solid var(--t-accent); outline-offset: 2px; border-radius: 0.5rem; }
 
@@ -204,6 +251,13 @@
     }
     .swatch[aria-pressed="true"] { border-color: var(--t-accent); }
     .swatch:focus-visible { outline: 2px solid var(--t-accent); outline-offset: 2px; }
+
+    #theme-bar-nav { display: none; }
+    #theme-bar-page {
+      justify-content: center; gap: 0.625rem;
+      margin: 2rem 0 0.5rem; padding-top: 1.25rem;
+      border-top: 1px solid var(--t-border);
+    }
 
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 3s !important; }
@@ -236,9 +290,36 @@
       }
       .tab[aria-current="page"] { background: var(--t-surface-2); }
 
-      #theme-bar-mobile { margin-left: auto; padding: 0; }
+      #theme-bar-nav { display: flex; margin-left: auto; padding: 0; }
+      #theme-bar-page { display: none; }
 
       .wrap { max-width: 62rem; }
+
+      /* The design's desktop hero is roomier and its number much larger — it
+         anchors a 4-column grid rather than sitting alone above a phone list. */
+      .dash-grid { grid-template-columns: repeat(4, 1fr); gap: 0.875rem; }
+      .span-2 { grid-column: span 2; }
+      .span-4 { grid-column: span 4; }
+
+      .hero { border-radius: var(--t-radius); padding: 1.5rem; min-height: 11.625rem; }
+      .hero > .ridge { width: 20rem; height: 11.875rem; right: -1.25rem; bottom: -1.625rem; }
+      .hero .count { font-size: 3.25rem; margin: 0.5rem 0 0.375rem; }
+      .hero .where { font-size: 0.84375rem; margin-bottom: 1.125rem; }
+      .hero .actions { margin-top: 0; }
+
+      /* On a phone each row is its own rounded card, thumb-sized. On a desktop
+         the design drops the card chrome and rules them off with a hairline
+         instead, with the time in a fixed column on the left. */
+      .row-item {
+        background: transparent; border: none; border-radius: 0;
+        border-bottom: 1px solid var(--t-border);
+        padding: 0.5625rem 0; gap: 0.8125rem;
+      }
+      .row-icon { width: 2rem; height: 2rem; }
+      .row-icon svg { width: 17px; height: 17px; }
+      .row-title { font-size: 0.8125rem; font-weight: 600; }
+      .row-sub { font-size: 0.71875rem; }
+      .row-time { order: -1; width: 3rem; flex: none; }
     }
 
   </style>
@@ -264,11 +345,14 @@
     <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 20c0-4 3.6-6 8-6s8 2 8 6"></path></svg>
     <span>Viajantes</span>
   </a>
-  <div class="theme-bar" id="theme-bar-mobile"></div>
+  <div class="theme-bar" id="theme-bar-nav"></div>
 </nav>
 
 <div class="wrap">
 {% block content %}{% endblock %}
+
+<!-- Phone only; on desktop the same picker rides in the top bar instead. -->
+<div class="theme-bar" id="theme-bar-page"></div>
 </div>
 
 <script>
@@ -312,7 +396,8 @@
     });
   }
 
-  buildThemeBar(document.getElementById('theme-bar-mobile'));
+  buildThemeBar(document.getElementById('theme-bar-nav'));
+  buildThemeBar(document.getElementById('theme-bar-page'));
   applyTheme(readTheme() || 'plum');
 
   // ── Prototype controls ─────────────────────────────────────────────────

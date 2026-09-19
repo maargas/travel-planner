@@ -7,10 +7,8 @@
   .total { display: flex; flex-direction: row; align-items: center; gap: 1.125rem; padding: 1.125rem; margin-bottom: 1.125rem; }
   .total .figures .k { font-size: 0.6875rem; opacity: 0.6; }
   .total .figures .v { font-family: var(--font-heading); font-size: 1.5rem; }
-  .total .figures .left { font-size: 0.75rem; color: var(--t-accent-soft); font-weight: 700; }
+  .total .figures .left { font-size: 0.75rem; color: var(--t-accent-text); font-weight: 700; }
 
-  .cat-bar { height: 5px; border-radius: var(--t-pill); background: var(--t-border); margin-top: 0.3125rem; overflow: hidden; }
-  .cat-bar span { display: block; height: 100%; }
 
   .split-row { display: flex; align-items: center; gap: 0.625rem; padding: 0.5rem 0; }
   .split-dot { width: 1.875rem; height: 1.875rem; border-radius: 50%; flex: none; }
@@ -50,34 +48,34 @@
 
 <div class="stack">
   <div class="row-item">
-    <div class="row-icon cyan" style="width:2.25rem;height:2.25rem;border-radius:0.75rem;" aria-hidden="true">
+    <div class="row-icon tint-1" style="width:2.25rem;height:2.25rem;border-radius:0.75rem;" aria-hidden="true">
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="3"></rect><path d="M3 10h18M8 2v4M16 2v4"></path></svg>
     </div>
     <div class="row-main">
       <div class="row-title">Hospedagem</div>
-      <div class="cat-bar"><span style="width:70%; background:var(--t-accent);"></span></div>
+      <div class="meter" style="margin-top:0.3125rem;"><span style="width:70%;"></span></div>
     </div>
     <div class="row-value">$980</div>
   </div>
 
   <div class="row-item">
-    <div class="row-icon sage" style="width:2.25rem;height:2.25rem;border-radius:0.75rem;" aria-hidden="true">
+    <div class="row-icon tint-2" style="width:2.25rem;height:2.25rem;border-radius:0.75rem;" aria-hidden="true">
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2 16l20-8-8 20-2-9-10-3z"></path></svg>
     </div>
     <div class="row-main">
       <div class="row-title">Voos</div>
-      <div class="cat-bar"><span style="width:45%; background:var(--t-accent-soft);"></span></div>
+      <div class="meter" style="margin-top:0.3125rem;"><span style="width:45%; background:var(--t-accent-soft);"></span></div>
     </div>
     <div class="row-value">$620</div>
   </div>
 
   <div class="row-item">
-    <div class="row-icon cyan" style="width:2.25rem;height:2.25rem;border-radius:0.75rem;" aria-hidden="true">
+    <div class="row-icon tint-1" style="width:2.25rem;height:2.25rem;border-radius:0.75rem;" aria-hidden="true">
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 010 8h-1M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"></path><path d="M6 1v3M10 1v3M14 1v3"></path></svg>
     </div>
     <div class="row-main">
       <div class="row-title">Comida</div>
-      <div class="cat-bar"><span style="width:28%; background:var(--t-accent);"></span></div>
+      <div class="meter" style="margin-top:0.3125rem;"><span style="width:28%;"></span></div>
     </div>
     <div class="row-value">$360</div>
   </div>
@@ -89,7 +87,7 @@
   <div class="split-row">
     <div class="split-dot" style="background:var(--t-accent-soft);"></div>
     <div class="split-name">Maya te deve</div>
-    <div class="tag tag-sage">$140</div>
+    <div class="tag tag-soft">$140</div>
   </div>
   <div class="split-row">
     <div class="split-dot" style="background:var(--t-accent);"></div>
