@@ -33,10 +33,13 @@ MODEL = os.environ.get("PLANNER_MODEL", "claude-sonnet-5")
 HAS_API_KEY = bool(os.environ.get("ANTHROPIC_API_KEY", "").strip())
 MOCK_MODE = os.environ.get("MOCK_MODE") == "1" or not HAS_API_KEY
 
-# Each search injects the page contents into the prompt, so this is the main cost dial.
-# One measured run came to US$0.2863; the arithmetic at these settings lands around
-# US$0.25-0.30 depending on how much the searches bring back.
-SEARCHES = int(os.environ.get("PLANNER_SEARCHES", "6"))
+# Each search dumps whole web pages into the prompt, so this is THE cost dial.
+# Measured split on a 6-search run: the pages the searches brought back were 64%
+# of the bill, the searches themselves 24%, the written itinerary only 13%.
+# Three searches is about US$0.14 an itinerary against US$0.25 at six, and a
+# shorter searching turn is also less likely to be paused by the API. Two is
+# cheaper still (~US$0.11) if you only care about the headline facts.
+SEARCHES = int(os.environ.get("PLANNER_SEARCHES", "3"))
 
 # Sitting next to someone while they try the app is exactly when a stray extra
 # click costs real money. The per-IP rate limit does not help there — it is the
@@ -48,9 +51,11 @@ SEARCHES = int(os.environ.get("PLANNER_SEARCHES", "6"))
 MAX_RUNS = int(os.environ.get("PLANNER_MAX_RUNS", "4"))
 SPEND = {"runs": 0, "usd": 0.0}
 
-# How many times one itinerary may be sent back to finish a paused turn. Each
-# round is billed, so this is a ceiling, not a target.
-MAX_ROUNDS = int(os.environ.get("PLANNER_MAX_ROUNDS", "4"))
+# How many times one itinerary may be sent back to finish a paused turn. Every
+# round resends the whole conversation, search results included, so a second
+# round costs about as much as the first — four of them quadruple the bill.
+# One retry is almost always enough.
+MAX_ROUNDS = int(os.environ.get("PLANNER_MAX_ROUNDS", "2"))
 
 # Counting itineraries is not the same as counting money: a paused turn can cost
 # four calls, so four "runs" can be sixteen. This cap is in dollars, checked
@@ -365,9 +370,13 @@ def log_cost(response, count_run=True):
     if count_run:
         SPEND["runs"] += 1
     SPEND["usd"] += total
+    c_in = u.input_tokens / 1_000_000 * price_in
+    c_out = u.output_tokens / 1_000_000 * price_out
     print(
-        f"[custo] {MODEL} | entrada {u.input_tokens} | saída {u.output_tokens} "
-        f"| buscas {searches} | parada: {response.stop_reason} | ~US${total:.4f}",
+        f"[custo] ~US${total:.4f} = US${c_in:.4f} páginas das buscas "
+        f"({u.input_tokens} tokens) + US${c_out:.4f} roteiro escrito "
+        f"({u.output_tokens}) + US${searches * SEARCH_COST:.4f} de {searches} buscas "
+        f"| parada: {response.stop_reason}",
         flush=True,
     )
     print(
@@ -629,7 +638,8 @@ if __name__ == "__main__":
     if MOCK_MODE:
         banner.append("  MODO DEMONSTRAÇÃO — nenhuma chamada à API, custo zero.")
     else:
-        banner.append("  MODO REAL — cada roteiro custa entre US$0,25 e US$0,30 de verdade.")
+        banner.append(f"  MODO REAL — {SEARCHES} buscas por roteiro, cerca de "
+                      f"US${0.03 + SEARCHES * 0.037:.2f} cada.")
         banner.append(f"  Teto de segurança: {MAX_RUNS} roteiros OU US${MAX_USD:.2f},")
         banner.append("  o que vier primeiro. Reinicie o servidor para liberar mais.")
     banner.append("")
