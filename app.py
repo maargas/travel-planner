@@ -1,6 +1,7 @@
 import os
+import re
 import sys
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from dotenv import load_dotenv
 load_dotenv()
 import anthropic
@@ -32,8 +33,9 @@ MODEL = os.environ.get("PLANNER_MODEL", "claude-sonnet-5")
 HAS_API_KEY = bool(os.environ.get("ANTHROPIC_API_KEY", "").strip())
 MOCK_MODE = os.environ.get("MOCK_MODE") == "1" or not HAS_API_KEY
 
-# Each search injects the page contents into the prompt, so this is the main cost dial:
-# measured ~US$0.29/itinerary at 5 searches on Sonnet 5.
+# Each search injects the page contents into the prompt, so this is the main cost dial.
+# One measured run came to US$0.2863; the arithmetic at these settings lands around
+# US$0.25-0.30 depending on how much the searches bring back.
 SEARCHES = int(os.environ.get("PLANNER_SEARCHES", "6"))
 
 # Sitting next to someone while they try the app is exactly when a stray extra
@@ -293,12 +295,55 @@ MOCK_SOURCES = [
 
 
 # USD per million tokens, so you can see what each itinerary actually cost.
+# Confirmado em 19/09/2026 na documentação oficial: Sonnet 5 custa US$2/US$10 por
+# milhão de tokens (entrada/saída) e a busca na web, US$10 por 1.000 buscas.
 PRICES = {
     "claude-opus-5": (5.0, 25.0),
     "claude-sonnet-5": (2.0, 10.0),
     "claude-haiku-4-5": (1.0, 5.0),
 }
 SEARCH_COST = 0.01  # per search
+
+# Once the API answers, the money is already gone. From that moment the answer
+# has to survive anything that happens next — a crash in the page, a restarted
+# server, a closed tab, a browser that navigates away. So it goes to disk first,
+# straight from the response, before it is parsed or rendered.
+SAVE_DIR = os.environ.get("PLANNER_SAVE_DIR", "roteiros")
+
+
+def save_itinerary(response, destination, start_date, days, budget):
+    """Write the paid answer to a file. Never raises: it can only add a copy."""
+    path = None
+    try:
+        os.makedirs(SAVE_DIR, exist_ok=True)
+        slug = re.sub(r"[^a-z0-9]+", "-", destination.lower()).strip("-")[:40] or "roteiro"
+        stamp = datetime.now().strftime("%Y-%m-%d_%Hh%M")
+        path = os.path.join(SAVE_DIR, f"{stamp}_{slug}.md")
+
+        # The crudest possible read of the response, so that nothing clever can
+        # fail between being billed and having the text on disk.
+        raw = "".join(getattr(b, "text", "") or "" for b in response.content)
+
+        with open(path, "w", encoding="utf-8") as fh:
+            fh.write(f"# {destination}\n\n")
+            fh.write(f"{start_date} · {days} dias · orçamento US${budget}\n\n---\n\n")
+            fh.write(raw)
+
+        # Sources are a bonus: if this half fails the itinerary is already saved.
+        try:
+            _, sources = extract(response)
+            if sources:
+                with open(path, "a", encoding="utf-8") as fh:
+                    fh.write("\n\n---\n\n## Fontes consultadas\n\n")
+                    for s in sources:
+                        fh.write(f"- [{s['title']}]({s['url']})\n")
+        except Exception as exc:
+            print(f"[salvo] fontes nao anexadas: {exc}", flush=True)
+
+        print(f"[salvo] roteiro gravado em {path}", flush=True)
+    except Exception as exc:
+        print(f"[salvo] FALHOU ao gravar o roteiro: {exc}", flush=True)
+    return path
 
 
 def log_cost(response):
@@ -456,9 +501,13 @@ def plan():
             )}],
         )
 
+        # Disk first. Everything below this line is allowed to fail.
+        saved = save_itinerary(response, destination, start_date, days, budget)
+
         itinerary, sources = extract(response)
         log_cost(response)
-        return render_template("index.html", itinerary=itinerary, sources=sources, **form_values)
+        return render_template("index.html", itinerary=itinerary, sources=sources,
+                               saved=saved, **form_values)
 
     except anthropic.APITimeoutError:
         return render_template("index.html",
@@ -472,6 +521,14 @@ def plan():
         return render_template("index.html", error=f"O serviço de IA retornou um erro ({e.status_code}). Tente de novo.", **form_values)
     except anthropic.APIConnectionError:
         return render_template("index.html", error="Não foi possível conectar ao serviço de IA. Verifique sua internet.", **form_values)
+    except Exception as exc:
+        # Anything unforeseen after the call still owes the reader an answer, and
+        # the file on disk is that answer. A bare 500 would hide both.
+        print(f"[erro] falha depois da resposta da API: {exc!r}", flush=True)
+        return render_template("index.html", error=(
+            "O roteiro foi gerado, mas deu erro ao montar a página. "
+            f"Ele está salvo na pasta '{SAVE_DIR}' do projeto — nada foi perdido."
+        ), **form_values)
 
 
 # Prototype screens: static sample data, no account and no database behind them.
