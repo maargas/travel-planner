@@ -48,6 +48,15 @@ SEARCHES = int(os.environ.get("PLANNER_SEARCHES", "6"))
 MAX_RUNS = int(os.environ.get("PLANNER_MAX_RUNS", "4"))
 SPEND = {"runs": 0, "usd": 0.0}
 
+# How many times one itinerary may be sent back to finish a paused turn. Each
+# round is billed, so this is a ceiling, not a target.
+MAX_ROUNDS = int(os.environ.get("PLANNER_MAX_ROUNDS", "4"))
+
+# Counting itineraries is not the same as counting money: a paused turn can cost
+# four calls, so four "runs" can be sixteen. This cap is in dollars, checked
+# before every single call, and it is the one that actually protects a balance.
+MAX_USD = float(os.environ.get("PLANNER_MAX_USD", "1.00"))
+
 # The 2026 web search tool only exists on Opus 4.6+/Sonnet 4.6+; older tiers need the 2025 one.
 MODERN_SEARCH_MODELS = (
     "claude-opus-5", "claude-opus-4-8", "claude-opus-4-7", "claude-opus-4-6",
@@ -311,42 +320,38 @@ SEARCH_COST = 0.01  # per search
 SAVE_DIR = os.environ.get("PLANNER_SAVE_DIR", "roteiros")
 
 
-def save_itinerary(response, destination, start_date, days, budget):
-    """Write the paid answer to a file. Never raises: it can only add a copy."""
-    path = None
+def save_path_for(destination):
+    slug = re.sub(r"[^a-z0-9]+", "-", destination.lower()).strip("-")[:40] or "roteiro"
+    stamp = datetime.now().strftime("%Y-%m-%d_%Hh%M")
+    return os.path.join(SAVE_DIR, f"{stamp}_{slug}.md")
+
+
+def save_itinerary(path, text, sources, destination, start_date, days, budget, note=""):
+    """Write what has been paid for to a file. Never raises: it can only add a copy.
+
+    Called after every round of the conversation, overwriting the same file, so a
+    failure halfway through a paused turn still leaves the part already bought.
+    """
     try:
         os.makedirs(SAVE_DIR, exist_ok=True)
-        slug = re.sub(r"[^a-z0-9]+", "-", destination.lower()).strip("-")[:40] or "roteiro"
-        stamp = datetime.now().strftime("%Y-%m-%d_%Hh%M")
-        path = os.path.join(SAVE_DIR, f"{stamp}_{slug}.md")
-
-        # The crudest possible read of the response, so that nothing clever can
-        # fail between being billed and having the text on disk.
-        raw = "".join(getattr(b, "text", "") or "" for b in response.content)
-
         with open(path, "w", encoding="utf-8") as fh:
             fh.write(f"# {destination}\n\n")
-            fh.write(f"{start_date} · {days} dias · orçamento US${budget}\n\n---\n\n")
-            fh.write(raw)
-
-        # Sources are a bonus: if this half fails the itinerary is already saved.
-        try:
-            _, sources = extract(response)
+            fh.write(f"{start_date} · {days} dias · orçamento US${budget}\n\n")
+            if note:
+                fh.write(f"> {note}\n\n")
+            fh.write("---\n\n")
+            fh.write(text or "_(a IA não chegou a escrever o roteiro nesta tentativa)_")
             if sources:
-                with open(path, "a", encoding="utf-8") as fh:
-                    fh.write("\n\n---\n\n## Fontes consultadas\n\n")
-                    for s in sources:
-                        fh.write(f"- [{s['title']}]({s['url']})\n")
-        except Exception as exc:
-            print(f"[salvo] fontes nao anexadas: {exc}", flush=True)
-
-        print(f"[salvo] roteiro gravado em {path}", flush=True)
+                fh.write("\n\n---\n\n## Fontes consultadas\n\n")
+                for s in sources:
+                    fh.write(f"- [{s['title']}]({s['url']})\n")
+        print(f"[salvo] gravado em {path}", flush=True)
     except Exception as exc:
-        print(f"[salvo] FALHOU ao gravar o roteiro: {exc}", flush=True)
+        print(f"[salvo] FALHOU ao gravar: {exc}", flush=True)
     return path
 
 
-def log_cost(response):
+def log_cost(response, count_run=True):
     u = response.usage
     price_in, price_out = PRICES.get(MODEL, (2.0, 10.0))
     searches = getattr(getattr(u, "server_tool_use", None), "web_search_requests", 0) or 0
@@ -355,11 +360,14 @@ def log_cost(response):
         + u.output_tokens / 1_000_000 * price_out
         + searches * SEARCH_COST
     )
-    SPEND["runs"] += 1
+    # One itinerary can take several calls when the turn pauses; every call costs,
+    # but only the itinerary counts against the cap.
+    if count_run:
+        SPEND["runs"] += 1
     SPEND["usd"] += total
     print(
         f"[custo] {MODEL} | entrada {u.input_tokens} | saída {u.output_tokens} "
-        f"| buscas {searches} | ~US${total:.4f}",
+        f"| buscas {searches} | parada: {response.stop_reason} | ~US${total:.4f}",
         flush=True,
     )
     print(
@@ -478,10 +486,11 @@ def plan():
             **form_values,
         )
 
-    if SPEND["runs"] >= MAX_RUNS:
+    if SPEND["runs"] >= MAX_RUNS or SPEND["usd"] >= MAX_USD:
         return render_template("index.html", error=(
-            f"Limite de segurança: {MAX_RUNS} roteiros reais já foram gerados desde que o "
-            f"servidor ligou (cerca de US${SPEND['usd']:.2f}). Feche e abra o servidor para liberar mais."
+            f"Limite de segurança atingido: {SPEND['runs']} de {MAX_RUNS} roteiros, "
+            f"cerca de US${SPEND['usd']:.2f} de US${MAX_USD:.2f} gastos desde que o servidor ligou. "
+            f"Feche e abra o servidor para liberar mais."
         ), **form_values)
 
     try:
@@ -492,21 +501,63 @@ def plan():
             max_retries=1,
         )
 
-        response = client.messages.create(
-            model=MODEL,
-            max_tokens=5000,
-            tools=[search_tool()],
-            messages=[{"role": "user", "content": build_prompt(
-                destination, start_date, days, budget, style, interests
-            )}],
-        )
+        messages = [{"role": "user", "content": build_prompt(
+            destination, start_date, days, budget, style, interests
+        )}]
+        saved = save_path_for(destination)
+        parts, sources, stop = [], {}, None
 
-        # Disk first. Everything below this line is allowed to fail.
-        saved = save_itinerary(response, destination, start_date, days, budget)
+        # A long searching turn comes back with stop_reason "pause_turn": the
+        # searches are done and billed, but the itinerary has not been written
+        # yet. Treating that as the final answer is how a paid request returns
+        # nothing but a list of links. Send the paused turn back so the model can
+        # finish, bounded because every round is billed.
+        for attempt in range(MAX_ROUNDS):
+            if SPEND["usd"] >= MAX_USD:
+                print(f"[teto] US${SPEND['usd']:.4f} atingiu o limite de US${MAX_USD:.2f}",
+                      flush=True)
+                break
 
-        itinerary, sources = extract(response)
-        log_cost(response)
-        return render_template("index.html", itinerary=itinerary, sources=sources,
+            response = client.messages.create(
+                model=MODEL,
+                # 5000 was tight enough that a long itinerary could be cut off
+                # mid-sentence. The docs' guidance for non-streaming is ~16000.
+                max_tokens=16000,
+                tools=[search_tool()],
+                messages=messages,
+            )
+            log_cost(response, count_run=(attempt == 0))
+
+            text, found = extract(response)
+            if text:
+                parts.append(text)
+            for s in found:
+                sources[s["url"]] = s["title"]
+            stop = response.stop_reason
+
+            # Disk first, after every round — never hold a paid answer in memory.
+            save_itinerary(saved, "".join(parts),
+                           [{"title": t, "url": u} for u, t in sources.items()],
+                           destination, start_date, days, budget,
+                           note=("resposta parcial — a IA parou por "
+                                 f"'{stop}'" if stop == "pause_turn" else ""))
+
+            if stop != "pause_turn":
+                break
+            messages.append({"role": "assistant", "content": response.content})
+
+        itinerary = "".join(parts)
+        source_list = [{"title": t, "url": u} for u, t in sources.items()]
+
+        if not itinerary.strip():
+            # Billed and nothing to show. Say exactly that, rather than rendering
+            # a blank page and letting the reader guess.
+            return render_template("index.html", error=(
+                f"A IA fez as buscas mas parou antes de escrever o roteiro (motivo: {stop}). "
+                f"O que veio está salvo em '{saved}'. Tente de novo com menos dias."
+            ), **form_values)
+
+        return render_template("index.html", itinerary=itinerary, sources=source_list,
                                saved=saved, **form_values)
 
     except anthropic.APITimeoutError:
@@ -578,8 +629,9 @@ if __name__ == "__main__":
     if MOCK_MODE:
         banner.append("  MODO DEMONSTRAÇÃO — nenhuma chamada à API, custo zero.")
     else:
-        banner.append("  MODO REAL — cada roteiro custa cerca de US$0,29 de verdade.")
-        banner.append(f"  Teto de segurança: {MAX_RUNS} roteiros até reiniciar o servidor.")
+        banner.append("  MODO REAL — cada roteiro custa entre US$0,25 e US$0,30 de verdade.")
+        banner.append(f"  Teto de segurança: {MAX_RUNS} roteiros OU US${MAX_USD:.2f},")
+        banner.append("  o que vier primeiro. Reinicie o servidor para liberar mais.")
     banner.append("")
     print("\n".join(banner), flush=True)
     # The reloader watches the source files and restarts on any edit. In demo mode
