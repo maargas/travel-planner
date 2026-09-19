@@ -39,7 +39,7 @@ MOCK_MODE = os.environ.get("MOCK_MODE") == "1" or not HAS_API_KEY
 # Three searches is about US$0.14 an itinerary against US$0.25 at six, and a
 # shorter searching turn is also less likely to be paused by the API. Two is
 # cheaper still (~US$0.11) if you only care about the headline facts.
-SEARCHES = int(os.environ.get("PLANNER_SEARCHES", "3"))
+SEARCHES = int(os.environ.get("PLANNER_SEARCHES", "2"))
 
 # Sitting next to someone while they try the app is exactly when a stray extra
 # click costs real money. The per-IP rate limit does not help there — it is the
@@ -60,7 +60,7 @@ MAX_ROUNDS = int(os.environ.get("PLANNER_MAX_ROUNDS", "2"))
 # Counting itineraries is not the same as counting money: a paused turn can cost
 # four calls, so four "runs" can be sixteen. This cap is in dollars, checked
 # before every single call, and it is the one that actually protects a balance.
-MAX_USD = float(os.environ.get("PLANNER_MAX_USD", "1.00"))
+MAX_USD = float(os.environ.get("PLANNER_MAX_USD", "0.30"))
 
 # The 2026 web search tool only exists on Opus 4.6+/Sonnet 4.6+; older tiers need the 2025 one.
 MODERN_SEARCH_MODELS = (
