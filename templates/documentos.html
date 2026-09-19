@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% set page = 'documentos' %}
+{% block title %}Documentos — Compass{% endblock %}
+
+{% block head_extra %}
+<style>
+  .doc-kind {
+    width: 2.625rem; height: 3.25rem; flex: none; border-radius: 0.5rem;
+    background: var(--t-surface-2); color: var(--t-accent-text);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.65625rem; font-weight: 700; letter-spacing: 0.04em;
+  }
+  .doc-open { font-size: 0.71875rem; color: var(--t-accent-text); font-weight: 600; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-head">
+  <h1>Documentos</h1>
+  <div class="sub">Passagens e reservas, disponíveis mesmo sem internet</div>
+</div>
+
+<div class="sample-note">
+  <span aria-hidden="true">🧪</span>
+  <span><strong>Tela de exemplo.</strong> Nenhum arquivo está guardado aqui — é a ideia de onde a passagem e a reserva vão ficar.</span>
+</div>
+
+<div class="two-col">
+
+  <div class="row-item">
+    <div class="doc-kind">PDF</div>
+    <div class="row-main">
+      <div class="row-title">Cartão de embarque — ida</div>
+      <div class="row-sub">TAP 1043 · 2 de out, 09:40</div>
+    </div>
+    <div class="doc-open">Abrir</div>
+  </div>
+
+  <div class="row-item">
+    <div class="doc-kind">PDF</div>
+    <div class="row-main">
+      <div class="row-title">Reserva do hotel</div>
+      <div class="row-sub">Alfama · 2 a 9 de out</div>
+    </div>
+    <div class="doc-open">Abrir</div>
+  </div>
+
+  <div class="row-item">
+    <div class="doc-kind">JPG</div>
+    <div class="row-main">
+      <div class="row-title">Passaporte</div>
+      <div class="row-sub">Válido até 2031</div>
+    </div>
+    <div class="doc-open">Abrir</div>
+  </div>
+
+  <div class="row-item">
+    <div class="doc-kind">PDF</div>
+    <div class="row-main">
+      <div class="row-title">Seguro viagem</div>
+      <div class="row-sub">Apólice 8842-C</div>
+    </div>
+    <div class="doc-open">Abrir</div>
+  </div>
+
+</div>
+
+<div style="margin-top:1.5rem;">
+  <button class="btn btn-primary" type="button" data-soon>Adicionar documento</button>
+</div>
+
+{% endblock %}

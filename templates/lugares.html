@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% set page = 'lugares' %}
+{% block title %}Lugares — Compass{% endblock %}
+
+{% block head_extra %}
+<style>
+  .map {
+    position: relative; overflow: hidden;
+    border: 1px solid var(--t-border); background: var(--t-surface);
+    border-radius: var(--t-radius); height: 13rem; margin-bottom: 1rem;
+  }
+  .map svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .map .legend {
+    position: absolute; left: 0.875rem; bottom: 0.875rem;
+    background: var(--t-surface); border: 1px solid var(--t-border);
+    border-radius: var(--t-pill); padding: 0.4375rem 0.875rem;
+    font-size: 0.75rem;
+  }
+
+  .num {
+    width: 1.75rem; height: 1.75rem; flex: none; border-radius: 50%;
+    background: var(--t-accent); color: var(--t-accent-ink);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; font-weight: 700;
+  }
+
+  @media (min-width: 60rem) {
+    .map { height: 18rem; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-head">
+  <h1>Lugares</h1>
+  <div class="sub">18 salvos · 6 já no roteiro</div>
+</div>
+
+<div class="sample-note">
+  <span aria-hidden="true">🧪</span>
+  <span><strong>Tela de exemplo.</strong> Os lugares são inventados e o mapa é um desenho — serve para mostrar onde o que o grupo indicar vai ficar guardado.</span>
+</div>
+
+<div class="map">
+  <svg viewBox="0 0 600 420" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M-10 300 C120 260 180 330 300 300 C420 270 500 330 620 300 L620 430 L-10 430Z" fill="var(--t-accent)" opacity="0.16"></path>
+    <path d="M60 400 L150 250 L250 300 L330 150 L430 210 L520 90" fill="none"
+          stroke="var(--t-accent)" stroke-width="3" stroke-dasharray="8 8" opacity="0.75"></path>
+  </svg>
+  <div class="legend">A pé · 4,2 km</div>
+</div>
+
+<div class="two-col">
+
+  <div class="row-item">
+    <div class="num">1</div>
+    <div class="row-main">
+      <div class="row-title">Time Out Market</div>
+      <div class="row-sub">Salvo pela Maya · abre 10h</div>
+    </div>
+    <div class="tag tag-soft">Comida</div>
+  </div>
+
+  <div class="row-item">
+    <div class="num">2</div>
+    <div class="row-main">
+      <div class="row-title">Miradouro da Senhora do Monte</div>
+      <div class="row-sub">Salvo pelo Diego · melhor no fim da tarde</div>
+    </div>
+    <div class="tag tag-outline">Vista</div>
+  </div>
+
+  <div class="row-item">
+    <div class="num">3</div>
+    <div class="row-main">
+      <div class="row-title">Livraria Bertrand</div>
+      <div class="row-sub">Salvo pela Ana · fecha 20h</div>
+    </div>
+    <div class="tag tag-outline">Passeio</div>
+  </div>
+
+  <div class="row-item">
+    <div class="num">4</div>
+    <div class="row-main">
+      <div class="row-title">Colinas de Sintra</div>
+      <div class="row-sub">Salvo pelo Diego · 40 min de trem</div>
+    </div>
+    <div class="tag tag-soft">Trilha</div>
+  </div>
+
+</div>
+
+<div style="margin-top:1.5rem;">
+  <button class="btn btn-primary" type="button" data-soon>Salvar um lugar</button>
+</div>
+
+{% endblock %}

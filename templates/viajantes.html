@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% set page = 'viajantes' %}
+{% block title %}Viajantes — Compass{% endblock %}
+
+{% block head_extra %}
+<style>
+  .face {
+    width: 2.75rem; height: 2.75rem; flex: none; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-heading); font-size: 1rem; color: var(--t-accent-ink);
+  }
+  .device {
+    font-size: 0.6875rem; color: var(--t-muted);
+    border: 1px solid var(--t-border); border-radius: var(--t-pill);
+    padding: 0.3125rem 0.625rem; white-space: nowrap;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-head">
+  <h1>Viajantes</h1>
+  <div class="sub">Todo mundo vê o mesmo plano, no celular ou no computador</div>
+</div>
+
+<div class="sample-note">
+  <span aria-hidden="true">🧪</span>
+  <span><strong>Tela de exemplo.</strong> Essas pessoas são inventadas — ninguém está realmente conectado, porque o app ainda não tem conta.</span>
+</div>
+
+<div class="two-col">
+
+  <div class="row-item">
+    <div class="face" style="background:var(--t-accent);">S</div>
+    <div class="row-main">
+      <div class="row-title">Sam · você</div>
+      <div class="row-sub">Criou a viagem</div>
+    </div>
+    <div class="device">iPhone</div>
+  </div>
+
+  <div class="row-item">
+    <div class="face" style="background:var(--t-accent-soft);">M</div>
+    <div class="row-main">
+      <div class="row-title">Maya</div>
+      <div class="row-sub">Editando o roteiro agora</div>
+    </div>
+    <div class="device">Mac</div>
+  </div>
+
+  <div class="row-item">
+    <div class="face" style="background:var(--t-accent-deep); color:#fff;">D</div>
+    <div class="row-main">
+      <div class="row-title">Diego</div>
+      <div class="row-sub">Salvou 6 lugares</div>
+    </div>
+    <div class="device">Android</div>
+  </div>
+
+  <div class="row-item">
+    <div class="face" style="background:var(--t-surface-2); color:var(--t-text);">A</div>
+    <div class="row-main">
+      <div class="row-title">Ana</div>
+      <div class="row-sub">Convite enviado, ainda não entrou</div>
+    </div>
+    <div class="device">—</div>
+  </div>
+
+</div>
+
+<div style="margin-top:1.5rem;">
+  <button class="btn btn-primary" type="button" data-soon>Convidar alguém</button>
+</div>
+
+{% endblock %}

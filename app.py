@@ -1,4 +1,5 @@
 import os
+import sys
 from datetime import date, timedelta
 from dotenv import load_dotenv
 load_dotenv()
@@ -6,6 +7,14 @@ import anthropic
 from flask import Flask, request, render_template
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+
+# A Windows console still defaults to a legacy code page, which turns every
+# accented word printed below into rubbish. Ask for UTF-8 and carry on if the
+# stream does not support it.
+try:
+    sys.stdout.reconfigure(encoding="utf-8")
+except Exception:
+    pass
 
 app = Flask(__name__)
 
@@ -26,6 +35,14 @@ MOCK_MODE = os.environ.get("MOCK_MODE") == "1" or not HAS_API_KEY
 # Each search injects the page contents into the prompt, so this is the main cost dial:
 # measured ~US$0.29/itinerary at 5 searches on Sonnet 5.
 SEARCHES = int(os.environ.get("PLANNER_SEARCHES", "6"))
+
+# Sitting next to someone while they try the app is exactly when a stray extra
+# click costs real money. The per-IP rate limit does not help there — it is the
+# same person on the same machine — so the server also refuses to run more than
+# this many real itineraries before it is restarted. Raise it with
+# PLANNER_MAX_RUNS if a session genuinely needs more.
+MAX_RUNS = int(os.environ.get("PLANNER_MAX_RUNS", "10"))
+SPEND = {"runs": 0, "usd": 0.0}
 
 # The 2026 web search tool only exists on Opus 4.6+/Sonnet 4.6+; older tiers need the 2025 one.
 MODERN_SEARCH_MODELS = (
@@ -291,9 +308,16 @@ def log_cost(response):
         + u.output_tokens / 1_000_000 * price_out
         + searches * SEARCH_COST
     )
+    SPEND["runs"] += 1
+    SPEND["usd"] += total
     print(
         f"[custo] {MODEL} | entrada {u.input_tokens} | saída {u.output_tokens} "
         f"| buscas {searches} | ~US${total:.4f}",
+        flush=True,
+    )
+    print(
+        f"[total] {SPEND['runs']} de {MAX_RUNS} roteiros nesta sessão "
+        f"| ~US${SPEND['usd']:.4f} gastos ao todo",
         flush=True,
     )
 
@@ -407,6 +431,12 @@ def plan():
             **form_values,
         )
 
+    if SPEND["runs"] >= MAX_RUNS:
+        return render_template("index.html", error=(
+            f"Limite de segurança: {MAX_RUNS} roteiros reais já foram gerados desde que o "
+            f"servidor ligou (cerca de US${SPEND['usd']:.2f}). Feche e abra o servidor para liberar mais."
+        ), **form_values)
+
     try:
         # A hosted request that never returns just spins the browser forever, so cap it.
         client = anthropic.Anthropic(
@@ -459,6 +489,21 @@ def viagem():
     return render_template("viagem.html")
 
 
+@app.route("/lugares")
+def lugares():
+    return render_template("lugares.html")
+
+
+@app.route("/documentos")
+def documentos():
+    return render_template("documentos.html")
+
+
+@app.route("/viajantes")
+def viajantes():
+    return render_template("viajantes.html")
+
+
 @app.errorhandler(429)
 def rate_limit_exceeded(e):
     today, latest = date_bounds()
@@ -469,4 +514,13 @@ def rate_limit_exceeded(e):
 
 
 if __name__ == "__main__":
+    # Which mode is running should never be a guess: one of these costs money.
+    banner = [""]
+    if MOCK_MODE:
+        banner.append("  MODO DEMONSTRAÇÃO — nenhuma chamada à API, custo zero.")
+    else:
+        banner.append("  MODO REAL — cada roteiro custa cerca de US$0,29 de verdade.")
+        banner.append(f"  Teto de segurança: {MAX_RUNS} roteiros até reiniciar o servidor.")
+    banner.append("")
+    print("\n".join(banner), flush=True)
     app.run(debug=True)
