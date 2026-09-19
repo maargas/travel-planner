@@ -39,9 +39,11 @@ SEARCHES = int(os.environ.get("PLANNER_SEARCHES", "6"))
 # Sitting next to someone while they try the app is exactly when a stray extra
 # click costs real money. The per-IP rate limit does not help there — it is the
 # same person on the same machine — so the server also refuses to run more than
-# this many real itineraries before it is restarted. Raise it with
-# PLANNER_MAX_RUNS if a session genuinely needs more.
-MAX_RUNS = int(os.environ.get("PLANNER_MAX_RUNS", "10"))
+# this many real itineraries before it is restarted. The default has to be safe
+# on its own: `python app.py` with nothing else typed must already be capped,
+# because the day someone forgets the variable is the day it matters. Raise it
+# with PLANNER_MAX_RUNS when a session genuinely needs more.
+MAX_RUNS = int(os.environ.get("PLANNER_MAX_RUNS", "4"))
 SPEND = {"runs": 0, "usd": 0.0}
 
 # The 2026 web search tool only exists on Opus 4.6+/Sonnet 4.6+; older tiers need the 2025 one.
@@ -523,4 +525,8 @@ if __name__ == "__main__":
         banner.append(f"  Teto de segurança: {MAX_RUNS} roteiros até reiniciar o servidor.")
     banner.append("")
     print("\n".join(banner), flush=True)
-    app.run(debug=True)
+    # The reloader watches the source files and restarts on any edit. In demo mode
+    # that is just convenient. In real mode it can tear down a request that has
+    # already been paid for and hand back nothing, which is the worst outcome
+    # there is: money gone, no itinerary.
+    app.run(debug=MOCK_MODE, use_reloader=MOCK_MODE)
