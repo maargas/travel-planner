@@ -303,6 +303,7 @@
           <label for="destination">Destino</label>
           <input type="text" id="destination" name="destination" required autocomplete="off"
                  placeholder="Paris, Buenos Aires, Tóquio..." value="{{ destination or '' }}">
+          <span class="field-msg" id="msg-destination"></span>
         </div>
 
         <div class="row">
@@ -457,6 +458,7 @@
   function setMsg(field, text) {
     const el = document.getElementById('msg-' + field.id);
     const bad = Boolean(text);
+    if (!el) { field.setAttribute('aria-invalid', String(bad)); return !bad; }
     el.textContent = text || '';
     el.dataset.on = bad ? '1' : '0';
     field.setAttribute('aria-invalid', String(bad));
@@ -500,6 +502,15 @@
     'conferindo horários e fechamentos...',
     'montando os dias...',
   ];
+
+  // When a required field is empty the browser blocks the submit and shows a
+  // small native bubble that is very easy to miss — the page just sits there and
+  // looks broken. Say it in the page's own voice, next to the field.
+  document.getElementById('form').addEventListener('invalid', (e) => {
+    const el = e.target;
+    setMsg(el, el.value.trim() ? 'Confira este campo.' : 'Preencha este campo para continuar.');
+    el.setAttribute('aria-invalid', 'true');
+  }, true);
 
   document.getElementById('form').addEventListener('submit', (e) => {
     const ok = [checkNumber(document.getElementById('days')),
