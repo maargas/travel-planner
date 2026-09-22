@@ -1,111 +1,272 @@
 {#
-  Dioramas isométricos, no espírito das peças do Airbnb: uma casinha pousada
-  num pedaço de chão recortado, vista de cima e de lado, com sombra macia e luz
-  quente nas janelas.
+  Dioramas isométricos, no espírito das peças do Airbnb.
 
-  Desenhados em SVG e não em imagem por três motivos: acompanham as cinco
-  paletas sozinhos (toda cor sai de um --t-*), não pesam nada para carregar num
-  celular com internet ruim, e ficam nítidos em qualquer tela.
+  DUAS REGRAS QUE NÃO PODEM SER DESFEITAS
 
-  A projeção é a isométrica de sempre: um passo para a direita anda 80 para a
-  direita e 46 para cima na tela; um passo para a esquerda faz o espelho. Todas
-  as coordenadas abaixo saem dessa regra, e é por isso que as faces encaixam.
+  1. Cada cena tem as cores do mundo dela, não as do app.
+     Telha é terracota, palha é palha, água é turquesa, pinheiro é verde escuro
+     — em qualquer paleta que o app esteja. A primeira versão tirava toda cor
+     dos tokens --t-*, e o resultado foi praia e montanha serem a mesma casa
+     pintada de outro tom. Só o fundo recebe um sopro da paleta, para a peça
+     não brigar com a tela em volta.
 
-  Duas coisas que precisam continuar verdadeiras se alguém mexer:
-
-  1. A base da casa tem de cair sobre o topo do torrão. O topo do torrão é o
-     losango de centro (200,192); a base das paredes é o losango de centro
-     (196,196). Foi por não respeitar isso que, na primeira versão, a casa ficou
-     flutuando 76 pixels no ar.
-  2. O que é paisagem de fundo (montanha, prédios) é desenhado ANTES da casa, e
-     o que é primeiro plano (piscina, árvores) DEPOIS. Na primeira versão a
-     montanha vinha por último e passava por cima do telhado.
+  2. A geometria é isométrica de verdade: um passo para a direita anda 80 para
+     a direita e 46 para cima. A base da casa cai sobre o topo do torrão — o
+     topo é o losango de centro (200,192), a base das paredes é o losango de
+     centro (196,196). Paisagem de fundo antes da casa, primeiro plano depois.
+     Já erramos os dois: casa flutuando no ar, montanha por cima do telhado.
 #}
 
-{% macro diorama(cena='cabana', id='d') -%}
+{% set PALETAS = {
+  'praia': {
+    'ceu1':'#fbe9cf', 'ceu2':'#f2cfa4',
+    'chao':'#e8d5b0', 'chao_lado':'#c9ae83', 'terra':'#a8865c',
+    'parede':'#efe3d0', 'parede2':'#d9c7ab', 'telhado':'#d8b072', 'telhado2':'#b58a4c',
+    'madeira':'#b5844f', 'madeira2':'#8f6337', 'folha':'#3f9a63', 'folha2':'#2c7a4c',
+    'agua':'#43c4bd', 'agua2':'#2a9d98', 'luz':'#ffd79a'
+  },
+  'mata': {
+    'ceu1':'#3c4f3f', 'ceu2':'#23332a',
+    'chao':'#4a6340', 'chao_lado':'#3a4d33', 'terra':'#33291f',
+    'parede':'#9a7047', 'parede2':'#7a5433', 'telhado':'#6f5c44', 'telhado2':'#53442f',
+    'madeira':'#8a6440', 'madeira2':'#5d4128', 'folha':'#2f6b41', 'folha2':'#225231',
+    'agua':'#6f9fb0', 'agua2':'#4d7b8c', 'luz':'#ffcf87'
+  },
+  'casa': {
+    'ceu1':'#f2d6b3', 'ceu2':'#e0b183',
+    'chao':'#9ab070', 'chao_lado':'#7b8f56', 'terra':'#6b5136',
+    'parede':'#eee0c6', 'parede2':'#d6c3a2', 'telhado':'#c04f31', 'telhado2':'#94371f',
+    'madeira':'#8d6540', 'madeira2':'#6a4829', 'folha':'#4d8241', 'folha2':'#33602f',
+    'agua':'#b9ada0', 'agua2':'#958a7d', 'luz':'#ffd489'
+  },
+  'montanha': {
+    'ceu1':'#d7e6ef', 'ceu2':'#a8c2d4',
+    'chao':'#e9eff4', 'chao_lado':'#7b8794', 'terra':'#5a646f',
+    'parede':'#7c5a3c', 'parede2':'#5d422a', 'telhado':'#f4f8fb', 'telhado2':'#cfdae4',
+    'madeira':'#6d4e33', 'madeira2':'#4d3622', 'folha':'#2d5340', 'folha2':'#1f3d2f',
+    'agua':'#8fb6cc', 'agua2':'#6a93ac', 'luz':'#ffcf87'
+  }
+} %}
+
+{% macro diorama(cena='mata', id='d') -%}
+{% set c = PALETAS.get(cena, PALETAS['mata']) %}
 <svg class="diorama" viewBox="0 0 400 330" role="img"
-     aria-label="Ilustração isométrica de uma casa de viagem" preserveAspectRatio="xMidYMid meet">
+     aria-label="Diorama isométrico de uma casa de viagem" preserveAspectRatio="xMidYMid meet">
   <defs>
-    <radialGradient id="ceu-{{ id }}" cx="50%" cy="34%" r="74%">
-      <stop offset="0%"  stop-color="var(--t-surface-2)"/>
-      <stop offset="100%" stop-color="var(--t-surface)"/>
-    </radialGradient>
-    <linearGradient id="teto-{{ id }}" x1="0" y1="0" x2="0.4" y2="1">
-      <stop offset="0%"  stop-color="var(--t-accent-soft)"/>
-      <stop offset="100%" stop-color="var(--t-accent)"/>
+    <linearGradient id="ceu-{{ id }}" x1="0" y1="0" x2="0.3" y2="1">
+      <stop offset="0%" stop-color="{{ c.ceu1 }}"/>
+      <stop offset="100%" stop-color="{{ c.ceu2 }}"/>
     </linearGradient>
     <radialGradient id="luz-{{ id }}" cx="50%" cy="50%" r="50%">
-      <stop offset="0%"  stop-color="var(--t-accent-soft)" stop-opacity="0.9"/>
-      <stop offset="100%" stop-color="var(--t-accent-soft)" stop-opacity="0"/>
+      <stop offset="0%" stop-color="{{ c.luz }}" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="{{ c.luz }}" stop-opacity="0"/>
     </radialGradient>
-    <filter id="macia-{{ id }}" x="-30%" y="-30%" width="160%" height="160%">
-      <feGaussianBlur stdDeviation="9"/>
+    <filter id="macia-{{ id }}" x="-35%" y="-35%" width="170%" height="170%">
+      <feGaussianBlur stdDeviation="8"/>
     </filter>
   </defs>
 
-  <rect width="400" height="330" rx="24" fill="url(#ceu-{{ id }})"/>
+  <rect width="400" height="330" fill="url(#ceu-{{ id }})"/>
+  {# um sopro da paleta do app, só para a peça não brigar com a tela em volta #}
+  <rect width="400" height="330" fill="var(--t-accent)" opacity="0.07"/>
 
-  {# ── Paisagem de fundo, atrás de tudo ──────────────────────────────── #}
+  {# ══ PAISAGEM DE FUNDO ══════════════════════════════════════════════ #}
   {% if cena == 'montanha' %}
-    <path d="M44 196 L104 96 L150 156 L200 84 L262 190 Z" fill="var(--t-text)" opacity="0.13"/>
-    <path d="M104 96 L122 118 L86 118 Z"  fill="#fff" opacity="0.45"/>
-    <path d="M200 84 L220 110 L180 110 Z" fill="#fff" opacity="0.45"/>
-  {% elif cena == 'cidade' %}
-    <path d="M286 188 L322 167 L322 104 L286 125 Z" fill="var(--t-text)" opacity="0.16"/>
-    <path d="M286 188 L286 125 L256 108 L256 171 Z" fill="var(--t-text)" opacity="0.10"/>
-    <path d="M62 180 L96 160 L96 112 L62 132 Z"    fill="var(--t-text)" opacity="0.12"/>
+    <path d="M18 200 L92 74 L146 150 L206 58 L268 138 L318 96 L382 196 Z" fill="{{ c.terra }}" opacity="0.5"/>
+    <path d="M92 74 L116 104 L68 104 Z"   fill="#ffffff" opacity="0.9"/>
+    <path d="M206 58 L232 90 L180 90 Z"  fill="#ffffff" opacity="0.9"/>
+    <path d="M318 96 L336 118 L300 118 Z" fill="#ffffff" opacity="0.75"/>
+    {% for t in [[46,186,30],[350,190,26],[318,178,22]] %}
+      <path d="M{{ t[0] }} {{ t[1] }} L{{ t[0] }} {{ t[1]-t[2]//2 }}" stroke="{{ c.madeira2 }}" stroke-width="4"/>
+      <path d="M{{ t[0]-t[2]//2 }} {{ t[1]-t[2]//3 }} L{{ t[0] }} {{ t[1]-t[2]*2 }} L{{ t[0]+t[2]//2 }} {{ t[1]-t[2]//3 }} Z" fill="{{ c.folha2 }}"/>
+    {% endfor %}
+  {% elif cena == 'mata' %}
+    {# troncos altos, como os da floresta de sequoias #}
+    {% for x in [40, 74, 330, 364] %}
+      <rect x="{{ x }}" y="40" width="11" height="180" rx="4" fill="{{ c.madeira2 }}" opacity="0.85"/>
+      <ellipse cx="{{ x + 5 }}" cy="46" rx="36" ry="26" fill="{{ c.folha2 }}" opacity="0.9"/>
+      <ellipse cx="{{ x + 5 }}" cy="24" rx="26" ry="19" fill="{{ c.folha }}" opacity="0.75"/>
+    {% endfor %}
+    <ellipse cx="200" cy="52" rx="150" ry="44" fill="{{ c.folha2 }}" opacity="0.45"/>
+  {% elif cena == 'casa' %}
+    {# ciprestes, que é o que diz "sul da Europa" sem precisar de mais nada #}
+    {% for x, h in [[64, 150], [92, 118], [318, 138], [344, 104]] %}
+      <ellipse cx="{{ x }}" cy="{{ 214 - h//2 }}" rx="{{ 13 if h > 130 else 11 }}" ry="{{ h//2 }}" fill="{{ c.folha2 }}"/>
+      <ellipse cx="{{ x - 3 }}" cy="{{ 214 - h//2 - 6 }}" rx="{{ 6 }}" ry="{{ h//2 - 14 }}" fill="{{ c.folha }}" opacity="0.55"/>
+    {% endfor %}
+  {% else %}
+    <ellipse cx="86" cy="150" rx="46" ry="34" fill="{{ c.folha2 }}" opacity="0.5"/>
+    <ellipse cx="320" cy="140" rx="40" ry="30" fill="{{ c.folha2 }}" opacity="0.4"/>
   {% endif %}
 
-  {# A sombra vem antes da peça: é o que a faz parecer pousada, e não colada. #}
-  <ellipse cx="205" cy="288" rx="130" ry="32"
-           fill="var(--t-text)" opacity="0.18" filter="url(#macia-{{ id }})"/>
+  <ellipse cx="205" cy="292" rx="132" ry="30" fill="{{ c.terra }}" opacity="0.45" filter="url(#macia-{{ id }})"/>
 
-  {# ── O torrão de chão ──────────────────────────────────────────────── #}
-  <path d="M200 112 L340 192 L200 272 L60 192 Z" fill="var(--t-accent-soft)" opacity="0.5"/>
-  <path d="M60 192 L200 272 L200 300 L60 220 Z"  fill="var(--t-accent-deep)"/>
-  <path d="M200 272 L340 192 L340 220 L200 300 Z" fill="var(--t-accent-deep)" opacity="0.76"/>
-  {# a terra à mostra por baixo, como um pedaço arrancado do chão #}
-  <path d="M60 220 L200 300 L200 313 L60 233 Z"  fill="var(--t-text)" opacity="0.24"/>
-  <path d="M200 300 L340 220 L340 233 L200 313 Z" fill="var(--t-text)" opacity="0.15"/>
+  {# ══ O TORRÃO DE CHÃO ═══════════════════════════════════════════════ #}
+  <path d="M200 112 L340 192 L200 272 L60 192 Z" fill="{{ c.chao }}"/>
+  <path d="M60 192 L200 272 L200 300 L60 220 Z"  fill="{{ c.chao_lado }}"/>
+  <path d="M200 272 L340 192 L340 220 L200 300 Z" fill="{{ c.chao_lado }}" opacity="0.72"/>
+  <path d="M60 220 L200 300 L200 316 L60 236 Z"  fill="{{ c.terra }}"/>
+  <path d="M200 300 L340 220 L340 236 L200 316 Z" fill="{{ c.terra }}" opacity="0.72"/>
+  {# pedras soltas na borda de terra, para o corte não ficar uma linha reta #}
+  <ellipse cx="108" cy="252" rx="9" ry="5" fill="{{ c.terra }}" opacity="0.6"/>
+  <ellipse cx="292" cy="248" rx="7" ry="4" fill="{{ c.terra }}" opacity="0.5"/>
 
-  {# ── A casa ────────────────────────────────────────────────────────────
-     Topo das paredes: E(116,146) F(196,100) D(276,146) A(196,192).
-     A cumeeira corre paralela a E→F, 34 acima dos meios das bordas laterais:
-     de (156,135) a (236,89). #}
-  <path d="M116 196 L196 242 L196 192 L116 146 Z" fill="var(--t-surface)"/>
-  <path d="M196 242 L276 196 L276 146 L196 192 Z" fill="var(--t-surface-2)"/>
-
-  <circle cx="211" cy="213" r="30" fill="url(#luz-{{ id }})"/>
-  <path d="M136 188 L158 201 L158 181 L136 168 Z" fill="url(#teto-{{ id }})" opacity="0.92"/>
-  <path d="M218 201 L240 188 L240 168 L218 181 Z" fill="url(#teto-{{ id }})" opacity="0.7"/>
-  <path d="M172 226 L188 235 L188 207 L172 198 Z" fill="var(--t-accent-deep)"/>
-
-  <path d="M116 146 L196 100 L236 89 L156 135 Z" fill="url(#teto-{{ id }})"/>
-  <path d="M196 192 L276 146 L236 89 L156 135 Z" fill="var(--t-accent)" opacity="0.85"/>
-  <path d="M116 146 L196 192 L156 135 Z"         fill="var(--t-accent-deep)" opacity="0.5"/>
-  <path d="M196 100 L276 146 L236 89 Z"          fill="var(--t-accent-deep)" opacity="0.3"/>
-
-  {# ── Primeiro plano, na frente da casa ─────────────────────────────── #}
   {% if cena == 'praia' %}
-    <path d="M206 258 L268 222 L302 241 L240 277 Z" fill="var(--t-accent-soft)" opacity="0.9"/>
-    <path d="M218 258 L264 231 L280 240 L234 267 Z" fill="#fff" opacity="0.3"/>
-    <g>
-      <path d="M104 244 L110 196" stroke="var(--t-accent-deep)" stroke-width="5" stroke-linecap="round"/>
-      <path d="M110 196 C90 186 76 195 72 208 C86 199 98 199 110 205 Z" fill="var(--t-accent-soft)"/>
-      <path d="M110 196 C130 186 144 195 148 208 C134 199 122 199 110 205 Z" fill="var(--t-accent-soft)" opacity="0.78"/>
-      <path d="M110 196 C106 176 117 165 130 163 C119 173 116 185 114 198 Z" fill="var(--t-accent-soft)" opacity="0.6"/>
-    </g>
-  {% elif cena != 'montanha' and cena != 'cidade' %}
-    {# mata: a cena padrão, no espírito da cabana na floresta #}
-    <path d="M100 250 L100 226" stroke="var(--t-accent-deep)" stroke-width="5" stroke-linecap="round"/>
-    <path d="M100 230 L76 230 L100 176 L124 230 Z" fill="var(--t-accent-soft)" opacity="0.88"/>
-    <path d="M100 206 L81 206 L100 168 L119 206 Z" fill="var(--t-accent-soft)"/>
-    <path d="M306 258 L306 238" stroke="var(--t-accent-deep)" stroke-width="4" stroke-linecap="round"/>
-    <path d="M306 242 L289 242 L306 202 L323 242 Z" fill="var(--t-accent-soft)" opacity="0.72"/>
+    {# faixa de água lambendo a ponta esquerda do torrão #}
+    <path d="M60 192 L124 229 L86 251 L60 236 Z" fill="{{ c.agua }}" opacity="0.9"/>
+    <path d="M74 214 L104 231 L96 236 L66 219 Z" fill="#ffffff" opacity="0.4"/>
   {% endif %}
 
-  {# arbustos que amarram a casa ao chão dos dois lados #}
-  <ellipse cx="146" cy="236" rx="21" ry="11" fill="var(--t-accent-deep)" opacity="0.6"/>
-  <ellipse cx="258" cy="232" rx="17" ry="9"  fill="var(--t-accent-deep)" opacity="0.45"/>
+  {# ══ A CASA ═════════════════════════════════════════════════════════
+     Paredes: base E(116,196) A(196,242) D(276,196), topo 50 acima.
+     Cumeeira de (156,135) a (236,89). #}
+
+  {% if cena == 'casa' %}
+    {# casa mais alta, de dois andares, como a da referência com hera #}
+    <path d="M116 196 L196 242 L196 172 L116 126 Z" fill="{{ c.parede }}"/>
+    <path d="M196 242 L276 196 L276 126 L196 172 Z" fill="{{ c.parede2 }}"/>
+    {# janelas dos dois andares #}
+    {% for dy in [0, 34] %}
+      <path d="M134 {{ 176 - dy }} L152 {{ 186 - dy }} L152 {{ 168 - dy }} L134 {{ 158 - dy }} Z" fill="{{ c.luz }}" opacity="0.92"/>
+      <path d="M164 {{ 193 - dy }} L182 {{ 203 - dy }} L182 {{ 185 - dy }} L164 {{ 175 - dy }} Z" fill="{{ c.luz }}" opacity="0.8"/>
+      <path d="M216 {{ 200 - dy }} L234 {{ 190 - dy }} L234 {{ 172 - dy }} L216 {{ 182 - dy }} Z" fill="{{ c.luz }}" opacity="0.6"/>
+    {% endfor %}
+    <circle cx="200" cy="200" r="42" fill="url(#luz-{{ id }})"/>
+    {# hera subindo pela quina, que é a assinatura daquela foto #}
+    {% for p in [[120,150],[128,164],[124,178],[134,192],[130,134],[140,176],[118,192]] %}
+      <ellipse cx="{{ p[0] }}" cy="{{ p[1] }}" rx="13" ry="9" fill="{{ c.folha }}" opacity="0.9"/>
+      <ellipse cx="{{ p[0]+4 }}" cy="{{ p[1]-3 }}" rx="7" ry="5" fill="{{ c.folha2 }}" opacity="0.7"/>
+    {% endfor %}
+    {# telhado de telha, com as fiadas marcadas #}
+    <path d="M116 126 L196 80 L236 69 L156 115 Z" fill="{{ c.telhado }}"/>
+    <path d="M196 172 L276 126 L236 69 L156 115 Z" fill="{{ c.telhado2 }}"/>
+    <path d="M116 126 L196 172 L156 115 Z" fill="{{ c.telhado2 }}" opacity="0.8"/>
+    {% for i in range(1, 5) %}
+      <path d="M{{ 156 + i*16 }} {{ 115 + i*9 }} L{{ 196 + i*16 }} {{ 172 - i*9 }}"
+            stroke="{{ c.telhado }}" stroke-width="1.5" opacity="0.5"/>
+    {% endfor %}
+    {# chaminé #}
+    <path d="M232 104 L248 113 L248 95 L232 86 Z" fill="{{ c.parede2 }}"/>
+    <path d="M248 113 L262 105 L262 87 L248 95 Z" fill="{{ c.telhado2 }}"/>
+    <ellipse cx="252" cy="80" rx="13" ry="8" fill="#ffffff" opacity="0.35"/>
+    <ellipse cx="262" cy="64" rx="9" ry="6" fill="#ffffff" opacity="0.22"/>
+
+  {% elif cena == 'praia' %}
+    {# casa aberta, com deque em volta #}
+    <path d="M196 254 L276 208 L316 231 L236 277 Z" fill="{{ c.madeira }}"/>
+    {% for i in range(1, 7) %}
+      <path d="M{{ 196 + i*17 }} {{ 254 - i*10 }} L{{ 236 + i*17 }} {{ 277 - i*10 }}"
+            stroke="{{ c.madeira2 }}" stroke-width="1.4" opacity="0.55"/>
+    {% endfor %}
+    {# piscina encaixada no deque #}
+    <path d="M226 254 L272 227 L296 241 L250 268 Z" fill="{{ c.agua2 }}"/>
+    <path d="M230 254 L271 231 L290 242 L249 265 Z" fill="{{ c.agua }}"/>
+    <path d="M240 252 L266 237 L274 242 L248 257 Z" fill="#ffffff" opacity="0.3"/>
+
+    <path d="M116 196 L196 242 L196 196 L116 150 Z" fill="{{ c.parede }}"/>
+    <path d="M196 242 L276 196 L276 150 L196 196 Z" fill="{{ c.parede2 }}"/>
+    <circle cx="205" cy="212" r="34" fill="url(#luz-{{ id }})"/>
+    <path d="M132 188 L164 206 L164 176 L132 158 Z" fill="{{ c.luz }}" opacity="0.55"/>
+    <path d="M208 208 L240 190 L240 160 L208 178 Z" fill="{{ c.madeira2 }}" opacity="0.35"/>
+    {# telhado de palha: fiadas grossas e a beirada franjada #}
+    <path d="M108 154 L196 104 L244 90 L156 140 Z" fill="{{ c.telhado }}"/>
+    <path d="M196 200 L284 150 L244 90 L156 140 Z" fill="{{ c.telhado2 }}"/>
+    <path d="M108 154 L196 200 L156 140 Z" fill="{{ c.telhado2 }}" opacity="0.85"/>
+    {% for i in range(1, 6) %}
+      <path d="M{{ 156 + i*18 }} {{ 140 + i*10 }} L{{ 196 + i*18 }} {{ 200 - i*10 }}"
+            stroke="{{ c.telhado }}" stroke-width="2" opacity="0.45"/>
+    {% endfor %}
+
+  {% elif cena == 'montanha' %}
+    <path d="M116 196 L196 242 L196 192 L116 146 Z" fill="{{ c.parede }}"/>
+    <path d="M196 242 L276 196 L276 146 L196 192 Z" fill="{{ c.parede2 }}"/>
+    {% for i in range(1, 5) %}
+      <path d="M116 {{ 146 + i*10 }} L196 {{ 192 + i*10 }}" stroke="{{ c.madeira2 }}" stroke-width="1.4" opacity="0.45"/>
+    {% endfor %}
+    <circle cx="211" cy="213" r="30" fill="url(#luz-{{ id }})"/>
+    <path d="M136 188 L158 201 L158 181 L136 168 Z" fill="{{ c.luz }}" opacity="0.95"/>
+    <path d="M218 201 L240 188 L240 168 L218 181 Z" fill="{{ c.luz }}" opacity="0.72"/>
+    <path d="M172 226 L188 235 L188 207 L172 198 Z" fill="{{ c.madeira2 }}"/>
+    {# telhado íngreme com neve acumulada #}
+    <path d="M112 148 L196 96 L240 84 L156 136 Z" fill="{{ c.telhado }}"/>
+    <path d="M196 196 L280 144 L240 84 L156 136 Z" fill="{{ c.telhado2 }}"/>
+    <path d="M112 148 L196 196 L156 136 Z" fill="{{ c.telhado2 }}" opacity="0.9"/>
+    <path d="M112 148 L156 136 L172 158 L128 170 Z" fill="#ffffff" opacity="0.55"/>
+    <path d="M232 92 L248 102 L248 82 L232 72 Z" fill="{{ c.terra }}"/>
+    <ellipse cx="248" cy="66" rx="11" ry="7" fill="#ffffff" opacity="0.4"/>
+
+  {% else %}
+    {# mata: cabana de madeira com varanda e chaminé de pedra #}
+    <path d="M196 250 L262 212 L296 232 L230 270 Z" fill="{{ c.madeira }}" opacity="0.95"/>
+    <path d="M116 196 L196 242 L196 192 L116 146 Z" fill="{{ c.parede }}"/>
+    <path d="M196 242 L276 196 L276 146 L196 192 Z" fill="{{ c.parede2 }}"/>
+    {% for i in range(1, 5) %}
+      <path d="M116 {{ 146 + i*10 }} L196 {{ 192 + i*10 }}" stroke="{{ c.madeira2 }}" stroke-width="1.5" opacity="0.5"/>
+      <path d="M196 {{ 192 + i*10 }} L276 {{ 146 + i*10 }}" stroke="{{ c.madeira2 }}" stroke-width="1.5" opacity="0.32"/>
+    {% endfor %}
+    <circle cx="207" cy="212" r="34" fill="url(#luz-{{ id }})"/>
+    {# janela redonda, como a da cabana da referência #}
+    <ellipse cx="150" cy="184" rx="13" ry="15" fill="{{ c.luz }}" opacity="0.92"/>
+    <path d="M216 202 L242 187 L242 165 L216 180 Z" fill="{{ c.luz }}" opacity="0.7"/>
+    <path d="M172 228 L188 237 L188 207 L172 198 Z" fill="{{ c.madeira2 }}"/>
+    <path d="M116 146 L196 100 L236 89 L156 135 Z" fill="{{ c.telhado }}"/>
+    <path d="M196 192 L276 146 L236 89 L156 135 Z" fill="{{ c.telhado2 }}"/>
+    <path d="M116 146 L196 192 L156 135 Z" fill="{{ c.telhado2 }}" opacity="0.85"/>
+    {% for i in range(1, 5) %}
+      <path d="M{{ 156 + i*16 }} {{ 135 + i*9 }} L{{ 196 + i*16 }} {{ 192 - i*9 }}"
+            stroke="{{ c.telhado }}" stroke-width="1.6" opacity="0.45"/>
+    {% endfor %}
+    {# chaminé de pedra, com fumaça #}
+    <path d="M128 132 L144 141 L144 113 L128 104 Z" fill="{{ c.terra }}"/>
+    <path d="M144 141 L158 133 L158 105 L144 113 Z" fill="{{ c.terra }}" opacity="0.7"/>
+    <ellipse cx="148" cy="98" rx="12" ry="7" fill="#ffffff" opacity="0.3"/>
+    <ellipse cx="158" cy="82" rx="9" ry="6" fill="#ffffff" opacity="0.18"/>
+  {% endif %}
+
+  {# ══ PRIMEIRO PLANO ═════════════════════════════════════════════════ #}
+  {% if cena == 'praia' %}
+    {% for x, y, s in [[96, 250, 1.0], [320, 232, 0.8]] %}
+      <g transform="translate({{ x }} {{ y }}) scale({{ s }})">
+        <path d="M0 0 C-3 -22 2 -40 8 -54" stroke="{{ c.madeira2 }}" stroke-width="6" fill="none" stroke-linecap="round"/>
+        <path d="M8 -54 C-14 -66 -30 -58 -36 -44 C-20 -54 -4 -54 8 -46 Z" fill="{{ c.folha }}"/>
+        <path d="M8 -54 C30 -66 46 -58 52 -44 C36 -54 20 -54 8 -46 Z" fill="{{ c.folha2 }}"/>
+        <path d="M8 -54 C4 -76 16 -88 30 -92 C18 -80 14 -68 12 -54 Z" fill="{{ c.folha }}" opacity="0.85"/>
+        <path d="M8 -54 C-2 -74 -16 -80 -30 -80 C-16 -72 -4 -64 4 -52 Z" fill="{{ c.folha2 }}" opacity="0.8"/>
+      </g>
+    {% endfor %}
+    {% for p in [[140,242],[258,224],[168,252]] %}
+      <ellipse cx="{{ p[0] }}" cy="{{ p[1] }}" rx="15" ry="9" fill="{{ c.folha }}" opacity="0.85"/>
+      <ellipse cx="{{ p[0]-5 }}" cy="{{ p[1]-5 }}" rx="10" ry="6" fill="{{ c.folha2 }}" opacity="0.8"/>
+    {% endfor %}
+  {% elif cena == 'montanha' %}
+    {% for x, y, h in [[96, 254, 56], [302, 242, 44], [128, 262, 34]] %}
+      <path d="M{{ x }} {{ y }} L{{ x }} {{ y - h//3 }}" stroke="{{ c.madeira2 }}" stroke-width="5" stroke-linecap="round"/>
+      <path d="M{{ x - h//3 }} {{ y - h//4 }} L{{ x }} {{ y - h }} L{{ x + h//3 }} {{ y - h//4 }} Z" fill="{{ c.folha }}"/>
+      <path d="M{{ x - h//4 }} {{ y - h//2 }} L{{ x }} {{ y - h - 8 }} L{{ x + h//4 }} {{ y - h//2 }} Z" fill="{{ c.folha2 }}"/>
+      <path d="M{{ x - h//5 }} {{ y - (h*0.7)|int }} L{{ x }} {{ y - h - 10 }} L{{ x + h//5 }} {{ y - (h*0.7)|int }} Z" fill="#ffffff" opacity="0.5"/>
+    {% endfor %}
+  {% elif cena == 'casa' %}
+    {# caminho de pedra e canteiros floridos #}
+    {% for i in range(5) %}
+      <ellipse cx="{{ 214 + i*17 }}" cy="{{ 256 - i*10 }}" rx="11" ry="6" fill="{{ c.agua }}" opacity="0.85"/>
+    {% endfor %}
+    {% for p in [[142,238],[166,250],[262,228]] %}
+      <ellipse cx="{{ p[0] }}" cy="{{ p[1] }}" rx="16" ry="10" fill="{{ c.folha }}" opacity="0.9"/>
+      <circle cx="{{ p[0]-5 }}" cy="{{ p[1]-4 }}" r="3" fill="#f2f2f2" opacity="0.9"/>
+      <circle cx="{{ p[0]+5 }}" cy="{{ p[1]-6 }}" r="3" fill="{{ c.telhado }}" opacity="0.9"/>
+    {% endfor %}
+  {% else %}
+    {# samambaias e uma pedra na frente da cabana #}
+    {% for x, y, h in [[92, 256, 62], [312, 244, 48]] %}
+      <path d="M{{ x }} {{ y }} L{{ x }} {{ y - h//3 }}" stroke="{{ c.madeira2 }}" stroke-width="5" stroke-linecap="round"/>
+      <path d="M{{ x - h//3 }} {{ y - h//4 }} L{{ x }} {{ y - h }} L{{ x + h//3 }} {{ y - h//4 }} Z" fill="{{ c.folha }}"/>
+      <path d="M{{ x - h//4 }} {{ y - h//2 }} L{{ x }} {{ y - h - 10 }} L{{ x + h//4 }} {{ y - h//2 }} Z" fill="{{ c.folha2 }}"/>
+    {% endfor %}
+    {% for p in [[146,244],[258,230],[176,254]] %}
+      <ellipse cx="{{ p[0] }}" cy="{{ p[1] }}" rx="16" ry="9" fill="{{ c.folha }}" opacity="0.8"/>
+      <ellipse cx="{{ p[0]+6 }}" cy="{{ p[1]-4 }}" rx="10" ry="6" fill="{{ c.folha2 }}" opacity="0.85"/>
+    {% endfor %}
+    <ellipse cx="238" cy="252" rx="14" ry="8" fill="{{ c.terra }}" opacity="0.55"/>
+  {% endif %}
 </svg>
 {%- endmacro %}

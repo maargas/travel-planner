@@ -84,7 +84,7 @@
 <div class="cartoes">
   {% for v in viagens %}
   <a class="cartao" href="/viagens/{{ v.slug }}">
-    {{ diorama(v.scene or 'cabana', v.slug) }}
+    {{ diorama(v.scene or 'mata', v.slug) }}
     <div class="texto">
       <h2>{{ v.destination }}{% if v.country %}, {{ v.country }}{% endif %}</h2>
       <div class="quando">
