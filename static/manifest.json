@@ -1,7 +1,7 @@
 {
-  "name": "Compass — Roteiros de viagem",
+  "name": "Compass — Roteiros de viagem conferidos",
   "short_name": "Compass",
-  "description": "Roteiro de viagem verificado nas suas datas reais.",
+  "description": "Roteiros de viagem pesquisados de verdade: horários, eventos nas suas datas e o tempo entre cada parada.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

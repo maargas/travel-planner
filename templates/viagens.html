@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% from "_cenas.html" import diorama %}
+{% set page = 'viagens' %}
+{% block title %}Viagens — Compass{% endblock %}
+
+{% block head_extra %}
+<style>
+  .cartoes { display: grid; grid-template-columns: 1fr; gap: 1.125rem; }
+
+  .cartao {
+    display: block; text-decoration: none; color: inherit;
+    background: var(--t-surface); border: 1px solid var(--t-border);
+    border-radius: var(--t-radius-lg); overflow: hidden;
+    box-shadow: var(--shadow-md);
+    transition: transform 0.15s, border-color 0.15s;
+  }
+  .cartao:hover { transform: translateY(-3px); border-color: var(--t-accent); }
+  .cartao .diorama { width: 100%; height: auto; border-radius: 0; }
+  .cartao .texto { padding: 1.125rem 1.25rem 1.375rem; }
+  .cartao h2 { font-size: 1.25rem; margin-bottom: 0.1875rem; }
+  .cartao .quando { font-size: 0.75rem; color: var(--t-muted); margin-bottom: 0.625rem; }
+  .cartao .resumo { font-size: 0.8125rem; opacity: 0.85; line-height: 1.5; }
+
+  .achado {
+    display: flex; gap: 0.5rem; align-items: flex-start;
+    margin-top: 0.875rem; padding: 0.75rem 0.875rem;
+    background: var(--t-surface-2); border-left: 3px solid var(--t-accent);
+    border-radius: 0 var(--t-radius-sm) var(--t-radius-sm) 0;
+    font-size: 0.75rem; line-height: 1.45;
+  }
+
+  .selo {
+    display: inline-flex; align-items: center; gap: 0.3125rem;
+    font-size: 0.625rem; letter-spacing: 0.06em; text-transform: uppercase;
+    font-weight: 700; color: var(--t-accent-text);
+    margin-top: 0.875rem;
+  }
+
+  .pedir-box {
+    margin-top: 1.75rem; padding: 1.25rem;
+    border: 1px dashed var(--t-border); border-radius: var(--t-radius-lg);
+  }
+  .pedir-box h2 { font-size: 1.0625rem; margin-bottom: 0.375rem; }
+  .pedir-box p { font-size: 0.8125rem; color: var(--t-muted); margin-bottom: 0.875rem; line-height: 1.5; }
+  .pedir-box .linha { display: grid; grid-template-columns: 1fr; gap: 0.625rem; margin-bottom: 0.75rem; }
+  .pedir-box input {
+    width: 100%; background: var(--t-surface-2);
+    border: 1px solid var(--t-border); border-radius: var(--t-pill);
+    color: var(--t-text); font-family: inherit; font-size: 0.9375rem;
+    padding: 0.625rem 0.9375rem;
+  }
+  .pedir-box input:focus-visible { outline: none; border-color: var(--t-accent); }
+
+  .aviso-ok {
+    display: flex; align-items: center; gap: 0.5rem;
+    background: var(--t-surface-2); border: 1px solid var(--t-accent);
+    border-radius: var(--t-radius); padding: 0.75rem 0.9375rem;
+    margin-bottom: 1.25rem; font-size: 0.8125rem;
+  }
+
+  @media (min-width: 60rem) {
+    .cartoes { grid-template-columns: repeat(2, 1fr); gap: 1.25rem; }
+    .pedir-box .linha { grid-template-columns: 2fr 1fr 1fr; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-head">
+  <h1>Viagens</h1>
+  <div class="sub">Roteiros pesquisados de verdade — cada horário e cada preço
+      com a fonte anotada.</div>
+</div>
+
+{% if request.args.get('pedido') %}
+<div class="aviso-ok">
+  <span aria-hidden="true">✅</span>
+  <span><strong>Pedido anotado.</strong> Esse destino entra na fila para ser
+        pesquisado. Você é avisado quando o roteiro estiver pronto.</span>
+</div>
+{% endif %}
+
+<div class="cartoes">
+  {% for v in viagens %}
+  <a class="cartao" href="/viagens/{{ v.slug }}">
+    {{ diorama(v.scene or 'cabana', v.slug) }}
+    <div class="texto">
+      <h2>{{ v.destination }}{% if v.country %}, {{ v.country }}{% endif %}</h2>
+      <div class="quando">
+        {% if v.start_date %}{{ v.start_date.strftime('%d/%m/%Y') }} · {% endif %}
+        {{ v.days }} dias{% if v.budget_usd %} · US$ {{ '{:,}'.format(v.budget_usd).replace(',', '.') }}{% endif %}
+      </div>
+      {% if v.summary %}<p class="resumo">{{ v.summary }}</p>{% endif %}
+      {% if v.headline %}
+      <div class="achado">
+        <span aria-hidden="true">⚠️</span>
+        <span>{{ v.headline }}</span>
+      </div>
+      {% endif %}
+      <div class="selo">
+        <span aria-hidden="true">🔎</span>
+        Pesquisado{% if v.researched_on %} em {{ v.researched_on.strftime('%d/%m/%Y') }}{% endif %}
+      </div>
+    </div>
+  </a>
+  {% else %}
+  <p style="opacity:0.7;">Ainda não há roteiros publicados.</p>
+  {% endfor %}
+</div>
+
+{% if usuario() %}
+<div class="pedir-box">
+  <h2>Pedir um destino</h2>
+  <p>Diga para onde e quando. O destino entra numa fila, alguém pesquisa de
+     verdade — horários, eventos nas suas datas, deslocamento — e o roteiro
+     aparece aqui. Não é a IA respondendo de memória.</p>
+  <form method="POST" action="/pedir">
+    <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+    <div class="linha">
+      <input type="text" name="destination" required maxlength="120"
+             placeholder="Para onde? Ex.: Lisboa, Portugal">
+      <input type="date" name="start_date" aria-label="Data de ida">
+      <input type="number" name="days" min="1" max="30" placeholder="Dias">
+    </div>
+    <div class="linha" style="grid-template-columns:1fr;">
+      <input type="text" name="interests" maxlength="255"
+             placeholder="Interesses: comida local, trilhas, museus...">
+    </div>
+    <button class="btn btn-primary" type="submit">Entrar na fila</button>
+  </form>
+</div>
+{% else %}
+<div class="pedir-box">
+  <h2>Quer pedir um destino?</h2>
+  <p>Crie uma conta para pedir um roteiro pesquisado e guardar os que gostar.</p>
+  <a class="btn btn-primary" href="/criar-conta?proximo=/viagens">Criar conta</a>
+</div>
+{% endif %}
+
+{% endblock %}

@@ -2,3 +2,9 @@
 __pycache__/
 *.pyc
 roteiros/
+
+# O banco local guarda e-mail e senha de quem criou conta.
+# Nunca pode ir para o GitHub.
+*.db
+*.sqlite
+*.sqlite3

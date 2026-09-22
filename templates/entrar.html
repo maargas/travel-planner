@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% from "_cenas.html" import diorama %}
+{% set page = 'entrar' %}
+{% block title %}{{ 'Criar conta' if aba == 'criar' else 'Entrar' }} — Compass{% endblock %}
+
+{% block head_extra %}
+<style>
+  .porta { display: grid; gap: 1.5rem; padding: 1.5rem 0 2rem; }
+
+  .porta .arte { display: none; }
+  .diorama { width: 100%; height: auto; display: block; }
+
+  .lema { text-align: center; }
+  .lema h1 { font-size: 1.875rem; margin-bottom: 0.5rem; text-wrap: balance; }
+  .lema h1 em { font-style: normal; color: var(--t-accent-text); }
+  .lema p { font-size: 0.875rem; color: var(--t-muted); max-width: 24rem; margin: 0 auto; }
+
+  .abas {
+    display: flex; gap: 0.25rem; padding: 0.25rem;
+    background: var(--t-surface-2); border-radius: var(--t-pill);
+    margin-bottom: 1.25rem;
+  }
+  .abas a {
+    flex: 1; text-align: center; text-decoration: none;
+    padding: 0.5rem; border-radius: var(--t-pill);
+    font-size: 0.8125rem; font-weight: 700; color: var(--t-muted);
+  }
+  .abas a[aria-current="page"] { background: var(--t-accent); color: var(--t-accent-ink); }
+
+  .campos { display: flex; flex-direction: column; gap: 0.875rem; }
+  .campo { display: flex; flex-direction: column; gap: 0.375rem; }
+  .campo label { font-size: 0.75rem; font-weight: 700; opacity: 0.85; }
+  .campo input {
+    width: 100%; background: var(--t-surface-2);
+    border: 1px solid var(--t-border); border-radius: var(--t-pill);
+    color: var(--t-text); font-family: inherit; font-size: 1rem;
+    padding: 0.75rem 1rem; caret-color: var(--t-accent);
+  }
+  .campo input:focus-visible {
+    outline: none; border-color: var(--t-accent);
+    box-shadow: 0 0 0 3px var(--t-surface-2);
+  }
+  .dica { font-size: 0.6875rem; color: var(--t-muted); }
+
+  .erro {
+    display: flex; align-items: center; gap: 0.5rem;
+    background: var(--t-danger-bg); border: 1px solid var(--t-danger);
+    color: var(--t-danger); font-weight: 600;
+    border-radius: var(--t-radius); padding: 0.75rem 0.9375rem;
+    margin-bottom: 1rem; font-size: 0.8125rem;
+  }
+
+  .promessa {
+    margin-top: 1rem; font-size: 0.71875rem; color: var(--t-muted);
+    line-height: 1.5; text-align: center;
+  }
+
+  @media (min-width: 60rem) {
+    .porta { grid-template-columns: 1fr 24rem; align-items: center; gap: 3.5rem; min-height: 78vh; }
+    .porta .arte { display: block; }
+    .lema { text-align: left; }
+    .lema h1 { font-size: 2.5rem; }
+    .lema p { margin: 0; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="porta">
+
+  <div class="arte">
+    {{ diorama('cabana', 'entrada') }}
+    <div class="lema" style="margin-top:1.5rem;">
+      <h1>Vá para onde <em>você não conhece</em>.<br>Com um plano que confere.</h1>
+      <p>Horários, fechamentos e o que está acontecendo nas suas datas — e o tempo
+         de deslocamento entre cada parada.</p>
+    </div>
+  </div>
+
+  <div class="card" style="padding:1.5rem;">
+
+    <div class="abas">
+      <a href="/entrar?proximo={{ proximo|urlencode }}"
+         {% if aba != 'criar' %}aria-current="page"{% endif %}>Entrar</a>
+      <a href="/criar-conta?proximo={{ proximo|urlencode }}"
+         {% if aba == 'criar' %}aria-current="page"{% endif %}>Criar conta</a>
+    </div>
+
+    {% if erro %}
+    <div class="erro" role="alert">
+      <span aria-hidden="true">⚠️</span><span>{{ erro }}</span>
+    </div>
+    {% endif %}
+
+    <form method="POST"
+          action="{{ '/criar-conta' if aba == 'criar' else '/entrar' }}"
+          autocomplete="on">
+      <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+      <input type="hidden" name="proximo" value="{{ proximo }}">
+
+      <div class="campos">
+        {% if aba == 'criar' %}
+        <div class="campo">
+          <label for="nome">Seu nome</label>
+          <input type="text" id="nome" name="nome" required maxlength="80"
+                 autocomplete="name" value="{{ nome or '' }}">
+        </div>
+        {% endif %}
+
+        <div class="campo">
+          <label for="email">E-mail</label>
+          <input type="email" id="email" name="email" required
+                 autocomplete="email" value="{{ email or '' }}">
+        </div>
+
+        <div class="campo">
+          <label for="senha">Senha</label>
+          <input type="password" id="senha" name="senha" required
+                 minlength="{{ 8 if aba == 'criar' else 1 }}"
+                 autocomplete="{{ 'new-password' if aba == 'criar' else 'current-password' }}">
+          {% if aba == 'criar' %}
+          <span class="dica">Pelo menos 8 caracteres.</span>
+          {% endif %}
+        </div>
+      </div>
+
+      <button class="btn btn-primary" type="submit" style="margin-top:1.25rem;">
+        {{ 'Criar minha conta' if aba == 'criar' else 'Entrar' }}
+      </button>
+    </form>
+
+    <p class="promessa">
+      Sua senha é guardada embaralhada, de um jeito que não tem volta —
+      nem quem cuida do app consegue lê-la.
+    </p>
+  </div>
+
+</div>
+
+{% endblock %}

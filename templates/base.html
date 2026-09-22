@@ -250,6 +250,17 @@
 
     .side-group { display: none; }
     .tab-extra { display: none; }
+    /* No celular a conta é uma aba; no computador vira a caixa do pé do trilho. */
+    .conta-box { display: none; }
+    .conta-nome { font-size: 0.8125rem; font-weight: 700; }
+    .conta-email { font-size: 0.6875rem; color: var(--t-muted); word-break: break-all; }
+    .conta-sair {
+      width: 100%; padding: 0.375rem; border-radius: var(--t-radius-sm);
+      background: transparent; border: 1px solid var(--t-border);
+      color: var(--t-muted); font-family: inherit; font-size: 0.71875rem;
+      font-weight: 600; cursor: pointer;
+    }
+    .conta-sair:hover { color: var(--t-accent-text); border-color: var(--t-accent); }
     .tab svg { display: block; }
     .tab:focus-visible { outline: 2px solid var(--t-accent); outline-offset: 2px; border-radius: 0.5rem; }
 
@@ -323,8 +334,15 @@
       .tab[aria-current="page"] { font-weight: 700; background: var(--t-ink-wash); }
 
       /* Pinned to the foot of the rail, where the design keeps its sync box. */
+      .conta-tab { display: none; }
+      .conta-box {
+        display: block; margin-top: auto; margin-bottom: 0.5rem;
+        background: var(--t-surface-2); border-radius: var(--t-radius-sm);
+        padding: 0.75rem;
+      }
+
       #theme-bar-nav {
-        display: flex; margin-top: auto; justify-content: center;
+        display: flex; justify-content: center;
         gap: 0.4375rem; padding: 0.75rem 0.5rem;
         background: var(--t-surface-2); border-radius: var(--t-radius-sm);
       }
@@ -392,7 +410,11 @@
     <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-6.3 7-11a7 7 0 10-14 0c0 4.7 7 11 7 11z"></path><circle cx="12" cy="10" r="2.5"></circle></svg>
     <span>Lugares</span>
   </a>
-  <a class="tab" href="/orcamento" {% if page == 'orcamento' %}aria-current="page"{% endif %}>
+  <a class="tab" href="/viagens" {% if page == 'viagens' %}aria-current="page"{% endif %}>
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-6.3 7-11a7 7 0 10-14 0c0 4.7 7 11 7 11z"></path><circle cx="12" cy="10" r="2.5"></circle></svg>
+    <span>Viagens</span>
+  </a>
+  <a class="tab tab-extra" href="/orcamento" {% if page == 'orcamento' %}aria-current="page"{% endif %}>
     <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"></rect><path d="M3 11h18M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2"></path></svg>
     <span>Orçamento</span>
   </a>
@@ -405,10 +427,29 @@
     <span>Viajantes</span>
   </a>
   <div class="side-group">Ajustes</div>
-  <a class="tab" href="/viagem" {% if page == 'viagem' %}aria-current="page"{% endif %}>
+  <a class="tab tab-extra" href="/viagem" {% if page == 'viagem' %}aria-current="page"{% endif %}>
     <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="3"></rect><path d="M3 10h18M8 2v4M16 2v4"></path></svg>
     <span>Viagem</span>
   </a>
+  <a class="tab conta-tab" href="{{ '/painel' if usuario() else '/entrar' }}"
+     {% if page == 'entrar' %}aria-current="page"{% endif %}>
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 20c0-4 3.6-6 8-6s8 2 8 6"></path></svg>
+    <span>{{ usuario().name.split()[0][:9] if usuario() else 'Entrar' }}</span>
+  </a>
+
+  <div class="conta-box">
+    {% if usuario() %}
+      <div class="conta-nome">{{ usuario().name }}</div>
+      <div class="conta-email">{{ usuario().email }}</div>
+      <form method="POST" action="/sair" style="margin-top:0.5rem;">
+        <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+        <button class="conta-sair" type="submit">Sair</button>
+      </form>
+    {% else %}
+      <a class="conta-sair" href="/entrar" style="display:block;text-align:center;text-decoration:none;">Entrar</a>
+    {% endif %}
+  </div>
+
   <div class="theme-bar" id="theme-bar-nav"></div>
 </nav>
 
@@ -475,6 +516,17 @@
       setTimeout(() => { label.textContent = original; }, 1800);
     });
   });
+
+  // ── Instalar no celular ────────────────────────────────────────────────
+  // Sem isto o app é só um site: é o registro abaixo que permite adicionar o
+  // Compass à tela de início e abri-lo em tela cheia, sem barra de navegador.
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(() => {
+        /* sem service worker o site continua funcionando, só não instala */
+      });
+    });
+  }
 
   document.querySelectorAll('.switch').forEach((sw) => {
     sw.addEventListener('click', () => {

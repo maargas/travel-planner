@@ -5,9 +5,12 @@ from datetime import date, datetime, timedelta
 from dotenv import load_dotenv
 load_dotenv()
 import anthropic
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, redirect, abort
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+
+import db
+import contas
 
 # A Windows console still defaults to a legacy code page, which turns every
 # accented word printed below into rubbish. Ask for UTF-8 and carry on if the
@@ -18,6 +21,30 @@ except Exception:
     pass
 
 app = Flask(__name__)
+
+# ── Sessão ──────────────────────────────────────────────────────────────────
+# O cookie de quem está logado é assinado com esta chave. Se ela vazar, qualquer
+# um forja um login; se ela mudar, todo mundo é deslogado. Por isso ela vem do
+# ambiente, e nunca do código.
+_SEGREDO = os.environ.get("SECRET_KEY", "").strip()
+if not _SEGREDO:
+    if os.environ.get("RENDER"):
+        # Em produção, uma chave inventada a cada arranque desloga todo mundo a
+        # cada republicação e não protege nada. Melhor recusar a subir.
+        raise RuntimeError(
+            "SECRET_KEY não está definida. No painel do Render, adicione a variável "
+            "SECRET_KEY com um valor longo e aleatório antes de publicar."
+        )
+    _SEGREDO = "chave-de-desenvolvimento-nao-use-em-producao"
+app.secret_key = _SEGREDO
+
+app.config.update(
+    SESSION_COOKIE_HTTPONLY=True,               # JavaScript da página não lê o cookie
+    SESSION_COOKIE_SAMESITE="Lax",              # outro site não o envia junto
+    SESSION_COOKIE_SECURE=bool(os.environ.get("RENDER")),  # só por HTTPS, em produção
+    PERMANENT_SESSION_LIFETIME=timedelta(days=30),
+    MAX_CONTENT_LENGTH=256 * 1024,              # ninguém precisa enviar mais que isso
+)
 
 # Render terminates TLS at its own proxy, so without this every visitor arrives
 # from the same address and the per-visitor rate limit becomes a per-site one:
@@ -38,6 +65,28 @@ limiter = Limiter(
     app=app,
     default_limits=["300 per hour"],
 )
+
+db.init()
+# Os roteiros pesquisados à mão são carregados a cada arranque. É idempotente, e
+# faz com que publicar conteúdo novo seja publicar o app — sem passo manual.
+try:
+    import semente
+    semente.carregar()
+except Exception as exc:
+    print(f"[semente] não carregou: {exc}", flush=True)
+
+app.register_blueprint(contas.bp)
+
+# Todo template precisa saber quem está logado e carregar o segredo do
+# formulário, então em vez de passar os dois em cada render_template, eles ficam
+# disponíveis em todos.
+app.jinja_env.globals["usuario"] = contas.usuario_atual
+app.jinja_env.globals["csrf_token"] = contas.csrf_token
+
+# Tentar senha atrás de senha é o ataque óbvio contra uma tela de login, e o
+# limite por endereço é a defesa mais simples que existe contra ele.
+limiter.limit("10 per hour")(app.view_functions["contas.entrar"])
+limiter.limit("5 per hour")(app.view_functions["contas.criar_conta"])
 
 MODEL = os.environ.get("PLANNER_MODEL", "claude-sonnet-5")
 
@@ -642,6 +691,78 @@ def orcamento():
 @app.route("/viagem")
 def viagem():
     return render_template("viagem.html")
+
+
+@app.route("/sw.js")
+def service_worker():
+    """Servido da raiz de propósito.
+
+    Um service worker só controla páginas a partir da pasta em que ele mora. Em
+    /static/sw.js o escopo era /static/, ou seja, ele não controlava nenhuma
+    tela do app — e sem isso o Compass não instala no celular.
+    """
+    resposta = app.send_static_file("sw.js")
+    resposta.headers["Service-Worker-Allowed"] = "/"
+    resposta.headers["Cache-Control"] = "no-cache"
+    return resposta
+
+
+@app.route("/viagens")
+def viagens():
+    """Os roteiros reais, os que foram pesquisados de verdade."""
+    from sqlalchemy import select as _sel
+    with db.engine.connect() as cx:
+        linhas = cx.execute(
+            _sel(db.trips).order_by(db.trips.c.start_date)
+        ).mappings().all()
+    return render_template("viagens.html", viagens=linhas)
+
+
+@app.route("/viagens/<slug>")
+def roteiro(slug):
+    from sqlalchemy import select as _sel
+    with db.engine.connect() as cx:
+        v = cx.execute(_sel(db.trips).where(db.trips.c.slug == slug)).mappings().first()
+        if v is None:
+            abort(404)
+        fontes = cx.execute(
+            _sel(db.trip_sources.c.title, db.trip_sources.c.url)
+            .where(db.trip_sources.c.trip_id == v["id"])
+        ).mappings().all()
+    return render_template("roteiro.html", v=v, fontes=fontes)
+
+
+@app.post("/pedir")
+@contas.precisa_login
+def pedir():
+    """Um destino que ainda não existe entra na fila, em vez de virar gasto.
+
+    É a peça que mantém a promessa de precisão sem conta de API: alguém
+    pesquisa o destino de verdade e publica depois.
+    """
+    if not contas.csrf_ok():
+        abort(400)
+    from sqlalchemy import insert as _ins
+    destino = (request.form.get("destination") or "").strip()[:120]
+    if not destino:
+        return redirect("/viagens")
+    def _int(campo, limite):
+        try:
+            return max(1, min(int(request.form.get(campo) or 0), limite))
+        except (ValueError, TypeError):
+            return None
+    try:
+        quando = date.fromisoformat(request.form.get("start_date") or "")
+    except (ValueError, TypeError):
+        quando = None
+    with db.engine.begin() as cx:
+        cx.execute(_ins(db.requests_table).values(
+            user_id=contas.usuario_atual()["id"],
+            destination=destino, start_date=quando,
+            days=_int("days", MAX_DAYS), budget_usd=_int("budget", MAX_BUDGET),
+            interests=(request.form.get("interests") or "").strip()[:255],
+        ))
+    return redirect("/viagens?pedido=1")
 
 
 @app.route("/lugares")

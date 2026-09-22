@@ -3,3 +3,5 @@ flask
 flask-limiter
 python-dotenv
 gunicorn
+SQLAlchemy>=2.0
+psycopg[binary]

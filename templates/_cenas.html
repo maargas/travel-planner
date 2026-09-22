@@ -1,0 +1,111 @@
+{#
+  Dioramas isométricos, no espírito das peças do Airbnb: uma casinha pousada
+  num pedaço de chão recortado, vista de cima e de lado, com sombra macia e luz
+  quente nas janelas.
+
+  Desenhados em SVG e não em imagem por três motivos: acompanham as cinco
+  paletas sozinhos (toda cor sai de um --t-*), não pesam nada para carregar num
+  celular com internet ruim, e ficam nítidos em qualquer tela.
+
+  A projeção é a isométrica de sempre: um passo para a direita anda 80 para a
+  direita e 46 para cima na tela; um passo para a esquerda faz o espelho. Todas
+  as coordenadas abaixo saem dessa regra, e é por isso que as faces encaixam.
+
+  Duas coisas que precisam continuar verdadeiras se alguém mexer:
+
+  1. A base da casa tem de cair sobre o topo do torrão. O topo do torrão é o
+     losango de centro (200,192); a base das paredes é o losango de centro
+     (196,196). Foi por não respeitar isso que, na primeira versão, a casa ficou
+     flutuando 76 pixels no ar.
+  2. O que é paisagem de fundo (montanha, prédios) é desenhado ANTES da casa, e
+     o que é primeiro plano (piscina, árvores) DEPOIS. Na primeira versão a
+     montanha vinha por último e passava por cima do telhado.
+#}
+
+{% macro diorama(cena='cabana', id='d') -%}
+<svg class="diorama" viewBox="0 0 400 330" role="img"
+     aria-label="Ilustração isométrica de uma casa de viagem" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <radialGradient id="ceu-{{ id }}" cx="50%" cy="34%" r="74%">
+      <stop offset="0%"  stop-color="var(--t-surface-2)"/>
+      <stop offset="100%" stop-color="var(--t-surface)"/>
+    </radialGradient>
+    <linearGradient id="teto-{{ id }}" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0%"  stop-color="var(--t-accent-soft)"/>
+      <stop offset="100%" stop-color="var(--t-accent)"/>
+    </linearGradient>
+    <radialGradient id="luz-{{ id }}" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"  stop-color="var(--t-accent-soft)" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="var(--t-accent-soft)" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="macia-{{ id }}" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="9"/>
+    </filter>
+  </defs>
+
+  <rect width="400" height="330" rx="24" fill="url(#ceu-{{ id }})"/>
+
+  {# ── Paisagem de fundo, atrás de tudo ──────────────────────────────── #}
+  {% if cena == 'montanha' %}
+    <path d="M44 196 L104 96 L150 156 L200 84 L262 190 Z" fill="var(--t-text)" opacity="0.13"/>
+    <path d="M104 96 L122 118 L86 118 Z"  fill="#fff" opacity="0.45"/>
+    <path d="M200 84 L220 110 L180 110 Z" fill="#fff" opacity="0.45"/>
+  {% elif cena == 'cidade' %}
+    <path d="M286 188 L322 167 L322 104 L286 125 Z" fill="var(--t-text)" opacity="0.16"/>
+    <path d="M286 188 L286 125 L256 108 L256 171 Z" fill="var(--t-text)" opacity="0.10"/>
+    <path d="M62 180 L96 160 L96 112 L62 132 Z"    fill="var(--t-text)" opacity="0.12"/>
+  {% endif %}
+
+  {# A sombra vem antes da peça: é o que a faz parecer pousada, e não colada. #}
+  <ellipse cx="205" cy="288" rx="130" ry="32"
+           fill="var(--t-text)" opacity="0.18" filter="url(#macia-{{ id }})"/>
+
+  {# ── O torrão de chão ──────────────────────────────────────────────── #}
+  <path d="M200 112 L340 192 L200 272 L60 192 Z" fill="var(--t-accent-soft)" opacity="0.5"/>
+  <path d="M60 192 L200 272 L200 300 L60 220 Z"  fill="var(--t-accent-deep)"/>
+  <path d="M200 272 L340 192 L340 220 L200 300 Z" fill="var(--t-accent-deep)" opacity="0.76"/>
+  {# a terra à mostra por baixo, como um pedaço arrancado do chão #}
+  <path d="M60 220 L200 300 L200 313 L60 233 Z"  fill="var(--t-text)" opacity="0.24"/>
+  <path d="M200 300 L340 220 L340 233 L200 313 Z" fill="var(--t-text)" opacity="0.15"/>
+
+  {# ── A casa ────────────────────────────────────────────────────────────
+     Topo das paredes: E(116,146) F(196,100) D(276,146) A(196,192).
+     A cumeeira corre paralela a E→F, 34 acima dos meios das bordas laterais:
+     de (156,135) a (236,89). #}
+  <path d="M116 196 L196 242 L196 192 L116 146 Z" fill="var(--t-surface)"/>
+  <path d="M196 242 L276 196 L276 146 L196 192 Z" fill="var(--t-surface-2)"/>
+
+  <circle cx="211" cy="213" r="30" fill="url(#luz-{{ id }})"/>
+  <path d="M136 188 L158 201 L158 181 L136 168 Z" fill="url(#teto-{{ id }})" opacity="0.92"/>
+  <path d="M218 201 L240 188 L240 168 L218 181 Z" fill="url(#teto-{{ id }})" opacity="0.7"/>
+  <path d="M172 226 L188 235 L188 207 L172 198 Z" fill="var(--t-accent-deep)"/>
+
+  <path d="M116 146 L196 100 L236 89 L156 135 Z" fill="url(#teto-{{ id }})"/>
+  <path d="M196 192 L276 146 L236 89 L156 135 Z" fill="var(--t-accent)" opacity="0.85"/>
+  <path d="M116 146 L196 192 L156 135 Z"         fill="var(--t-accent-deep)" opacity="0.5"/>
+  <path d="M196 100 L276 146 L236 89 Z"          fill="var(--t-accent-deep)" opacity="0.3"/>
+
+  {# ── Primeiro plano, na frente da casa ─────────────────────────────── #}
+  {% if cena == 'praia' %}
+    <path d="M206 258 L268 222 L302 241 L240 277 Z" fill="var(--t-accent-soft)" opacity="0.9"/>
+    <path d="M218 258 L264 231 L280 240 L234 267 Z" fill="#fff" opacity="0.3"/>
+    <g>
+      <path d="M104 244 L110 196" stroke="var(--t-accent-deep)" stroke-width="5" stroke-linecap="round"/>
+      <path d="M110 196 C90 186 76 195 72 208 C86 199 98 199 110 205 Z" fill="var(--t-accent-soft)"/>
+      <path d="M110 196 C130 186 144 195 148 208 C134 199 122 199 110 205 Z" fill="var(--t-accent-soft)" opacity="0.78"/>
+      <path d="M110 196 C106 176 117 165 130 163 C119 173 116 185 114 198 Z" fill="var(--t-accent-soft)" opacity="0.6"/>
+    </g>
+  {% elif cena != 'montanha' and cena != 'cidade' %}
+    {# mata: a cena padrão, no espírito da cabana na floresta #}
+    <path d="M100 250 L100 226" stroke="var(--t-accent-deep)" stroke-width="5" stroke-linecap="round"/>
+    <path d="M100 230 L76 230 L100 176 L124 230 Z" fill="var(--t-accent-soft)" opacity="0.88"/>
+    <path d="M100 206 L81 206 L100 168 L119 206 Z" fill="var(--t-accent-soft)"/>
+    <path d="M306 258 L306 238" stroke="var(--t-accent-deep)" stroke-width="4" stroke-linecap="round"/>
+    <path d="M306 242 L289 242 L306 202 L323 242 Z" fill="var(--t-accent-soft)" opacity="0.72"/>
+  {% endif %}
+
+  {# arbustos que amarram a casa ao chão dos dois lados #}
+  <ellipse cx="146" cy="236" rx="21" ry="11" fill="var(--t-accent-deep)" opacity="0.6"/>
+  <ellipse cx="258" cy="232" rx="17" ry="9"  fill="var(--t-accent-deep)" opacity="0.45"/>
+</svg>
+{%- endmacro %}
