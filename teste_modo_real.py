@@ -82,6 +82,11 @@ c = app.app.test_client()
 form = dict(destination="Lisboa, Portugal", start_date="2026-11-10", days="4",
             budget="900", style="balanced", interests="comida local, esportes")
 
+# O limite de 5 por dia é real e tem o seu próprio cenário no fim. Nos demais
+# ele só atrapalharia: este arquivo faz mais de cinco envios, e a partir do
+# sexto toda resposta viraria a página do 429 em vez do que se quer medir.
+app.limiter.enabled = False
+
 checks = []
 
 
@@ -94,6 +99,7 @@ def run(script):
     shutil.rmtree("roteiros_teste", ignore_errors=True)
     app.SPEND["runs"] = 0
     app.SPEND["usd"] = 0.0
+    app.SPEND["worst"] = 0.0   # um servidor novo ainda não viu chamada nenhuma
     FakeClient.script = script
     FakeClient.calls = 0
     return c.post("/plan", data=form).get_data(as_text=True)
@@ -128,6 +134,11 @@ check(f"o custo bate com a conta (US${esperado:.4f})",
 # The first response carries searches and no text — exactly what came back the
 # day a paid run produced a file of links and nothing else.
 print("\n2) a IA pausa no meio das buscas (o defeito real)\n")
+# O dublê cobra o preço de uma chamada de 6 buscas, bem acima do teto real de
+# hoje. Este cenário testa a retomada da pausa, não o teto — então dá espaço.
+teto_original = app.MAX_USD
+app.MAX_USD = 1.00
+
 html = run([
     response([search_block("https://banff.ca/calendar", "Calendar - Banff")], "pause_turn"),
     response([search_block("https://banff.ca/events", "Events"),
@@ -148,7 +159,7 @@ if files:
 
 # ── 3. It never finishes: say so, do not render a blank page ──────────────
 print("\n3) a IA nunca escreve o roteiro\n")
-html = run([response([search_block("https://x.pt/a", "A")], "pause_turn")])
+html = run([response([search_block("https://x.pt/a", "A")], "pause_turn")])  # teto ainda em 1.00
 
 # The dollar cap bites before the round cap does, which is the point of it.
 check("parou antes de estourar o dinheiro",
@@ -160,6 +171,31 @@ check("o arquivo existe mesmo assim", len(files) == 1)
 if files:
     saved = open(files[0], encoding="utf-8").read()
     check("o arquivo explica que veio vazio", "não chegou a escrever" in saved)
+
+app.MAX_USD = teto_original
+
+# ── 3b. A reserva: o teto tem de recusar o que não conseguiria terminar ──
+# Foi o defeito que este teste pegou na hora: checar o teto ENTRE as rodadas
+# abandonava um turno já pago a uma rodada da resposta. A reserva é feita na
+# porta, pelo roteiro inteiro, e não no meio dele.
+print("\n3b) a reserva do teto\n")
+shutil.rmtree("roteiros_teste", ignore_errors=True)
+app.SPEND["runs"] = 0
+app.SPEND["usd"] = 0.0
+app.SPEND["worst"] = 0.20          # uma chamada cara já vista nesta sessão
+FakeClient.script = [response([text_block(ITINERARY)], "end_turn")]
+FakeClient.calls = 0
+html = c.post("/plan", data=form).get_data(as_text=True)
+# 2 rodadas x US$0,20 = US$0,40 reservados, acima do teto de US$0,30.
+check("recusa o roteiro que nao caberia ate o fim", "Limite de seguran" in html)
+check("e nem chama a API", FakeClient.calls == 0)
+check("explica quanto precisaria reservar", "reservados" in html)
+
+app.SPEND["worst"] = 0.0           # servidor novo: a previsão é a chamada barata
+FakeClient.calls = 0
+html = c.post("/plan", data=form).get_data(as_text=True)
+check("mas deixa passar o que cabe",
+      "Limite de seguran" not in html and FakeClient.calls == 1)
 
 # ── 4. The spend cap still holds ─────────────────────────────────────────
 print("\n4) o teto de gasto\n")
@@ -177,6 +213,29 @@ FakeClient.calls = 0
 html = c.post("/plan", data=form).get_data(as_text=True)
 check("o teto de dinheiro bloqueia sozinho", "Limite de seguran" in html)
 check("e tambem nem chama a API", FakeClient.calls == 0)
+
+# ── 5. O limite diário: protege dinheiro, e só ───────────────────────────
+# A demonstração não gasta nada, então barrar o 6º envio dela com "você usou
+# seus roteiros gratuitos" era mentira, e acontecia no site público.
+print("\n5) o limite diario\n")
+app.limiter.enabled = True
+app.limiter.reset()
+
+app.MOCK_MODE = True               # como o site publicado no Render
+enviados = [c.post("/plan", data=form).status_code for _ in range(7)]
+check("demonstracao nao e barrada pelo limite (7 envios, custo zero)",
+      all(s == 200 for s in enviados))
+
+app.MOCK_MODE = False              # modo real: aí sim o limite vale
+app.limiter.reset()
+app.SPEND["runs"] = app.MAX_RUNS   # o teto de gasto responde antes, e tudo bem
+reais = [c.post("/plan", data=form).status_code for _ in range(7)]
+check("modo real continua limitado a 5 por dia", 429 in reais)
+
+app.limiter.reset()
+resp = c.get("/painel")
+check("so navegar entre telas nao cai no limite de roteiros", resp.status_code == 200)
+app.limiter.enabled = False
 
 print()
 for label, passed in checks:

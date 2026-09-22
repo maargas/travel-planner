@@ -19,10 +19,24 @@ except Exception:
 
 app = Flask(__name__)
 
+# Render terminates TLS at its own proxy, so without this every visitor arrives
+# from the same address and the per-visitor rate limit becomes a per-site one:
+# one busy person locks everybody out. Only trusted behind that proxy — locally
+# there is none, and honouring X-Forwarded-For from anyone would let a caller
+# pick their own identity.
+if os.environ.get("RENDER"):
+    from werkzeug.middleware.proxy_fix import ProxyFix
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1)
+
+# Two different things were being guarded with one number. Browsing between the
+# screens costs nothing and had the same 100-a-day ceiling as generating an
+# itinerary, so clicking around the sample screens could lock a visitor out of
+# the whole site. The generous limit below is an abuse guard for pages; the real
+# protection for money lives on /plan.
 limiter = Limiter(
     get_remote_address,
     app=app,
-    default_limits=["100 per day"],
+    default_limits=["300 per hour"],
 )
 
 MODEL = os.environ.get("PLANNER_MODEL", "claude-sonnet-5")
@@ -49,7 +63,7 @@ SEARCHES = int(os.environ.get("PLANNER_SEARCHES", "2"))
 # because the day someone forgets the variable is the day it matters. Raise it
 # with PLANNER_MAX_RUNS when a session genuinely needs more.
 MAX_RUNS = int(os.environ.get("PLANNER_MAX_RUNS", "4"))
-SPEND = {"runs": 0, "usd": 0.0}
+SPEND = {"runs": 0, "usd": 0.0, "worst": 0.0}
 
 # How many times one itinerary may be sent back to finish a paused turn. Every
 # round resends the whole conversation, search results included, so a second
@@ -61,6 +75,20 @@ MAX_ROUNDS = int(os.environ.get("PLANNER_MAX_ROUNDS", "2"))
 # four calls, so four "runs" can be sixteen. This cap is in dollars, checked
 # before every single call, and it is the one that actually protects a balance.
 MAX_USD = float(os.environ.get("PLANNER_MAX_USD", "0.30"))
+
+
+def estimated_call_cost():
+    """What the next call could plausibly cost.
+
+    A cap that only asks "have I spent too much yet?" lets the call that breaks
+    it through: at US$0.25 spent against a US$0.30 cap it waves through a call
+    that costs another US$0.25 and lands at US$0.50. So the cap has to reserve
+    the next call before allowing it. Before anything has run there is only the
+    arithmetic; once a call has been billed, the most expensive one so far is
+    the better guide, and the more cautious one.
+    """
+    rough = 0.03 + SEARCHES * 0.037
+    return max(rough, SPEND["worst"])
 
 # The 2026 web search tool only exists on Opus 4.6+/Sonnet 4.6+; older tiers need the 2025 one.
 MODERN_SEARCH_MODELS = (
@@ -109,14 +137,15 @@ So, alongside the plan itself:
 
 Write each day as a clock timeline they can follow without knowing anything:
 
-**09:00 · Name of the place** (abre 09:00)
+**09:00 · Name of the place** (abre 09:00, confirmado)
 What to do there and how long it really takes, queue included.
 ↓ *18 min a pé* — or *25 min de metrô, linha azul, 4 paradas*
-**11:30 · Next place** (abre 10:00)
+**11:30 · Next place** (horário não confirmado — confira no site antes de ir)
 
 Rules for the timeline:
 - Every jump between two places gets its own line with the mode of transport and the minutes. Never let two stops touch without saying how you get from one to the other.
 - Never schedule an arrival before the place opens or too close to when it closes. State the opening hour next to the time so the reader can see it lines up.
+- OPENING HOURS FOLLOW THE SAME RULE AS PRICES, and this matters more than any other rule here. Write "(abre 09:00, confirmado)" ONLY for an hour you read on a page in this session. For every other stop write "(horário não confirmado — confira no site antes de ir)". Never dress a remembered hour as a checked one: standing in front of a locked door is the exact failure this itinerary exists to prevent, and you have far fewer searches than stops, so most hours will honestly be unconfirmed. An unconfirmed hour labelled as such is useful; one presented as fact is a trap.
 - Dead time is a planning failure. If the maths leaves an awkward gap, either fill it with something specific within walking distance, or move the stop to another day and say why.
 - Say where lunch fits in the timeline, not as an afterthought.
 - Warn about anything time-critical: last entry, last cable car, last train back, kitchen closing.
@@ -370,6 +399,7 @@ def log_cost(response, count_run=True):
     if count_run:
         SPEND["runs"] += 1
     SPEND["usd"] += total
+    SPEND["worst"] = max(SPEND["worst"], total)
     c_in = u.input_tokens / 1_000_000 * price_in
     c_out = u.output_tokens / 1_000_000 * price_out
     print(
@@ -464,7 +494,7 @@ def index():
 
 
 @app.route("/plan", methods=["POST"])
-@limiter.limit("5 per day")
+@limiter.limit("5 per day", exempt_when=lambda: MOCK_MODE)
 def plan():
     destination = request.form.get("destination", "").strip()
     start_date = request.form.get("start_date", "").strip()
@@ -495,11 +525,13 @@ def plan():
             **form_values,
         )
 
-    if SPEND["runs"] >= MAX_RUNS or SPEND["usd"] >= MAX_USD:
+    reserva = MAX_ROUNDS * estimated_call_cost()
+    if SPEND["runs"] >= MAX_RUNS or SPEND["usd"] + reserva > MAX_USD:
         return render_template("index.html", error=(
-            f"Limite de segurança atingido: {SPEND['runs']} de {MAX_RUNS} roteiros, "
-            f"cerca de US${SPEND['usd']:.2f} de US${MAX_USD:.2f} gastos desde que o servidor ligou. "
-            f"Feche e abra o servidor para liberar mais."
+            f"Limite de segurança atingido: {SPEND['runs']} de {MAX_RUNS} roteiros e cerca de "
+            f"US${SPEND['usd']:.2f} de US${MAX_USD:.2f} gastos desde que o servidor ligou. "
+            f"Este roteiro precisaria de até US${reserva:.2f} reservados e não cabe. "
+            f"Feche e abra o servidor, ou aumente o teto com PLANNER_MAX_USD."
         ), **form_values)
 
     try:
@@ -522,10 +554,14 @@ def plan():
         # nothing but a list of links. Send the paused turn back so the model can
         # finish, bounded because every round is billed.
         for attempt in range(MAX_ROUNDS):
-            if SPEND["usd"] >= MAX_USD:
-                print(f"[teto] US${SPEND['usd']:.4f} atingiu o limite de US${MAX_USD:.2f}",
-                      flush=True)
-                break
+            # No money check inside the loop, deliberately. The reservation at
+            # the door decided this itinerary could be afforded; stopping now
+            # would strand a turn that has already been billed one round short
+            # of the answer — full price, nothing delivered, which is the worst
+            # outcome available. What bounds the damage here is MAX_ROUNDS. If
+            # the calls cost more than the estimate, the door turns the next
+            # itinerary away, because the reservation then uses what was really
+            # spent.
 
             response = client.messages.create(
                 model=MODEL,
@@ -625,9 +661,17 @@ def viajantes():
 
 @app.errorhandler(429)
 def rate_limit_exceeded(e):
+    # One message for "you asked for too many itineraries" and another for "you
+    # loaded too many pages" — telling a visitor who was only clicking around
+    # that they used up their free itineraries is simply false.
+    if request.endpoint == "plan":
+        message = "Você usou seus roteiros gratuitos de hoje. Volte amanhã."
+    else:
+        message = ("Muitos acessos em pouco tempo, então o site pausou por um "
+                   "momento. Espere um minuto e recarregue.")
     today, latest = date_bounds()
     return render_template("index.html",
-        error="Você usou seus roteiros gratuitos de hoje. Volte amanhã.",
+        error=message,
         today=today.isoformat(), max_date=latest.isoformat(), demo=MOCK_MODE,
     ), 429
 
@@ -640,8 +684,13 @@ if __name__ == "__main__":
     else:
         banner.append(f"  MODO REAL — {SEARCHES} buscas por roteiro, cerca de "
                       f"US${0.03 + SEARCHES * 0.037:.2f} cada.")
-        banner.append(f"  Teto de segurança: {MAX_RUNS} roteiros OU US${MAX_USD:.2f},")
-        banner.append("  o que vier primeiro. Reinicie o servidor para liberar mais.")
+        # Say how many actually fit, not how many the counter allows: the dollar
+        # cap reserves a whole itinerary at a time, so it is usually the binding
+        # one, and a banner promising four when one fits is a lie told daily.
+        cabem = int(MAX_USD // (MAX_ROUNDS * estimated_call_cost()))
+        banner.append(f"  Teto de segurança: US${MAX_USD:.2f} por sessão, "
+                      f"o que dá {cabem} roteiro{'s' if cabem != 1 else ''}.")
+        banner.append("  Reinicie o servidor, ou use PLANNER_MAX_USD, para liberar mais.")
     banner.append("")
     print("\n".join(banner), flush=True)
     # The reloader watches the source files and restarts on any edit. In demo mode
