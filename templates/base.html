@@ -215,6 +215,32 @@
     .btn-outline:hover { background: var(--t-surface-2); }
     .btn:focus-visible { outline: 2px solid var(--t-accent); outline-offset: 2px; }
 
+    .instalar {
+      display: flex; align-items: center; gap: 0.75rem;
+      background: var(--t-surface); border: 1px solid var(--t-accent);
+      border-radius: var(--t-radius); padding: 0.75rem 0.75rem 0.75rem 0.875rem;
+      margin: 1rem 0 0.25rem; box-shadow: var(--shadow-md);
+    }
+    .instalar[hidden] { display: none; }
+    .instalar-icone img { display: block; border-radius: 10px; }
+    .instalar-texto { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 0.125rem; }
+    .instalar-texto strong { font-size: 0.8125rem; }
+    .instalar-texto span { font-size: 0.71875rem; color: var(--t-muted); line-height: 1.4; }
+    .instalar-texto b { color: var(--t-text); font-weight: 700; }
+    .icone-compartilhar { vertical-align: -2px; color: var(--t-accent-text); }
+    .instalar-sim {
+      flex: none; background: var(--t-accent); color: var(--t-accent-ink);
+      border: none; border-radius: var(--t-pill); padding: 0.5rem 0.9375rem;
+      font-family: inherit; font-size: 0.8125rem; font-weight: 700; cursor: pointer;
+    }
+    .instalar-sim[hidden] { display: none; }
+    .instalar-fechar {
+      flex: none; background: none; border: none; color: var(--t-muted);
+      padding: 0.25rem; cursor: pointer; border-radius: 50%;
+    }
+    .instalar-fechar:hover { color: var(--t-text); }
+    .instalar button:focus-visible { outline: 2px solid var(--t-accent); outline-offset: 2px; }
+
     .sample-note {
       display: flex; align-items: center; gap: 0.5rem;
       background: var(--t-surface-2); border: 1px solid var(--t-accent);
@@ -440,7 +466,7 @@
   <div class="conta-box">
     {% if usuario() %}
       <div class="conta-nome">{{ usuario().name }}</div>
-      <div class="conta-email">{{ usuario().email }}</div>
+      <div class="conta-email">@{{ usuario().username }}</div>
       <form method="POST" action="/sair" style="margin-top:0.5rem;">
         <input type="hidden" name="csrf" value="{{ csrf_token() }}">
         <button class="conta-sair" type="submit">Sair</button>
@@ -454,6 +480,30 @@
 </nav>
 
 <div class="wrap">
+
+<!-- Instalar o app. Nenhum celular oferece isso sozinho de um jeito que as
+     pessoas vejam: o Android esconde a opção no menu do navegador e o iPhone
+     nunca oferece. Por isso o botão fica na própria página. Nasce escondido, e
+     o script só o mostra onde dá para instalar e ainda não foi instalado. -->
+<div class="instalar" id="instalar" hidden>
+  <div class="instalar-icone" aria-hidden="true">
+    <img src="/static/icon-192.png" alt="" width="40" height="40">
+  </div>
+  <div class="instalar-texto">
+    <strong>Tenha o Compass na tela de início</strong>
+    <span id="instalar-android">Abre em tela cheia, como um aplicativo.</span>
+    <span id="instalar-ios" hidden>
+      Toque em
+      <svg class="icone-compartilhar" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-label="Compartilhar"><path d="M12 3v13"></path><path d="M7 8l5-5 5 5"></path><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"></path></svg>
+      <b>Compartilhar</b> e depois em <b>Adicionar à Tela de Início</b>.
+    </span>
+  </div>
+  <button class="instalar-sim" id="instalar-sim" type="button">Instalar</button>
+  <button class="instalar-fechar" id="instalar-fechar" type="button" aria-label="Agora não">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+  </button>
+</div>
+
 {% block content %}{% endblock %}
 
 <!-- Phone only; on desktop the same picker rides in the top bar instead. -->
@@ -516,6 +566,60 @@
       setTimeout(() => { label.textContent = original; }, 1800);
     });
   });
+
+  // ── O botão de instalar ─────────────────────────────────────────────────
+  (function () {
+    const caixa = document.getElementById('instalar');
+    const sim = document.getElementById('instalar-sim');
+    const fechar = document.getElementById('instalar-fechar');
+    if (!caixa) return;
+
+    // Já instalado: abriu pelo ícone, em tela cheia. Nada a oferecer.
+    const instalado = window.matchMedia('(display-mode: standalone)').matches
+                      || window.navigator.standalone === true;
+    if (instalado) return;
+
+    // "Agora não" vale por uma semana, para não virar cobrança a cada tela.
+    const CHAVE = 'compass-instalar-dispensado';
+    try {
+      const quando = Number(localStorage.getItem(CHAVE) || 0);
+      if (Date.now() - quando < 7 * 864e5) return;
+    } catch (e) { /* janela anônima: mostra de novo, sem problema */ }
+
+    fechar.addEventListener('click', () => {
+      caixa.hidden = true;
+      try { localStorage.setItem(CHAVE, String(Date.now())); } catch (e) {}
+    });
+
+    // iPhone e iPad: não existe botão que instale por nós, só dá para ensinar
+    // o caminho. (iPad novo se apresenta como Mac, daí o teste de toque.)
+    const ios = /iphone|ipad|ipod/i.test(navigator.userAgent)
+                || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    if (ios) {
+      document.getElementById('instalar-android').hidden = true;
+      document.getElementById('instalar-ios').hidden = false;
+      sim.hidden = true;
+      caixa.hidden = false;
+      return;
+    }
+
+    // Android e computador: o navegador avisa quando o app é instalável, e
+    // guardamos esse aviso para disparar no clique do botão.
+    let pedido = null;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      pedido = e;
+      caixa.hidden = false;
+    });
+    sim.addEventListener('click', async () => {
+      if (!pedido) return;
+      pedido.prompt();
+      await pedido.userChoice;
+      pedido = null;
+      caixa.hidden = true;
+    });
+    window.addEventListener('appinstalled', () => { caixa.hidden = true; });
+  })();
 
   // ── Instalar no celular ────────────────────────────────────────────────
   // Sem isto o app é só um site: é o registro abaixo que permite adicionar o

@@ -28,7 +28,7 @@ app.config["TESTING"] = True
 appmod.limiter.enabled = False   # o limite tem cenário próprio; aqui atrapalharia
 
 SENHA = "umaSenhaBoa123"
-EMAIL = "amigo@exemplo.com"
+USUARIO = "amigo.teste"
 
 checks = []
 
@@ -45,59 +45,65 @@ def token(c, caminho="/entrar"):
     return html[i:html.index('"', i)]
 
 
+def criar(c, usuario, senha=SENHA, nome="Amigo"):
+    return c.post("/criar-conta", data={"csrf": token(c, "/criar-conta"), "nome": nome,
+                                        "usuario": usuario, "senha": senha})
+
+
 # ── Criar conta ─────────────────────────────────────────────────────────────
 c = app.test_client()
 
-r = c.post("/criar-conta", data={"csrf": token(c, "/criar-conta"), "nome": "Amigo",
-                                 "email": EMAIL, "senha": "curta"})
+r = criar(c, USUARIO, senha="curta")
 check("senha curta e recusada", r.status_code == 400 and "8 caracteres" in r.get_data(as_text=True))
 
-r = c.post("/criar-conta", data={"csrf": token(c, "/criar-conta"), "nome": "Amigo",
-                                 "email": "nao-e-email", "senha": SENHA})
-check("e-mail invalido e recusado", r.status_code == 400)
+for ruim in ["ab", "tem espaco", "ação", "a" * 25, "nome!"]:
+    r = criar(c, ruim)
+    check(f"usuario invalido recusado: {ruim!r}", r.status_code == 400)
 
-r = c.post("/criar-conta", data={"nome": "Amigo", "email": EMAIL, "senha": SENHA})
+r = c.post("/criar-conta", data={"nome": "Amigo", "usuario": USUARIO, "senha": SENHA})
 check("formulario sem o segredo e recusado", r.status_code == 400)
 
-r = c.post("/criar-conta", data={"csrf": token(c, "/criar-conta"), "nome": "Amigo",
-                                 "email": "  " + EMAIL.upper() + " ", "senha": SENHA})
-check("conta criada (e-mail normalizado)", r.status_code == 302)
+r = criar(c, "  @Amigo.Teste ")
+check("conta criada (com @, maiusculas e espacos limpos)", r.status_code == 302)
 check("ja entra logado depois de criar",
       "Amigo" in c.get("/painel").get_data(as_text=True))
 
 # Cliente novo: quem ja esta logado nem chega na tela de criar conta.
 outro = app.test_client()
-r = outro.post("/criar-conta", data={"csrf": token(outro, "/criar-conta"), "nome": "Outro",
-                                     "email": EMAIL, "senha": SENHA})
-check("e-mail repetido e recusado", "Já existe uma conta" in r.get_data(as_text=True))
+r = criar(outro, "AMIGO.TESTE", nome="Outro")
+check("usuario repetido e recusado, mesmo em maiusculas",
+      "já está em uso" in r.get_data(as_text=True))
 
-# ── A senha não pode estar legível em lugar nenhum ──────────────────────────
+# ── Nenhum e-mail guardado, e a senha ilegível ──────────────────────────────
 with db.engine.connect() as cx:
     linha = cx.execute(select(db.users)).mappings().first()
+check("nao existe coluna de e-mail", "email" not in linha.keys())
+check("o usuario foi guardado normalizado", linha["username"] == USUARIO)
 check("a senha nao esta no banco", SENHA not in str(dict(linha)))
 check("o que esta guardado e um hash scrypt", linha["password_hash"].startswith("scrypt:"))
-check("o e-mail foi guardado em minusculas", linha["email"] == EMAIL)
+check("so uma conta foi criada", db.count(db.users) == 1)
 
 corpo = c.get("/painel").get_data(as_text=True)
 check("a senha nao aparece na pagina", SENHA not in corpo)
+check("o @usuario aparece para quem esta logado", "@" + USUARIO in corpo)
 
 # ── Sair e entrar ───────────────────────────────────────────────────────────
 r = c.post("/sair", data={"csrf": token(c, "/painel")})
 check("sair funciona", r.status_code == 302)
 
-r = c.post("/entrar", data={"csrf": token(c), "email": EMAIL, "senha": "senhaErrada1"})
+r = c.post("/entrar", data={"csrf": token(c), "usuario": USUARIO, "senha": "senhaErrada1"})
 check("senha errada e recusada", r.status_code == 400)
-check("nao diz se o e-mail existe", "não conferem" in r.get_data(as_text=True))
+check("nao diz se o usuario existe", "não conferem" in r.get_data(as_text=True))
 
-r = c.post("/entrar", data={"csrf": token(c), "email": "ninguem@exemplo.com", "senha": SENHA})
-check("e-mail inexistente da a mesma mensagem", "não conferem" in r.get_data(as_text=True))
+r = c.post("/entrar", data={"csrf": token(c), "usuario": "ninguem", "senha": SENHA})
+check("usuario inexistente da a mesma mensagem", "não conferem" in r.get_data(as_text=True))
 
-r = c.post("/entrar", data={"csrf": token(c), "email": EMAIL, "senha": SENHA})
-check("senha certa entra", r.status_code == 302)
+r = c.post("/entrar", data={"csrf": token(c), "usuario": "Amigo.Teste", "senha": SENHA})
+check("entra com o usuario em maiusculas", r.status_code == 302)
 
 # ── Destino externo não pode ser usado para levar a pessoa para fora ────────
 c2 = app.test_client()
-r = c2.post("/entrar", data={"csrf": token(c2), "email": EMAIL, "senha": SENHA,
+r = c2.post("/entrar", data={"csrf": token(c2), "usuario": USUARIO, "senha": SENHA,
                              "proximo": "https://site-falso.exemplo"},
             query_string={"proximo": "https://site-falso.exemplo"})
 check("nao redireciona para fora do app",
@@ -122,6 +128,11 @@ html = c.get("/viagens/banff-julho-2027").get_data(as_text=True)
 check("o roteiro abre inteiro", "Moraine Lake" in html)
 check("com as fontes anotadas", "parks.canada.ca" in html or "calgarystampede" in html)
 check("endereco inventado da 404", c.get("/viagens/nao-existe").status_code == 404)
+
+# ── Instalar no celular ─────────────────────────────────────────────────────
+html = anon.get("/viagens").get_data(as_text=True)
+check("toda pagina tem o botao de instalar", 'id="instalar"' in html)
+check("e as instrucoes para iPhone", "Adicionar à Tela de Início" in html)
 
 # ── Resultado ───────────────────────────────────────────────────────────────
 print()

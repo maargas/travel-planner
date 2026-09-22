@@ -87,6 +87,10 @@ app.register_blueprint(contas.bp)
 # Todo template precisa saber quem está logado e carregar o segredo do
 # formulário, então em vez de passar os dois em cada render_template, eles ficam
 # disponíveis em todos.
+# Atenção: `usuario` é nome reservado nos templates. Nenhum render_template pode
+# passar uma variável chamada `usuario`, ou ela apaga esta função e toda página
+# que pergunta quem está logado quebra. (Já aconteceu: o texto digitado no
+# formulário de login foi passado com esse nome.)
 app.jinja_env.globals["usuario"] = contas.usuario_atual
 app.jinja_env.globals["csrf_token"] = contas.csrf_token
 

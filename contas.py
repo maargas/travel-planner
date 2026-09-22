@@ -7,9 +7,13 @@ são três amigos testando. Duas regras governam este arquivo:
    qual não se volta — nem eu, nem o dono do app, nem quem roubar o banco
    consegue ler a senha de ninguém.
 2. A senha nunca aparece em log, em mensagem de erro, ou no endereço da página.
+
+A conta é só um nome de usuário e uma senha, sem e-mail. Vantagem: o app não
+guarda nenhum dado que identifique a pessoa fora dele. Preço: quem esquecer a
+senha não tem como recuperá-la — não há para onde mandar o link. Enquanto são
+poucos amigos testando, o dono resolve isso à mão.
 """
 import hmac
-import os
 import re
 import secrets
 from functools import wraps
@@ -25,7 +29,10 @@ from db import engine, users
 bp = Blueprint("contas", __name__)
 
 MIN_SENHA = 8
-EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+# Letras sem acento, números, ponto e sublinhado: o que funciona igual em
+# qualquer teclado de celular, e o que não dá para confundir com outro usuário
+# por causa de um acento ou de um espaço invisível.
+USUARIO_RE = re.compile(r"^[a-z0-9_.]{3,24}$")
 
 
 # ── Proteção contra formulário forjado ──────────────────────────────────────
@@ -58,7 +65,7 @@ def usuario_atual():
     if uid:
         with engine.connect() as cx:
             linha = cx.execute(
-                select(users.c.id, users.c.email, users.c.name).where(users.c.id == uid)
+                select(users.c.id, users.c.username, users.c.name).where(users.c.id == uid)
             ).first()
         # A conta pode ter sumido desde que o cookie foi emitido.
         g.user = dict(linha._mapping) if linha else None
@@ -78,11 +85,18 @@ def precisa_login(view):
 
 # ── Validação ───────────────────────────────────────────────────────────────
 
-def _problema(nome, email, senha):
+def _normaliza(usuario):
+    """'  Ana.Silva ' vira 'ana.silva'. Um '@' do começo é aceito e descartado,
+    porque muita gente escreve o próprio usuário como em rede social."""
+    return (usuario or "").strip().lower().lstrip("@")
+
+
+def _problema(nome, usuario, senha):
     if not nome or len(nome) > 80:
         return "Escreva seu nome."
-    if not EMAIL_RE.match(email or ""):
-        return "Esse e-mail não parece válido."
+    if not USUARIO_RE.match(usuario):
+        return ("O nome de usuário precisa ter de 3 a 24 caracteres: letras sem "
+                "acento, números, ponto ou sublinhado.")
     if len(senha or "") < MIN_SENHA:
         return f"A senha precisa ter pelo menos {MIN_SENHA} caracteres."
     return None
@@ -114,22 +128,22 @@ def criar_conta():
                                    erro="A página expirou. Tente de novo."), 400
 
         nome = (request.form.get("nome") or "").strip()
-        email = (request.form.get("email") or "").strip().lower()
+        usuario = _normaliza(request.form.get("usuario"))
         senha = request.form.get("senha") or ""
 
-        erro = _problema(nome, email, senha)
+        erro = _problema(nome, usuario, senha)
         if erro:
             return render_template("entrar.html", aba="criar", erro=erro,
-                                   nome=nome, email=email, proximo=proximo), 400
+                                   nome=nome, digitado=usuario, proximo=proximo), 400
 
         with engine.begin() as cx:
-            existe = cx.execute(select(users.c.id).where(users.c.email == email)).first()
+            existe = cx.execute(select(users.c.id).where(users.c.username == usuario)).first()
             if existe:
-                return render_template("entrar.html", aba="criar", nome=nome, email=email,
+                return render_template("entrar.html", aba="criar", nome=nome, digitado=usuario,
                                        proximo=proximo,
-                                       erro="Já existe uma conta com esse e-mail. Entre por ali."), 400
+                                       erro="Esse nome de usuário já está em uso. Escolha outro."), 400
             novo = cx.execute(insert(users).values(
-                email=email, name=nome,
+                username=usuario, name=nome,
                 password_hash=generate_password_hash(senha),
             ))
             uid = novo.inserted_primary_key[0]
@@ -155,19 +169,19 @@ def entrar():
             return render_template("entrar.html", aba="entrar", proximo=proximo,
                                    erro="A página expirou. Tente de novo."), 400
 
-        email = (request.form.get("email") or "").strip().lower()
+        usuario = _normaliza(request.form.get("usuario"))
         senha = request.form.get("senha") or ""
 
         with engine.connect() as cx:
             linha = cx.execute(
-                select(users.c.id, users.c.password_hash).where(users.c.email == email)
+                select(users.c.id, users.c.password_hash).where(users.c.username == usuario)
             ).first()
 
-        # Uma só mensagem para "e-mail não existe" e "senha errada". Duas
-        # mensagens diferentes contam a quem tenta se aquele e-mail tem conta.
+        # Uma só mensagem para "usuário não existe" e "senha errada". Duas
+        # mensagens diferentes contam a quem tenta quais usuários existem.
         if linha is None or not check_password_hash(linha.password_hash, senha):
-            return render_template("entrar.html", aba="entrar", email=email, proximo=proximo,
-                                   erro="E-mail ou senha não conferem."), 400
+            return render_template("entrar.html", aba="entrar", digitado=usuario, proximo=proximo,
+                                   erro="Usuário ou senha não conferem."), 400
 
         session.clear()
         session["uid"] = linha.id

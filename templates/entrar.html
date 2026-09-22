@@ -109,9 +109,14 @@
         {% endif %}
 
         <div class="campo">
-          <label for="email">E-mail</label>
-          <input type="email" id="email" name="email" required
-                 autocomplete="email" value="{{ email or '' }}">
+          <label for="usuario">Nome de usuário</label>
+          <input type="text" id="usuario" name="usuario" required
+                 minlength="3" maxlength="25"
+                 autocapitalize="none" autocorrect="off" spellcheck="false"
+                 autocomplete="username" value="{{ digitado or '' }}">
+          {% if aba == 'criar' %}
+          <span class="dica">De 3 a 24 caracteres: letras sem acento, números, ponto ou sublinhado.</span>
+          {% endif %}
         </div>
 
         <div class="campo">
@@ -133,6 +138,8 @@
     <p class="promessa">
       Sua senha é guardada embaralhada, de um jeito que não tem volta —
       nem quem cuida do app consegue lê-la.
+      {% if aba == 'criar' %}<br>Não pedimos e-mail. Por isso, anote sua senha:
+      se esquecer, não há para onde mandar uma nova.{% endif %}
     </p>
   </div>
 

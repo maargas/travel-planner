@@ -40,9 +40,10 @@ def _now():
 users = Table(
     "users", meta,
     Column("id", Integer, primary_key=True),
-    # Guardado em minúsculas e sem espaços, para que "Ana@x.com " e "ana@x.com"
-    # não virem duas contas da mesma pessoa.
-    Column("email", String(255), nullable=False, unique=True),
+    # Nome de usuário, e não e-mail: por enquanto o app não guarda nenhum dado
+    # que identifique a pessoa fora dele. Sempre em minúsculas, para que "Ana" e
+    # "ana" não virem duas contas.
+    Column("username", String(24), nullable=False, unique=True),
     Column("name", String(80), nullable=False),
     # Nunca a senha: o resultado do scrypt, do qual não se volta.
     Column("password_hash", String(255), nullable=False),
