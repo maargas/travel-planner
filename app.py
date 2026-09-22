@@ -1,5 +1,6 @@
 import os
 import re
+import secrets
 import sys
 from datetime import date, datetime, timedelta
 from dotenv import load_dotenv
@@ -27,15 +28,21 @@ app = Flask(__name__)
 # um forja um login; se ela mudar, todo mundo é deslogado. Por isso ela vem do
 # ambiente, e nunca do código.
 _SEGREDO = os.environ.get("SECRET_KEY", "").strip()
+SEGREDO_IMPROVISADO = not _SEGREDO and bool(os.environ.get("RENDER"))
 if not _SEGREDO:
-    if os.environ.get("RENDER"):
-        # Em produção, uma chave inventada a cada arranque desloga todo mundo a
-        # cada republicação e não protege nada. Melhor recusar a subir.
-        raise RuntimeError(
-            "SECRET_KEY não está definida. No painel do Render, adicione a variável "
-            "SECRET_KEY com um valor longo e aleatório antes de publicar."
-        )
-    _SEGREDO = "chave-de-desenvolvimento-nao-use-em-producao"
+    if SEGREDO_IMPROVISADO:
+        # Antes isto derrubava o site, o que é pior do que o problema que
+        # resolvia: ninguém consegue nem olhar o app, e a variável que falta
+        # continua faltando. Uma chave sorteada a cada arranque é segura — só não
+        # dura: quem estava logado é deslogado quando o servidor reinicia. Serve
+        # para ver o app funcionando enquanto a variável de verdade não chega.
+        _SEGREDO = secrets.token_urlsafe(48)
+        print("\n  ATENÇÃO: SECRET_KEY não está definida.\n"
+              "  Uma chave temporária foi sorteada, então TODO MUNDO É DESLOGADO\n"
+              "  sempre que o servidor reiniciar. Defina SECRET_KEY no Render.\n",
+              flush=True)
+    else:
+        _SEGREDO = "chave-de-desenvolvimento-nao-use-em-producao"
 app.secret_key = _SEGREDO
 
 app.config.update(
