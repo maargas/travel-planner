@@ -9,7 +9,9 @@
 // mesmo depois de sair da conta. Página agora vai sempre à rede; se não houver
 // rede, aparece um aviso, e não uma cópia velha de coisa de alguém.
 
-const CACHE = 'compass-v2';
+// Trocar este nome apaga tudo que estava guardado. Subiu para v3 junto com a
+// mudança abaixo, para limpar o que a v2 guardou e nunca mais conferiu.
+const CACHE = 'compass-v3';
 const ESTATICOS = [
   '/static/manifest.json',
   '/static/icon-192.png',
@@ -39,13 +41,22 @@ self.addEventListener('fetch', (event) => {
   const estatico = url.origin === self.location.origin && url.pathname.startsWith('/static/');
 
   if (estatico) {
-    // Ícone e manifesto podem vir do cache: não são de ninguém.
+    // Ícone e manifesto podem vir do cache: não são de ninguém. Mas o cache
+    // não pode ser a palavra final. A versão anterior servia a cópia guardada e
+    // nunca mais perguntava ao servidor — um ícone trocado continuaria o antigo
+    // para sempre no celular de quem instalou, justamente na troca de logo.
+    // Agora entrega o que tem na hora (rápido) e, por trás, busca a versão nova
+    // para a próxima vez.
     event.respondWith(
-      caches.match(req).then((hit) => hit || fetch(req).then((res) => {
-        const copia = res.clone();
-        caches.open(CACHE).then((c) => c.put(req, copia));
-        return res;
-      }))
+      caches.open(CACHE).then((cache) =>
+        cache.match(req).then((guardado) => {
+          const atualizar = fetch(req).then((res) => {
+            if (res.ok) cache.put(req, res.clone());
+            return res;
+          }).catch(() => guardado);
+          return guardado || atualizar;
+        })
+      )
     );
     return;
   }
