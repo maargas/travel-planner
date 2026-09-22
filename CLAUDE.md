@@ -1,8 +1,9 @@
-# Compass — planejador de viagens
+# Farol — planejador de viagens
 
 App de roteiros de viagem para **quem viaja pouco** e vai a um lugar que não
 conhece. O dono (Gabriel, estudante da FGV) não programa e está aprendendo.
-O nome "Compass" é **provisório** — a marca ainda está sendo decidida.
+O nome é **Farol** (decidido em 22/09/2026, depois de quatro rodadas). A ideia
+vem das palavras dele: o app tem de "ser um norte pra qualquer um".
 
 A promessa, que manda em toda decisão: **precisão verificável**. O app nasceu
 porque uma IA sugeriu um museu a um amigo dele na Alemanha enquanto um evento de
@@ -61,11 +62,17 @@ nome concreto que vira símbolo (a referência é a marca Caju).
 
 ## Marca
 
-Ainda em aberto. Nomes já recusados — **não repetir**: atlas, luma, duna, orla,
-aria, marea, sotavento, maré, vereda, alísio, rumo, delta, baliza, preamar,
-arribada, carimbo. O nome precisa soar igual em português e inglês (sem lh, nh,
-ão, ç, acento nem o "j" brasileiro). O que o dono mais pesa: **ligação com o
-propósito**, depois apelo visual do símbolo, depois facilidade de falar.
+**Farol.** Decidido — ele disse que não quer mais gastar tempo com nome. Não
+reabrir o assunto por conta própria.
+
+- Símbolo: farol gordinho, torre vermelha com faixa creme, lanterna amarela,
+  cúpula e pedra azul-marinho, facho aceso para os dois lados. Fonte da verdade:
+  `static/farol.svg`. Cores: vermelho `#c8382e`, amarelo `#ffc93c`, marinho
+  `#1f3a5f`, creme `#fff6e6`.
+- Nome escrito em **Fredoka 600** (arredondada) — só na marca.
+- Ícones PNG gerados a partir do mesmo desenho: `icon-192`, `icon-512`,
+  `icon-maskable-512` (com margem para o Android recortar) e `apple-touch-icon`.
+- Pendente, e do dono: conferir `farol.com.br` no registro.br e a marca no INPI.
 
 ## Onde as coisas estão
 

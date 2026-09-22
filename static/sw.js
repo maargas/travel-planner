@@ -1,4 +1,4 @@
-// O que faz o Compass instalar no celular e abrir sem internet.
+// O que faz o Farol instalar no celular e abrir sem internet.
 //
 // Regra de privacidade, e ela manda em tudo aqui: SÓ arquivos estáticos entram
 // no cache. Nenhuma página é guardada.
@@ -9,13 +9,14 @@
 // mesmo depois de sair da conta. Página agora vai sempre à rede; se não houver
 // rede, aparece um aviso, e não uma cópia velha de coisa de alguém.
 
-// Trocar este nome apaga tudo que estava guardado. Subiu para v3 junto com a
-// mudança abaixo, para limpar o que a v2 guardou e nunca mais conferiu.
-const CACHE = 'compass-v3';
+// Trocar este nome apaga tudo que estava guardado. Virou farol-v1 com a troca
+// de nome e de ícone, para ninguém ficar com o ícone antigo.
+const CACHE = 'farol-v1';
 const ESTATICOS = [
   '/static/manifest.json',
   '/static/icon-192.png',
   '/static/icon-512.png',
+  '/static/farol.svg',
 ];
 
 self.addEventListener('install', (event) => {
@@ -66,12 +67,12 @@ self.addEventListener('fetch', (event) => {
     fetch(req).catch(() => new Response(
       `<!doctype html><meta charset="utf-8">
        <meta name="viewport" content="width=device-width,initial-scale=1">
-       <title>Sem internet — Compass</title>
+       <title>Sem internet — Farol</title>
        <div style="font-family:system-ui;padding:2.5rem 1.5rem;text-align:center;
                    background:#1a1020;color:#f6edf6;min-height:100vh">
          <h1 style="font-size:1.25rem;margin:0 0 .5rem">Sem internet</h1>
          <p style="opacity:.75;font-size:.9rem;line-height:1.5">
-           O Compass precisa de conexão para mostrar seus roteiros.<br>
+           O Farol precisa de conexão para mostrar seus roteiros.<br>
            Assim que voltar, recarregue a página.
          </p>
        </div>`,

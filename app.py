@@ -307,11 +307,11 @@ def demo_itinerary(destination, start_date, days, budget, interests):
         listed = topics[0] if topics else ""
 
     interest_line = (
-        f"Você marcou interesse em **{listed}** — no roteiro real, o Compass procuraria eventos "
+        f"Você marcou interesse em **{listed}** — no roteiro real, o Farol procuraria eventos "
         f"de {listed} acontecendo em {destination} exatamente nessas datas, e reorganizaria os "
         f"dias se achasse algum."
         if listed else
-        f"No roteiro real, o Compass procuraria eventos acontecendo em {destination} exatamente "
+        f"No roteiro real, o Farol procuraria eventos acontecendo em {destination} exatamente "
         f"nessas datas e reorganizaria os dias se achasse algum que valesse a pena."
     )
 
@@ -377,13 +377,13 @@ def demo_itinerary(destination, start_date, days, budget, interests):
         "",
         "Todo preço vem com uma etiqueta, e as duas significam coisas diferentes:",
         "",
-        "- **confirmado** — o Atlas leu esse valor numa página oficial nesta consulta, e o link está aqui embaixo.",
+        "- **confirmado** — o Farol leu esse valor numa página oficial nesta consulta, e o link está aqui embaixo.",
         "- **estimativa** — é uma faixa de preço, não um valor exato. Confira antes de reservar.",
         "",
         "**Passagem aérea nunca entra na conta.** O preço muda de hora em hora e depende de onde você sai — "
-        "qualquer número que o Atlas desse ali seria chute. Os custos são do que você gasta no destino.",
+        "qualquer número que o Farol desse ali seria chute. Os custos são do que você gasta no destino.",
         "",
-        "> Se o plano não couber no seu orçamento, o Atlas diz isso na cara e enxuga o roteiro — "
+        "> Se o plano não couber no seu orçamento, o Farol diz isso na cara e enxuga o roteiro — "
         "em vez de inventar números menores para fingir que coube.",
     ]
 
@@ -710,7 +710,7 @@ def service_worker():
 
     Um service worker só controla páginas a partir da pasta em que ele mora. Em
     /static/sw.js o escopo era /static/, ou seja, ele não controlava nenhuma
-    tela do app — e sem isso o Compass não instala no celular.
+    tela do app — e sem isso o Farol não instala no celular.
     """
     resposta = app.send_static_file("sw.js")
     resposta.headers["Service-Worker-Allowed"] = "/"

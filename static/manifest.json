@@ -1,12 +1,12 @@
 {
-  "name": "Compass — Roteiros de viagem conferidos",
-  "short_name": "Compass",
+  "name": "Farol — Roteiros de viagem conferidos",
+  "short_name": "Farol",
   "description": "Roteiros de viagem pesquisados de verdade: horários, eventos nas suas datas e o tempo entre cada parada.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#1a1020",
+  "background_color": "#fff6e6",
   "theme_color": "#1a1020",
   "lang": "pt-BR",
   "icons": [
@@ -23,7 +23,7 @@
       "purpose": "any"
     },
     {
-      "src": "/static/icon-512.png",
+      "src": "/static/icon-maskable-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
