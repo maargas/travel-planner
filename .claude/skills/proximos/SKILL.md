@@ -12,4 +12,5 @@ Revise os próximos passos do Farol seguindo as suas instruções: leia
 e entregue no formato combinado — onde estamos, próximos passos (com o porquê e
 a balança de cada um), ideias novas se houver, e o que deveria mudar na lista.
 
-Curto e em português simples: o dono lê no celular.
+Breve e em português simples: o dono lê no celular. Toda ideia nova vem com a
+descrição concreta da tela, para ser desenhada.

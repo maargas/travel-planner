@@ -91,7 +91,7 @@ check("formulario sem o segredo e recusado", r.status_code == 400)
 r = criar(c, "  @Amigo.Teste ")
 check("conta criada (com @, maiusculas e espacos limpos)", r.status_code == 302)
 check("ja entra logado depois de criar",
-      "Amigo" in c.get("/painel").get_data(as_text=True))
+      "Amigo" in c.get("/conta").get_data(as_text=True))
 
 # Cliente novo: quem ja esta logado nem chega na tela de criar conta.
 outro = app.test_client()
@@ -108,12 +108,12 @@ check("a senha nao esta no banco", SENHA not in str(dict(linha)))
 check("o que esta guardado e um hash scrypt", linha["password_hash"].startswith("scrypt:"))
 check("so uma conta foi criada", db.count(db.users) == 1)
 
-corpo = c.get("/painel").get_data(as_text=True)
+corpo = c.get("/conta").get_data(as_text=True)
 check("a senha nao aparece na pagina", SENHA not in corpo)
 check("o @usuario aparece para quem esta logado", "@" + USUARIO in corpo)
 
 # ── Sair e entrar ───────────────────────────────────────────────────────────
-r = c.post("/sair", data={"csrf": token(c, "/painel")})
+r = c.post("/sair", data={"csrf": token(c, "/conta")})
 check("sair funciona", r.status_code == 302)
 
 r = c.post("/entrar", data={"csrf": token(c), "usuario": USUARIO, "senha": "senhaErrada1"})
@@ -134,25 +134,82 @@ r = c2.post("/entrar", data={"csrf": token(c2), "usuario": USUARIO, "senha": SEN
 check("nao redireciona para fora do app",
       "site-falso" not in (r.headers.get("Location") or ""))
 
-# ── A fila de pedidos ───────────────────────────────────────────────────────
+# ── Viagens: o centro do app (estrutura A) ──────────────────────────────────
 anon = app.test_client()
-r = anon.post("/pedir", data={"csrf": "x", "destination": "Lisboa"})
-check("pedir exige estar logado", r.status_code in (302, 400))
-check("e nada foi gravado", db.count(db.requests_table) == 0)
+html = anon.get("/viagens").get_data(as_text=True)
+check("sem conta, a tela de viagens explica e mostra o exemplo", "Organize a sua viagem" in html and 'href="/exemplo"' in html)
+check("criar viagem exige estar logado", anon.get("/viagens/nova").status_code == 302)
+check("quem entrou abre o app nas viagens, nao na pagina de venda", c.get("/").status_code == 302)
 
-r = c.post("/pedir", data={"csrf": token(c, "/viagens"), "destination": "Lisboa, Portugal",
-                           "days": "4", "interests": "comida local"})
-check("logado consegue pedir um destino", r.status_code == 302)
-check("o pedido foi para a fila", db.count(db.requests_table) == 1)
+r = c.post("/viagens/nova", data={"destino": "Lisboa"})
+check("criar viagem sem o segredo do formulario e recusado", r.status_code == 400)
+r = c.post("/viagens/nova", data={"csrf": token(c, "/viagens/nova"), "destino": "Lisboa",
+                                  "ida": "2027-04-10", "volta": "2027-04-01"})
+check("volta antes da ida e recusada", r.status_code == 400 and "antes da ida" in r.get_data(as_text=True))
+r = c.post("/viagens/nova", data={"csrf": token(c, "/viagens/nova"), "destino": "  Lisboa,   Portugal ",
+                                  "ida": "2027-04-10", "volta": "2027-04-14",
+                                  "pessoas": "Maya, Diego\nmaya\n Ana ,"})
+check("viagem criada", r.status_code == 302)
+vid = int(r.headers["Location"].rstrip("/").split("/")[-1])
+check("as pessoas foram guardadas sem repetir nem vazio", db.count(db.viagem_pessoas) == 3)
+
+r = c.get("/viagens")
+check("com uma viagem so, o app abre direto nela", r.status_code == 302 and r.headers["Location"].endswith(f"/viagens/{vid}"))
+check("e 'todas' mostra a lista", "Lisboa, Portugal" in c.get("/viagens?todas=1").get_data(as_text=True))
+html = c.get(f"/viagens/{vid}/pessoas").get_data(as_text=True)
+check("a viagem mostra quem vai e as datas",
+      all(n in html for n in ("Maya", "Diego", "Ana")) and "10 a 14 de abr de 2027" in html)
+check("cada parte da viagem abre",
+      all(c.get(f"/viagens/{vid}/{a}").status_code == 200
+          for a in ("roteiro", "gastos", "documentos", "pessoas", "ajustes")))
+check("parte que nao existe da 404", c.get(f"/viagens/{vid}/nada").status_code == 404)
+html = c.get(f"/viagens/{vid}/roteiro").get_data(as_text=True)
+check("montar o roteiro ja leva destino, data e dias da viagem",
+      "destination=Lisboa%2C%20Portugal" in html and "start_date=2027-04-10" in html and "days=5" in html)
+html = c.get("/planejar?destination=Lisboa&start_date=2027-04-10&days=5").get_data(as_text=True)
+check("e o formulario chega preenchido", 'value="Lisboa"' in html and 'value="2027-04-10"' in html)
+
+terceiro = app.test_client()
+criar(terceiro, "segundo.amigo", nome="Segundo")
+check("a viagem de outra pessoa nao existe para quem nao e dono",
+      terceiro.get(f"/viagens/{vid}/roteiro").status_code == 404)
+check("nem da para apagar a viagem dos outros",
+      terceiro.post(f"/viagens/{vid}/apagar",
+                    data={"csrf": token(terceiro, "/conta"), "confirmo": "sim"}).status_code == 404)
+check("nem ela aparece na lista de outra pessoa",
+      "Lisboa, Portugal" not in terceiro.get("/viagens?todas=1").get_data(as_text=True))
+
+c.post(f"/viagens/{vid}/pessoas", data={"csrf": token(c, f"/viagens/{vid}/pessoas"), "nome": "Bia"})
+check("da para acrescentar alguem", db.count(db.viagem_pessoas) == 4)
+with db.engine.connect() as cx:
+    pid = cx.execute(select(db.viagem_pessoas.c.id).where(db.viagem_pessoas.c.nome == "Bia")).scalar_one()
+c.post(f"/viagens/{vid}/pessoas/{pid}/tirar", data={"csrf": token(c, f"/viagens/{vid}/pessoas")})
+check("e tirar alguem", db.count(db.viagem_pessoas) == 3)
+
+r = c.post(f"/viagens/{vid}/apagar", data={"csrf": token(c, f"/viagens/{vid}/ajustes")})
+check("apagar sem marcar a confirmacao nao apaga", db.count(db.viagens) == 1 and "erro=confirmar" in r.headers["Location"])
+r = c.post(f"/viagens/{vid}/apagar", data={"csrf": token(c, f"/viagens/{vid}/ajustes"), "confirmo": "sim"})
+check("com a confirmacao, a viagem e quem ia nela somem",
+      db.count(db.viagens) == 0 and db.count(db.viagem_pessoas) == 0)
+
+# ── A viagem de exemplo e os endereços antigos ──────────────────────────────
+check("as quatro partes da viagem de exemplo abrem",
+      all("Viagem de exemplo" in anon.get(f"/exemplo/{a}").get_data(as_text=True)
+          for a in ("roteiro", "gastos", "documentos", "pessoas")))
+r = anon.get("/orcamento")
+check("endereco antigo leva ao lugar novo", r.status_code == 301 and r.headers["Location"].endswith("/exemplo/gastos"))
 
 # ── Os roteiros reais ───────────────────────────────────────────────────────
-html = c.get("/viagens").get_data(as_text=True)
-check("a lista mostra o roteiro pesquisado", "Banff" in html)
+html = c.get("/explorar").get_data(as_text=True)
+check("explorar mostra o roteiro pesquisado", "Banff" in html)
 check("e mostra o achado que muda a viagem", "Stampede" in html)
-html = c.get("/viagens/banff-julho-2027").get_data(as_text=True)
+html = c.get("/explorar/banff-julho-2027").get_data(as_text=True)
 check("o roteiro abre inteiro", "Moraine Lake" in html)
 check("com as fontes anotadas", "parks.canada.ca" in html or "calgarystampede" in html)
-check("endereco inventado da 404", c.get("/viagens/nao-existe").status_code == 404)
+check("endereco inventado da 404", c.get("/explorar/nao-existe").status_code == 404)
+r = c.get("/viagens/banff-julho-2027")
+check("o link antigo do roteiro continua chegando",
+      r.status_code == 301 and r.headers["Location"].endswith("/explorar/banff-julho-2027"))
 
 # ── Instalar no celular ─────────────────────────────────────────────────────
 html = anon.get("/viagens").get_data(as_text=True)
@@ -166,7 +223,7 @@ html = anon.get("/").get_data(as_text=True)
 md = open(os.path.join("conteudo", "banff.md"), encoding="utf-8").read()
 check("a capa mostra a promessa", "Um plano que chega na hora certa" in html)
 check("e a prova: o roteiro de Banff, com o achado",
-      "Stampede" in html and "/viagens/banff-julho-2027" in html)
+      "Stampede" in html and "/explorar/banff-julho-2027" in html)
 check("o numero de fontes da capa e o do roteiro",
       f"{len(semente._fontes(md))} fontes lidas" in html)
 
@@ -191,8 +248,9 @@ check("e o fotografo aparece na capa",
 
 check("o formulario de roteiro mudou para /planejar",
       'action="/plan"' in anon.get("/planejar").get_data(as_text=True))
-check("quem esta logado tem como sair, tambem no celular",
-      'class="conta-rodape"' in c.get("/viagens").get_data(as_text=True))
+check("quem esta logado tem a conta a um toque, tambem no celular",
+      'href="/conta"' in c.get("/explorar").get_data(as_text=True))
+check("e a conta tem o botao de sair", 'action="/sair"' in c.get("/conta").get_data(as_text=True))
 
 # ── Trocar a senha ──────────────────────────────────────────────────────────
 NOVA = "outraSenhaBoa456"

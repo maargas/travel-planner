@@ -20,6 +20,13 @@ partes precisam ter nexo entre si e uma separação que faça sentido — por
 exemplo, um lugar só para a própria conta e as configurações. Coisa que não
 serve a nenhum dos dois pilares não entra (a "fila de pedidos" saiu por isso).
 
+Em 23/09/2026 ele acrescentou uma **pegada de rede social**: ver quem é seu
+amigo no app, onde essa pessoa está viajando, qual a próxima viagem. E
+escolheu a estrutura **A — tudo mora dentro de uma viagem** (barra: Viagens ·
+Explorar · Conta; dentro da viagem: Roteiro · Gastos · Documentos · Pessoas).
+A estética "Foto e vidro" vale para tudo isso: ele disse que o design é parte
+central da proposta, do site e do app.
+
 A promessa, que manda em toda decisão: **precisão verificável**. O app nasceu
 porque uma IA sugeriu um museu a um amigo dele na Alemanha enquanto um evento de
 Fórmula 1 acontecia nas datas da viagem. Toda mudança que aumenta a chance de
@@ -91,6 +98,10 @@ crie outra página de próximos passos.
 **Nada novo começa sem o sim explícito do dono.** "Se você não disser o
 contrário, começo" não é aprovação — a fila de pedidos foi feita assim e saiu.
 
+**Ideia nova sempre com esboço visual** (quando der para desenhar): telas de
+celular na página fixada, com a balança ao lado. Ele decide olhando. Ideias
+podem ir além dos dois pilares, se fizerem sentido.
+
 ## Decisões de design já tomadas
 
 Base: pesquisa que ele aprovou — atração julgada em 50 ms; site simples e
@@ -134,7 +145,16 @@ quiser voltar ao assunto — não reabrir por conta própria.
 - `db.py` — `DATABASE_URL` escolhe o banco: sem ela, SQLite local
 - `semente.py` + `conteudo/` — roteiros reais, carregados a cada arranque;
   `FOTOS` e `VITRINE` dizem a foto e o trecho de vitrine de cada um
-- `templates/inicio.html` — a página que vende; `planejar.html` — o formulário
+- `viagens.py` — as viagens de cada pessoa (estrutura A): lista, criar,
+  as partes de dentro, apagar, e a viagem de exemplo. Uma viagem só existe
+  para quem a criou (404 para os outros)
+- `templates/inicio.html` — a página que vende (só para quem não entrou);
+  `planejar.html` — o formulário do roteiro; `explorar.html` + `roteiro.html` —
+  os roteiros prontos (Banff)
+- `templates/viagens.html`, `viagem_nova.html`, `viagem.html` — a lista, criar
+  e as partes de uma viagem; `_viagem.html` — o cabeçalho com as quatro partes
+- Viagem de exemplo (Lisboa, dados inventados): `exemplo_roteiro.html`,
+  `orcamento.html`, `documentos.html`, `viajantes.html`, em `/exemplo/<parte>`
 - `templates/_marca.html` — o farol em SVG, a foto com os dois tamanhos, o sair
 - `templates/conta.html` + `senha.html` — a conta da pessoa e a troca de senha
 - `templates/_cenas.html` — dioramas em SVG, cada cena com as cores dela

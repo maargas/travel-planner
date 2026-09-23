@@ -1,6 +1,7 @@
 {% extends "base.html" %}
-{% set page = 'lugares' %}
-{% block title %}Lugares — Farol{% endblock %}
+{% from "_viagem.html" import cabecalho %}
+{% set page = 'viagem' %}
+{% block title %}Roteiro — Lisboa (exemplo) — Farol{% endblock %}
 
 {% block head_extra %}
 <style>
@@ -32,14 +33,13 @@
 
 {% block content %}
 
-<div class="page-head">
-  <h1>Lugares</h1>
-  <div class="sub">18 salvos · 6 já no roteiro</div>
-</div>
+{{ cabecalho(exemplo.destino, exemplo | periodo, exemplo.pessoas, '/exemplo', aba, exemplo=true) }}
+<h2 class="parte-titulo">Lugares do roteiro</h2>
+<div class="parte-sub">18 salvos · 6 já no roteiro</div>
 
 <div class="sample-note">
   <span aria-hidden="true">🧪</span>
-  <span><strong>Tela de exemplo.</strong> Os lugares são inventados e o mapa é um desenho — serve para mostrar onde o que o grupo indicar vai ficar guardado.</span>
+  <span><strong>Tela de exemplo.</strong> Os lugares existem, mas quem salvou e o mapa são ilustrativos — serve para mostrar como o roteiro do grupo vai ficar.</span>
 </div>
 
 <div class="map">
@@ -57,7 +57,7 @@
     <div class="num">1</div>
     <div class="row-main">
       <div class="row-title">Time Out Market</div>
-      <div class="row-sub">Salvo pela Maya · abre 10h</div>
+      <div class="row-sub">Salvo pela Maya</div>
     </div>
     <div class="tag tag-soft">Comida</div>
   </div>
@@ -75,7 +75,7 @@
     <div class="num">3</div>
     <div class="row-main">
       <div class="row-title">Livraria Bertrand</div>
-      <div class="row-sub">Salvo pela Ana · fecha 20h</div>
+      <div class="row-sub">Salvo pela Ana</div>
     </div>
     <div class="tag tag-outline">Passeio</div>
   </div>
@@ -84,7 +84,7 @@
     <div class="num">4</div>
     <div class="row-main">
       <div class="row-title">Colinas de Sintra</div>
-      <div class="row-sub">Salvo pelo Diego · 40 min de trem</div>
+      <div class="row-sub">Salvo pelo Diego · bate-volta de trem</div>
     </div>
     <div class="tag tag-soft">Trilha</div>
   </div>

@@ -1,156 +1,120 @@
 {% extends "base.html" %}
-{% from "_cenas.html" import diorama %}
-{% from "_marca.html" import foto_img %}
 {% set page = 'viagens' %}
-{% block title %}Roteiros — Farol{% endblock %}
+{% block title %}Suas viagens — Farol{% endblock %}
 
 {% block head_extra %}
 <style>
-  .cartoes { display: grid; grid-template-columns: 1fr; gap: 1.125rem; }
+  .topo-viagens { padding: 1.75rem 0 1.25rem; }
+  .topo-viagens h1 { font-size: 1.875rem; letter-spacing: -0.03em; }
+  .topo-viagens p { font-size: 0.9375rem; color: var(--t-muted); margin-top: 0.375rem; max-width: 34rem; line-height: 1.5; }
+  .topo-viagens .botoes { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1.125rem; }
 
-  .cartao {
-    display: block; text-decoration: none; color: inherit;
-    background: var(--t-surface); border-radius: var(--t-radius-lg); overflow: hidden;
-    box-shadow: var(--shadow-md);
+  .grade { display: grid; grid-template-columns: 1fr; gap: 0.875rem; }
+
+  .cartao-viagem {
+    position: relative; overflow: hidden; display: block; text-decoration: none; color: #fff;
+    background: linear-gradient(150deg, #1c3150, var(--navy)); border-radius: var(--t-radius-lg);
+    padding: 1.125rem 1.25rem 1.25rem; box-shadow: var(--shadow-md); min-height: 8.5rem;
     transition: transform 0.15s, box-shadow 0.15s;
   }
-  .cartao:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
-  .cartao .imagem { position: relative; aspect-ratio: 16 / 10; background: var(--navy); }
-  .cartao .imagem img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
-  .cartao .diorama { width: 100%; height: 100%; display: block; border-radius: 0; }
-  .cartao .selo {
-    position: absolute; left: 0.75rem; top: 0.75rem; z-index: 2;
-    display: inline-flex; align-items: center; gap: 0.375rem;
-    border-radius: var(--t-pill); padding: 0.3125rem 0.75rem;
-    font-size: 0.6875rem; font-weight: 800;
+  .cartao-viagem:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+  .cartao-viagem .ridge { position: absolute; right: -1rem; bottom: -1rem; width: 11rem; height: 6rem; opacity: 0.1; }
+  .cartao-viagem h2 { position: relative; font-size: 1.375rem; }
+  .cartao-viagem .quando { position: relative; font-size: 0.8125rem; opacity: 0.85; margin-top: 0.125rem; }
+  .cartao-viagem .faltam {
+    position: relative; display: inline-block; margin-top: 0.875rem; border-radius: var(--t-pill);
+    padding: 0.1875rem 0.625rem; font-size: 0.71875rem; font-weight: 800; background: var(--lima); color: var(--navy);
   }
-  .cartao .selo i { width: 0.5rem; height: 0.5rem; border-radius: 50%; background: #5bbf3a; }
-  .cartao .texto { padding: 1.125rem 1.25rem 1.375rem; }
-  .cartao h2 { font-size: 1.375rem; margin-bottom: 0.1875rem; }
-  .cartao .quando { font-size: 0.75rem; color: var(--t-muted); margin-bottom: 0.625rem; font-weight: 600; }
-  .cartao .resumo { font-size: 0.875rem; color: var(--t-muted); line-height: 1.5; }
 
-  .achado {
-    display: flex; gap: 0.5rem; align-items: flex-start;
-    margin-top: 0.875rem; padding: 0.75rem 0.875rem;
-    background: #fff4e0; color: #6b3b00;
-    border-radius: var(--t-radius-sm);
-    font-size: 0.8125rem; line-height: 1.45;
+  .nova {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.375rem;
+    min-height: 8.5rem; border-radius: var(--t-radius-lg); text-decoration: none;
+    border: 2px dashed rgba(15, 27, 45, 0.2); color: var(--t-accent-text); font-weight: 800;
+    background: rgba(255, 255, 255, 0.5);
   }
-  .achado b { font-weight: 800; }
+  .nova:hover { border-color: var(--navy); color: var(--navy); }
+  .nova .mais { width: 2.5rem; height: 2.5rem; border-radius: 50%; background: var(--lima); color: var(--navy);
+    display: grid; place-items: center; font-size: 1.5rem; line-height: 1; }
 
-  .pedir-box {
-    margin-top: 1.75rem; padding: 1.375rem;
-    background: var(--navy); color: #fff; border-radius: var(--t-radius-lg);
-    scroll-margin-top: 1.5rem;
+  .secao-exemplo { margin-top: 2rem; }
+  .secao-exemplo .eyebrow { margin-bottom: 0.625rem; }
+  .cartao-exemplo {
+    display: flex; gap: 1rem; align-items: center; text-decoration: none; color: inherit;
+    background: var(--t-surface); border-radius: var(--t-radius-lg); box-shadow: var(--shadow-md);
+    padding: 1rem 1.125rem;
   }
-  .pedir-box .eyebrow { color: var(--lima); }
-  .pedir-box h2 { font-size: 1.25rem; margin: 0.25rem 0 0.375rem; }
-  .pedir-box p { font-size: 0.8125rem; opacity: 0.8; margin-bottom: 0.875rem; line-height: 1.5; }
-  .pedir-box .linha { display: grid; grid-template-columns: 1fr; gap: 0.625rem; margin-bottom: 0.75rem; }
-  .pedir-box input {
-    width: 100%; background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.22); border-radius: var(--t-pill);
-    color: #fff; font-family: inherit; font-size: 0.9375rem;
-    padding: 0.6875rem 1rem; color-scheme: dark;
+  .cartao-exemplo:hover { box-shadow: var(--shadow-lg); }
+  .cartao-exemplo .mini {
+    width: 4rem; height: 4rem; border-radius: 1rem; flex: none;
+    background: linear-gradient(150deg, #1c3150, var(--navy)); color: var(--lima);
+    display: grid; place-items: center; font-weight: 800; font-size: 0.75rem; text-align: center; line-height: 1.2;
   }
-  .pedir-box input::placeholder { color: rgba(255, 255, 255, 0.55); }
-  .pedir-box input:focus-visible { outline: none; border-color: var(--lima); }
+  .cartao-exemplo b { display: block; font-size: 1rem; }
+  .cartao-exemplo span.sub { font-size: 0.8125rem; color: var(--t-muted); }
+  .cartao-exemplo .chip { display: inline-block; margin-bottom: 0.25rem; border-radius: var(--t-pill);
+    padding: 0.0625rem 0.5rem; font-size: 0.65625rem; font-weight: 800; background: var(--ambar); color: var(--navy); }
 
-  .aviso-ok {
-    display: flex; align-items: center; gap: 0.5rem;
-    background: var(--t-accent-soft); color: var(--t-accent-text);
-    border-radius: var(--t-radius); padding: 0.75rem 0.9375rem;
-    margin-bottom: 1.25rem; font-size: 0.8125rem;
-  }
+  .quatro { display: grid; grid-template-columns: 1fr 1fr; gap: 0.625rem; margin-top: 1.25rem; }
+  .quatro div { background: var(--t-surface); border-radius: var(--t-radius); padding: 0.875rem; box-shadow: var(--shadow-md); }
+  .quatro b { display: block; font-size: 0.875rem; }
+  .quatro span { font-size: 0.75rem; color: var(--t-muted); line-height: 1.4; }
 
   @media (min-width: 60rem) {
-    .cartoes { grid-template-columns: repeat(2, 1fr); gap: 1.25rem; }
-    .pedir-box { padding: 1.75rem 2rem; }
-    .pedir-box .linha { grid-template-columns: 2fr 1fr 1fr; }
+    .grade { grid-template-columns: repeat(3, 1fr); }
+    .quatro { grid-template-columns: repeat(4, 1fr); }
   }
 </style>
 {% endblock %}
 
 {% block content %}
-
-<div class="page-head">
-  <h1>Roteiros</h1>
-  <div class="sub">Roteiros pesquisados de verdade — cada horário e cada preço
-      com a fonte anotada.</div>
-</div>
-
-{% if request.args.get('pedido') %}
-<div class="aviso-ok">
-  <span aria-hidden="true">✅</span>
-  <span><strong>Pedido anotado.</strong> Esse destino entra na fila para ser
-        pesquisado. Você é avisado quando o roteiro estiver pronto.</span>
-</div>
-{% endif %}
-
-<div class="cartoes">
-  {% for v in viagens %}
-  {% set vit = vitrine(v.slug) %}
-  <a class="cartao" href="/viagens/{{ v.slug }}">
-    <div class="imagem">
-      {% if vit.foto %}
-        {# A primeira foto já está na tela ao abrir: não espera rolar. #}
-        {{ foto_img(vit.foto, "(min-width: 60rem) 28rem, 100vw", prioridade=loop.first) }}
-        <span class="credito-foto">{{ vit.foto.lugar }} · foto: {{ vit.foto.autor }} / Unsplash</span>
-      {% else %}
-        {{ diorama(v.scene or 'mata', v.slug) }}
-      {% endif %}
-      <span class="selo vidro-claro"><i aria-hidden="true"></i>Pesquisado{% if v.researched_on %} em {{ v.researched_on.strftime('%d/%m/%Y') }}{% endif %}</span>
-    </div>
-    <div class="texto">
-      <h2>{{ v.destination }}{% if v.country %}, {{ v.country }}{% endif %}</h2>
-      <div class="quando">
-        {% if v.start_date %}{{ v.start_date.strftime('%d/%m/%Y') }} · {% endif %}
-        {{ v.days }} dias{% if v.budget_usd %} · US$ {{ '{:,}'.format(v.budget_usd).replace(',', '.') }}{% endif %}
-      </div>
-      {% if v.summary %}<p class="resumo">{{ v.summary }}</p>{% endif %}
-      {% if v.headline %}
-      <div class="achado">
-        <span aria-hidden="true">⚠️</span>
-        <span><b>O que muda a viagem:</b> {{ v.headline }}</span>
-      </div>
-      {% endif %}
-    </div>
-  </a>
-  {% else %}
-  <p style="opacity:0.7;">Ainda não há roteiros publicados.</p>
-  {% endfor %}
-</div>
+{% set ridge %}<svg class="ridge" viewBox="0 0 300 180" preserveAspectRatio="none" aria-hidden="true"><path d="M0 180 L50 90 L100 150 L150 50 L205 130 L250 70 L300 140 L300 180 Z" fill="currentColor"></path></svg>{% endset %}
 
 {% if usuario() %}
-<div class="pedir-box" id="pedir">
-  <div class="eyebrow">Fila de pesquisa</div>
-  <h2>Pedir um destino</h2>
-  <p>Diga para onde e quando. O destino entra numa fila, alguém pesquisa de
-     verdade — horários, eventos nas suas datas, deslocamento — e o roteiro
-     aparece aqui. Não é a IA respondendo de memória.</p>
-  <form method="POST" action="/pedir">
-    <input type="hidden" name="csrf" value="{{ csrf_token() }}">
-    <div class="linha">
-      <input type="text" name="destination" required maxlength="120"
-             placeholder="Para onde? Ex.: Lisboa, Portugal">
-      <input type="date" name="start_date" aria-label="Data de ida">
-      <input type="number" name="days" min="1" max="30" placeholder="Dias">
-    </div>
-    <div class="linha" style="grid-template-columns:1fr;">
-      <input type="text" name="interests" maxlength="255"
-             placeholder="Interesses: comida local, trilhas, museus...">
-    </div>
-    <button class="btn btn-primary" type="submit">Entrar na fila</button>
-  </form>
-</div>
+  {% set lista = minhas_viagens() %}
+  <div class="topo-viagens">
+    <h1>Suas viagens</h1>
+    <p>{% if lista %}Toque numa viagem para ver o roteiro, os gastos, os documentos e quem vai.{% else %}Crie a sua primeira viagem: tudo dela — o roteiro, os gastos, os documentos e quem vai — fica junto, lá dentro.{% endif %}</p>
+  </div>
+
+  <div class="grade">
+    {% for mv in lista %}
+    {% set dias = faltam(mv.ida) %}
+    <a class="cartao-viagem" href="/viagens/{{ mv.id }}">
+      {{ ridge }}
+      <h2>{{ mv.destino }}</h2>
+      <div class="quando">{{ mv | periodo }} · {{ mv.pessoas }} pessoa{{ 's' if mv.pessoas != 1 }}</div>
+      {% if dias is not none %}<span class="faltam">{{ 'É hoje' if dias == 0 else ('Falta 1 dia' if dias == 1 else 'Faltam ' ~ dias ~ ' dias') }}</span>{% endif %}
+    </a>
+    {% endfor %}
+    <a class="nova" href="/viagens/nova"><span class="mais" aria-hidden="true">+</span>Nova viagem</a>
+  </div>
 {% else %}
-<div class="pedir-box" id="pedir">
-  <div class="eyebrow">Fila de pesquisa</div>
-  <h2>Quer pedir um destino?</h2>
-  <p>Crie uma conta para pedir um roteiro pesquisado e guardar os que gostar.</p>
-  <a class="btn btn-primary" href="/criar-conta?proximo=/viagens">Criar conta</a>
-</div>
+  <div class="topo-viagens">
+    <h1>Organize a sua viagem</h1>
+    <p>Crie uma viagem e tudo dela fica junto: o roteiro pelos seus interesses, os gastos e
+       quem deve a quem, os documentos e quem vai com você.</p>
+    <div class="botoes">
+      <a class="btn btn-primary" href="/criar-conta?proximo=/viagens/nova">Criar conta e começar</a>
+      <a class="btn btn-outline" href="/entrar?proximo=/viagens">Já tenho conta</a>
+    </div>
+  </div>
+  <div class="quatro">
+    <div><b>Roteiro</b><span>Pelos seus interesses, com horário conferido e o caminho entre as paradas.</span></div>
+    <div><b>Gastos</b><span>Quem pagou o quê e quem deve quanto a quem.</span></div>
+    <div><b>Documentos</b><span>Passagem e reservas num lugar só.</span></div>
+    <div><b>Pessoas</b><span>Quem vai junto, com ou sem conta no app.</span></div>
+  </div>
 {% endif %}
 
+<div class="secao-exemplo">
+  <div class="eyebrow">Para ver como fica</div>
+  <a class="cartao-exemplo" href="/exemplo">
+    <span class="mini" aria-hidden="true">Lisboa</span>
+    <span>
+      <span class="chip">Viagem de exemplo</span>
+      <b>Lisboa, com 4 amigos</b>
+      <span class="sub">O roteiro, os gastos e quem deve a quem, já preenchidos com dados inventados.</span>
+    </span>
+  </a>
+</div>
 {% endblock %}

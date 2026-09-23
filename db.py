@@ -101,6 +101,31 @@ requests_table = Table(
 )
 
 
+# As viagens de cada pessoa: o centro do app (a estrutura A, escolhida em
+# 23/09/2026). Tudo de uma viagem — roteiro, gastos, documentos, pessoas —
+# pendura aqui. Não confundir com `trips`, que são os roteiros publicados,
+# iguais para todo mundo e mostrados em Explorar.
+viagens = Table(
+    "viagens", meta,
+    Column("id", Integer, primary_key=True),
+    Column("user_id", Integer, ForeignKey("users.id"), nullable=False),
+    Column("destino", String(120), nullable=False),
+    Column("ida", Date),
+    Column("volta", Date),
+    Column("criada_em", DateTime, default=_now),
+)
+
+# Quem vai junto. Por enquanto é só um nome: a pessoa não precisa ter conta
+# para entrar na divisão dos gastos. Quem criou a viagem não aparece aqui — é
+# sempre o primeiro da lista, pela própria conta.
+viagem_pessoas = Table(
+    "viagem_pessoas", meta,
+    Column("id", Integer, primary_key=True),
+    Column("viagem_id", Integer, ForeignKey("viagens.id"), nullable=False),
+    Column("nome", String(60), nullable=False),
+)
+
+
 def init():
     """Cria o que faltar. Não apaga nem altera o que já existe."""
     meta.create_all(engine)

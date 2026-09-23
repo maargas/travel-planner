@@ -44,8 +44,10 @@ que o dono (Gabriel) aprovar.
 Dois pilares, nas palavras do dono (detalhes em `CLAUDE.md`): **roteiro
 detalhista** para um destino, pelos interesses de quem vai; e **organizador da
 viagem**, sozinho ou em grupo — orçamento, quem emprestou quanto para quem,
-documentos, organização geral. Sugestão que não serve a nenhum dos dois não
-entra na lista. E marque sempre: nada novo começa sem o sim dele.
+documentos, organização geral — e, desde 23/09/2026, uma pegada de rede
+social (ver amigos, onde estão viajando, a próxima viagem de cada um). A
+estética "Foto e vidro" é parte da proposta: nada de sugestão que a quebre.
+Marque sempre: nada novo começa sem o sim dele.
 
 # Como decidir a ordem
 
@@ -64,22 +66,24 @@ diga que não conferiu.
 
 # O que entregar
 
-Português simples, curto. O dono não programa. Nada de jargão sem explicar.
+Português simples e **breve** — o dono pediu menos texto nos próximos passos.
+Ele não programa; nada de jargão sem explicar.
 
-**Onde estamos** — duas ou três linhas.
+**Onde estamos** — uma ou duas linhas.
 
-**Próximos passos** — no máximo cinco, em ordem. Para cada um:
-- o que é, em uma linha;
-- **por quê** agora, em uma ou duas linhas;
-- **balança**: o que ganha, o que perde;
-- tamanho (P, M, G) e quem faz (Gabriel ou Claude).
+**Próximos passos** — no máximo quatro, em ordem. Cada um em **uma linha só**:
+o que é · por que agora · o que se perde (se houver) · tamanho (P, M, G).
 
-**Ideias novas** — no máximo três, só se forem boas de verdade. Para cada uma:
-por que importa para quem viaja pouco e para a promessa de precisão, e o que
-sustenta a ideia (um link, um dado conferido, algo que você viu no código).
+**Ideias novas** — no máximo três. Podem ir além dos pilares, se fizerem
+sentido de verdade. Toda ideia vem com:
+- uma frase do porquê, e o que a sustenta (link, dado conferido, algo no código);
+- **um esboço de como ficaria na prática**: descreva a tela como ela seria —
+  título, o que aparece de cima para baixo, os botões, um exemplo de conteúdo —
+  concreto o bastante para o Claude principal desenhar. O dono decide olhando o
+  desenho, não lendo; ideia sem esboço não ajuda a decidir.
 
-**Mudou algo na lista?** — diga em uma frase o que deveria entrar, sair ou
-mudar de ordem em `PROXIMOS_PASSOS.md`, para o Claude principal aplicar.
+**Mudou algo na lista?** — uma frase, para o Claude principal aplicar em
+`PROXIMOS_PASSOS.md` e na página fixada.
 
-Se não houver nada novo que valha a pena, diga isso. Lista inchada é pior que
-lista curta.
+Se não houver nada novo que valha a pena, diga isso. Lista curta é melhor que
+lista inchada.

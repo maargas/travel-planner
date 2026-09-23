@@ -233,7 +233,7 @@ reais = [c.post("/plan", data=form).status_code for _ in range(7)]
 check("modo real continua limitado a 5 por dia", 429 in reais)
 
 app.limiter.reset()
-resp = c.get("/painel")
+resp = c.get("/explorar")
 check("so navegar entre telas nao cai no limite de roteiros", resp.status_code == 200)
 app.limiter.enabled = False
 

@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% from "_cenas.html" import diorama %}
+{% from "_marca.html" import foto_img %}
+{% set page = 'explorar' %}
+{% block title %}Explorar — Farol{% endblock %}
+
+{% block head_extra %}
+<style>
+  .cartoes { display: grid; grid-template-columns: 1fr; gap: 1.125rem; }
+
+  .cartao {
+    display: block; text-decoration: none; color: inherit;
+    background: var(--t-surface); border-radius: var(--t-radius-lg); overflow: hidden;
+    box-shadow: var(--shadow-md);
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .cartao:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+  .cartao .imagem { position: relative; aspect-ratio: 16 / 10; background: var(--navy); }
+  .cartao .imagem img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+  .cartao .diorama { width: 100%; height: 100%; display: block; border-radius: 0; }
+  .cartao .selo {
+    position: absolute; left: 0.75rem; top: 0.75rem; z-index: 2;
+    display: inline-flex; align-items: center; gap: 0.375rem;
+    border-radius: var(--t-pill); padding: 0.3125rem 0.75rem;
+    font-size: 0.6875rem; font-weight: 800;
+  }
+  .cartao .selo i { width: 0.5rem; height: 0.5rem; border-radius: 50%; background: #5bbf3a; }
+  .cartao .texto { padding: 1.125rem 1.25rem 1.375rem; }
+  .cartao h2 { font-size: 1.375rem; margin-bottom: 0.1875rem; }
+  .cartao .quando { font-size: 0.75rem; color: var(--t-muted); margin-bottom: 0.625rem; font-weight: 600; }
+  .cartao .resumo { font-size: 0.875rem; color: var(--t-muted); line-height: 1.5; }
+
+  .achado {
+    display: flex; gap: 0.5rem; align-items: flex-start;
+    margin-top: 0.875rem; padding: 0.75rem 0.875rem;
+    background: #fff4e0; color: #6b3b00;
+    border-radius: var(--t-radius-sm);
+    font-size: 0.8125rem; line-height: 1.45;
+  }
+  .achado b { font-weight: 800; }
+
+  .montar {
+    display: flex; align-items: center; gap: 0.875rem; margin-top: 1.25rem;
+    background: var(--navy); color: #fff; text-decoration: none;
+    border-radius: var(--t-radius-lg); padding: 1.125rem 1.25rem;
+  }
+  .montar-ico { width: 2.75rem; height: 2.75rem; border-radius: 0.875rem; flex: none;
+    background: var(--lima); color: var(--navy); display: grid; place-items: center; }
+  .montar-txt { flex: 1; display: flex; flex-direction: column; gap: 0.125rem; }
+  .montar-txt b { font-size: 1rem; }
+  .montar-txt span { font-size: 0.8125rem; opacity: 0.8; }
+
+  @media (min-width: 60rem) {
+    .cartoes { grid-template-columns: repeat(2, 1fr); gap: 1.25rem; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-head">
+  <h1>Explorar</h1>
+  <div class="sub">Roteiros pesquisados de verdade — cada horário e cada preço
+      com a fonte anotada.</div>
+</div>
+
+<div class="cartoes">
+  {% for v in viagens %}
+  {% set vit = vitrine(v.slug) %}
+  <a class="cartao" href="/explorar/{{ v.slug }}">
+    <div class="imagem">
+      {% if vit.foto %}
+        {# A primeira foto já está na tela ao abrir: não espera rolar. #}
+        {{ foto_img(vit.foto, "(min-width: 60rem) 28rem, 100vw", prioridade=loop.first) }}
+        <span class="credito-foto">{{ vit.foto.lugar }} · foto: {{ vit.foto.autor }} / Unsplash</span>
+      {% else %}
+        {{ diorama(v.scene or 'mata', v.slug) }}
+      {% endif %}
+      <span class="selo vidro-claro"><i aria-hidden="true"></i>Pesquisado{% if v.researched_on %} em {{ v.researched_on.strftime('%d/%m/%Y') }}{% endif %}</span>
+    </div>
+    <div class="texto">
+      <h2>{{ v.destination }}{% if v.country %}, {{ v.country }}{% endif %}</h2>
+      <div class="quando">
+        {% if v.start_date %}{{ v.start_date.strftime('%d/%m/%Y') }} · {% endif %}
+        {{ v.days }} dias{% if v.budget_usd %} · US$ {{ '{:,}'.format(v.budget_usd).replace(',', '.') }}{% endif %}
+      </div>
+      {% if v.summary %}<p class="resumo">{{ v.summary }}</p>{% endif %}
+      {% if v.headline %}
+      <div class="achado">
+        <span aria-hidden="true">⚠️</span>
+        <span><b>O que muda a viagem:</b> {{ v.headline }}</span>
+      </div>
+      {% endif %}
+    </div>
+  </a>
+  {% else %}
+  <p style="opacity:0.7;">Ainda não há roteiros publicados.</p>
+  {% endfor %}
+</div>
+
+<a class="montar" href="/planejar">
+  <span class="montar-ico" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M16 8l-5 3-3 5 5-3 3-5z"></path></svg></span>
+  <span class="montar-txt">
+    <b>Monte um roteiro com os seus interesses</b>
+    <span>Diga para onde, quando e do que você gosta. Por enquanto, em modo demonstração.</span>
+  </span>
+  <span aria-hidden="true">›</span>
+</a>
+
+{% endblock %}

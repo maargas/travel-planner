@@ -1,6 +1,7 @@
 {% extends "base.html" %}
-{% set page = 'viajantes' %}
-{% block title %}Viajantes — Farol{% endblock %}
+{% from "_viagem.html" import cabecalho %}
+{% set page = 'viagem' %}
+{% block title %}Pessoas — Lisboa (exemplo) — Farol{% endblock %}
 
 {% block head_extra %}
 <style>
@@ -19,10 +20,9 @@
 
 {% block content %}
 
-<div class="page-head">
-  <h1>Viajantes</h1>
-  <div class="sub">Todo mundo vê o mesmo plano, no celular ou no computador</div>
-</div>
+{{ cabecalho(exemplo.destino, exemplo | periodo, exemplo.pessoas, '/exemplo', aba, exemplo=true) }}
+<h2 class="parte-titulo">Quem vai</h2>
+<div class="parte-sub">Todo mundo vê o mesmo plano, no celular ou no computador</div>
 
 <div class="sample-note">
   <span aria-hidden="true">🧪</span>

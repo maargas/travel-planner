@@ -86,6 +86,8 @@ except Exception as exc:
     print(f"[semente] não carregou: {exc}", flush=True)
 
 app.register_blueprint(contas.bp)
+import viagens as viagens_mod  # noqa: E402
+app.register_blueprint(viagens_mod.bp)
 
 # Todo template precisa saber quem está logado e carregar o segredo do
 # formulário, então em vez de passar os dois em cada render_template, eles ficam
@@ -100,6 +102,10 @@ app.jinja_env.globals["csrf_token"] = contas.csrf_token
 # crédito de cada uma. Ficam no semente.py, junto do catálogo.
 app.jinja_env.globals["vitrine"] = semente.vitrine
 app.jinja_env.globals["foto"] = semente.FOTOS.get
+app.jinja_env.globals["minhas_viagens"] = viagens_mod.minhas_viagens
+app.jinja_env.globals["ABAS_VIAGEM"] = viagens_mod.ABAS
+app.jinja_env.filters["periodo"] = lambda v: viagens_mod.periodo(v["ida"], v["volta"])
+app.jinja_env.globals["faltam"] = viagens_mod.faltam
 
 # Tentar senha atrás de senha é o ataque óbvio contra uma tela de login, e o
 # limite por endereço é a defesa mais simples que existe contra ele.
@@ -563,6 +569,8 @@ MESES = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho",
 @app.route("/")
 def inicio():
     """A página que apresenta o Farol: a promessa, como funciona, a prova."""
+    if contas.usuario_atual():
+        return redirect("/viagens")
     from sqlalchemy import select as _sel, func as _func
     destaque = None
     with db.engine.connect() as cx:
@@ -585,11 +593,16 @@ def inicio():
 @app.route("/planejar", methods=["GET"])
 def planejar():
     today, latest = date_bounds()
+    # Vindo de dentro de uma viagem, destino, data e dias já chegam preenchidos.
+    # São só sugestões no formulário: a validação de sempre continua valendo.
+    pre = {k: (request.args.get(k) or "")[:120]
+           for k in ("destination", "start_date", "days")}
     return render_template(
         "planejar.html",
         today=today.isoformat(),
         max_date=latest.isoformat(),
         demo=MOCK_MODE,
+        **pre,
     )
 
 
@@ -727,21 +740,15 @@ def plan():
         ), **form_values)
 
 
-# Prototype screens: static sample data, no account and no database behind them.
-# They exist so testers can see the shape of the finished product before it is built.
-@app.route("/painel")
-def painel():
-    return render_template("painel.html")
-
-
-@app.route("/orcamento")
-def orcamento():
-    return render_template("orcamento.html")
-
-
-@app.route("/viagem")
-def viagem():
-    return render_template("viagem.html")
+# Os endereços antigos das telas de exemplo. Elas viraram as partes da viagem
+# de exemplo (estrutura A); quem tinha o link, ou o app instalado com a tela
+# aberta, continua chegando no lugar certo.
+ANTIGOS = {"/painel": "/viagens", "/orcamento": "/exemplo/gastos",
+           "/viagem": "/exemplo/roteiro", "/lugares": "/exemplo/roteiro",
+           "/documentos": "/exemplo/documentos", "/viajantes": "/exemplo/pessoas"}
+for _antigo, _novo in ANTIGOS.items():
+    app.add_url_rule(_antigo, f"antigo{_antigo.replace('/', '_')}",
+                     (lambda destino: lambda: redirect(destino, code=301))(_novo))
 
 
 @app.route("/sw.js")
@@ -758,18 +765,18 @@ def service_worker():
     return resposta
 
 
-@app.route("/viagens")
-def viagens():
-    """Os roteiros reais, os que foram pesquisados de verdade."""
+@app.route("/explorar")
+def explorar():
+    """Roteiros prontos, pesquisados de verdade — e o caminho para montar o seu."""
     from sqlalchemy import select as _sel
     with db.engine.connect() as cx:
         linhas = cx.execute(
             _sel(db.trips).order_by(db.trips.c.start_date)
         ).mappings().all()
-    return render_template("viagens.html", viagens=linhas)
+    return render_template("explorar.html", viagens=linhas)
 
 
-@app.route("/viagens/<slug>")
+@app.route("/explorar/<slug>")
 def roteiro(slug):
     from sqlalchemy import select as _sel
     with db.engine.connect() as cx:
@@ -781,54 +788,6 @@ def roteiro(slug):
             .where(db.trip_sources.c.trip_id == v["id"])
         ).mappings().all()
     return render_template("roteiro.html", v=v, fontes=fontes)
-
-
-@app.post("/pedir")
-@contas.precisa_login
-def pedir():
-    """Um destino que ainda não existe entra na fila, em vez de virar gasto.
-
-    É a peça que mantém a promessa de precisão sem conta de API: alguém
-    pesquisa o destino de verdade e publica depois.
-    """
-    if not contas.csrf_ok():
-        abort(400)
-    from sqlalchemy import insert as _ins
-    destino = (request.form.get("destination") or "").strip()[:120]
-    if not destino:
-        return redirect("/viagens")
-    def _int(campo, limite):
-        try:
-            return max(1, min(int(request.form.get(campo) or 0), limite))
-        except (ValueError, TypeError):
-            return None
-    try:
-        quando = date.fromisoformat(request.form.get("start_date") or "")
-    except (ValueError, TypeError):
-        quando = None
-    with db.engine.begin() as cx:
-        cx.execute(_ins(db.requests_table).values(
-            user_id=contas.usuario_atual()["id"],
-            destination=destino, start_date=quando,
-            days=_int("days", MAX_DAYS), budget_usd=_int("budget", MAX_BUDGET),
-            interests=(request.form.get("interests") or "").strip()[:255],
-        ))
-    return redirect("/viagens?pedido=1")
-
-
-@app.route("/lugares")
-def lugares():
-    return render_template("lugares.html")
-
-
-@app.route("/documentos")
-def documentos():
-    return render_template("documentos.html")
-
-
-@app.route("/viajantes")
-def viajantes():
-    return render_template("viajantes.html")
 
 
 @app.errorhandler(429)

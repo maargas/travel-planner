@@ -1,100 +1,126 @@
 {% extends "base.html" %}
+{% from "_viagem.html" import cabecalho %}
 {% set page = 'viagem' %}
-{% block title %}Ajustes — Farol{% endblock %}
+{% block title %}{{ v.destino }} — Farol{% endblock %}
 
 {% block head_extra %}
 <style>
-  .cover {
-    border-radius: var(--t-radius-lg); overflow: hidden;
-    height: 8.5rem; position: relative; margin-bottom: 1.125rem;
-    background: linear-gradient(150deg, #1c3150, var(--navy));
+  .pessoas-lista { background: var(--t-surface); border-radius: var(--t-radius-lg); box-shadow: var(--shadow-md); overflow: hidden; }
+  .pessoa { display: flex; align-items: center; gap: 0.75rem; padding: 0.875rem 1.125rem; }
+  .pessoa + .pessoa { border-top: 1px solid var(--t-border); }
+  .pessoa .bola {
+    width: 2.25rem; height: 2.25rem; border-radius: 50%; flex: none;
+    background: var(--t-accent-soft); color: var(--t-accent-text);
+    display: grid; place-items: center; font-weight: 800;
   }
-  .cover svg { position: absolute; bottom: 0; left: 0; width: 100%; height: 60%; }
-  .cover .label { position: absolute; bottom: 0.75rem; left: 1rem; color: #fff; }
-  .cover .label .n { font-family: var(--font-heading); font-weight: 800; font-size: 1.25rem; }
-  .cover .label .d { font-size: 0.75rem; opacity: 0.9; }
+  .pessoa.eu .bola { background: var(--lima); color: var(--navy); }
+  .pessoa .nome { flex: 1; min-width: 0; }
+  .pessoa .nome b { display: block; font-size: 0.9375rem; }
+  .pessoa .nome span { font-size: 0.75rem; color: var(--t-muted); }
+  .tirar {
+    background: none; border: 1px solid var(--t-border); border-radius: var(--t-pill);
+    padding: 0.3125rem 0.75rem; font: inherit; font-size: 0.75rem; font-weight: 700;
+    color: var(--t-muted); cursor: pointer;
+  }
+  .tirar:hover { color: var(--t-danger); border-color: var(--t-danger); }
+  .add-pessoa { display: flex; gap: 0.5rem; margin-top: 0.875rem; }
+  .add-pessoa input {
+    flex: 1; min-width: 0; background: var(--t-surface); border: 1px solid var(--t-border);
+    border-radius: var(--t-pill); padding: 0.6875rem 1rem; font: inherit; font-size: 1rem; color: var(--t-text);
+  }
+  .add-pessoa input:focus-visible { outline: none; border-color: var(--navy); box-shadow: 0 0 0 3px var(--t-accent-soft); }
+  .add-pessoa .btn { width: auto; min-width: 0; padding: 0.6875rem 1.125rem; }
+  .nota { font-size: 0.75rem; color: var(--t-muted); margin-top: 0.75rem; line-height: 1.5; }
 
-  .group-label {
-    font-size: 0.6875rem; letter-spacing: 0.08em; text-transform: uppercase;
-    opacity: 0.55; padding-left: 0.25rem; margin-bottom: 0.5rem; font-weight: 700;
-  }
-
-  .list { background: var(--t-surface); border-radius: var(--t-radius-lg); overflow: hidden; margin-bottom: 1.125rem; }
-  .list-row { display: flex; align-items: center; gap: 0.75rem; padding: 0.875rem 1rem; }
-  .list-row + .list-row { border-top: 1px solid var(--t-border); }
-  .list-row .lbl { flex: 1; font-size: 0.875rem; }
-  .list-row .val { font-size: 0.8125rem; opacity: 0.6; }
-
-  .switch {
-    width: 2.75rem; height: 1.625rem; border-radius: var(--t-pill);
-    position: relative; border: none; cursor: pointer; flex: none;
-    transition: background 0.15s;
-  }
-  .switch::after {
-    content: ""; position: absolute; top: 2px; width: 1.375rem; height: 1.375rem;
-    border-radius: 50%; background: #fff; transition: left 0.15s, right 0.15s;
-  }
-  .switch[aria-checked="true"] { background: var(--t-accent); }
-  .switch[aria-checked="true"]::after { right: 2px; }
-  .switch[aria-checked="false"] { background: var(--t-border); }
-  .switch[aria-checked="false"]::after { left: 2px; }
-  .switch:focus-visible { outline: 2px solid var(--t-accent); outline-offset: 2px; }
+  .ajustes-card { background: var(--t-surface); border-radius: var(--t-radius-lg); box-shadow: var(--shadow-md); padding: 1.125rem 1.25rem; }
+  .ajustes-card dl { display: grid; grid-template-columns: auto 1fr; gap: 0.5rem 1rem; margin: 0; font-size: 0.875rem; }
+  .ajustes-card dt { color: var(--t-muted); }
+  .ajustes-card dd { margin: 0; font-weight: 700; }
+  .perigo { margin-top: 1rem; border: 1px solid rgba(180, 35, 24, 0.3); border-radius: var(--t-radius-lg); padding: 1.125rem 1.25rem; background: var(--t-surface); }
+  .perigo h2 { font-size: 1rem; color: var(--t-danger); }
+  .perigo p { font-size: 0.8125rem; color: var(--t-muted); margin: 0.25rem 0 0.75rem; }
+  .perigo label { display: flex; gap: 0.5rem; align-items: flex-start; font-size: 0.8125rem; margin-bottom: 0.75rem; cursor: pointer; }
+  .btn-perigo { background: var(--t-danger); color: #fff; }
+  .erro { background: var(--t-danger-bg); color: var(--t-danger); font-weight: 600; border-radius: var(--t-radius); padding: 0.625rem 0.875rem; margin-bottom: 0.75rem; font-size: 0.8125rem; }
 </style>
 {% endblock %}
 
 {% block content %}
+{% set base = '/viagens/' ~ v.id %}
+{{ cabecalho(v.destino, v | periodo, 1 + pessoas | length, base, aba, dias=faltam(v.ida)) }}
 
-<div class="page-head">
-  <h1>Detalhes da viagem</h1>
-</div>
-
-<div class="sample-note">
-  <span aria-hidden="true">🧪</span>
-  <span><strong>Tela de exemplo.</strong> Os controles reagem ao toque, mas ainda não guardam nada.</span>
-</div>
-
-<div class="cover">
-  <svg viewBox="0 0 300 80" preserveAspectRatio="none" aria-hidden="true">
-    <path d="M0 60 L40 20 L80 55 L120 10 L160 50 L200 25 L240 55 L300 15 L300 80 L0 80 Z" fill="#fff" opacity="0.1"></path>
-  </svg>
-  <div class="label">
-    <div class="n">Lisboa, Portugal</div>
-    <div class="d">2 a 9 de outubro · 7 noites</div>
+{% if aba == 'roteiro' %}
+  {% set dias_viagem = ((v.volta - v.ida).days + 1) if v.ida and v.volta else '' %}
+  <div class="vazio">
+    <div class="vazio-ico" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M16 8l-5 3-3 5 5-3 3-5z"></path></svg></div>
+    <h2>O roteiro desta viagem</h2>
+    <p>Pelos interesses de quem vai: cada parada com o horário conferido e o caminho até a próxima.</p>
+    <div class="acoes">
+      <a class="btn btn-primary" href="/planejar?destination={{ v.destino | urlencode }}{% if v.ida %}&start_date={{ v.ida.isoformat() }}{% endif %}{% if dias_viagem and dias_viagem <= 30 %}&days={{ dias_viagem }}{% endif %}">Montar o roteiro</a>
+      <a class="btn btn-outline" href="/explorar">Ver roteiros prontos</a>
+    </div>
+    <span class="breve">Por enquanto o roteiro abre em demonstração e ainda não fica guardado aqui</span>
   </div>
-</div>
 
-<div class="group-label">Geral</div>
-<div class="list">
-  <div class="list-row">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--t-accent)" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="3"></rect><path d="M3 10h18M8 2v4M16 2v4"></path></svg>
-    <div class="lbl">Datas</div>
-    <div class="val">2 a 9 de out</div>
+{% elif aba == 'gastos' %}
+  <div class="vazio">
+    <div class="vazio-ico" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="13" rx="2"></rect><circle cx="12" cy="12.5" r="2.5"></circle></svg></div>
+    <h2>Gastos e quem deve a quem</h2>
+    <p>Cada gasto lançado aqui é dividido entre quem participou, e o app mostra quanto cada um deve a quem.</p>
+    <div class="acoes"><a class="btn btn-outline" href="/exemplo/gastos">Ver como fica, no exemplo</a></div>
+    <span class="breve">Ainda não funciona — é o próximo passo</span>
   </div>
-  <div class="list-row">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--t-accent-soft)" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="7" r="4"></circle><path d="M2 21c0-3.5 3-5.5 7-5.5s7 2 7 5.5"></path><path d="M17 7a3 3 0 110 6"></path><path d="M23 21c0-2.8-2-4.5-4.5-5"></path></svg>
-    <div class="lbl">Viajantes</div>
-    <div class="val">4 pessoas</div>
-  </div>
-  <div class="list-row">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--t-accent)" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 20A7 7 0 019.8 6.1C15.5 5 17 9.5 15 12.5c-2 3-5.7 3.3-4.3 7.5z"></path><path d="M9.9 11.1c1.5-3.5 4.5-4.5 7-3.5"></path></svg>
-    <div class="lbl">Tipo de viagem</div>
-    <div class="val">Natureza e trilhas</div>
-  </div>
-</div>
 
-<div class="group-label">Avisos</div>
-<div class="list">
-  <div class="list-row">
-    <div class="lbl">Lembretes do roteiro</div>
-    <button class="switch" role="switch" aria-checked="true" aria-label="Lembretes do roteiro"></button>
+{% elif aba == 'documentos' %}
+  <div class="vazio">
+    <div class="vazio-ico" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8z"></path><path d="M14 3v5h5"></path></svg></div>
+    <h2>Documentos da viagem</h2>
+    <p>Passagem, reservas e seguro num lugar só, à mão na hora do embarque.</p>
+    <div class="acoes"><a class="btn btn-outline" href="/exemplo/documentos">Ver como fica, no exemplo</a></div>
+    <span class="breve">Ainda não — documento é dado sensível e pede o mesmo cuidado das senhas</span>
   </div>
-  <div class="list-row">
-    <div class="lbl">Alertas de orçamento</div>
-    <button class="switch" role="switch" aria-checked="false" aria-label="Alertas de orçamento"></button>
+
+{% elif aba == 'pessoas' %}
+  <div class="pessoas-lista">
+    <div class="pessoa eu">
+      <span class="bola" aria-hidden="true">{{ usuario().name[:1] | upper }}</span>
+      <span class="nome"><b>{{ usuario().name }}</b><span>Você · criou a viagem</span></span>
+    </div>
+    {% for p in pessoas %}
+    <div class="pessoa">
+      <span class="bola" aria-hidden="true">{{ p.nome[:1] | upper }}</span>
+      <span class="nome"><b>{{ p.nome }}</b><span>Vai junto</span></span>
+      <form method="POST" action="{{ base }}/pessoas/{{ p.id }}/tirar">
+        <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+        <button class="tirar" type="submit" aria-label="Tirar {{ p.nome }} da viagem">Tirar</button>
+      </form>
+    </div>
+    {% endfor %}
   </div>
-</div>
+  <form class="add-pessoa" method="POST" action="{{ base }}/pessoas">
+    <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+    <label class="sr" for="nome" style="position:absolute; left:-9999px;">Nome de quem vai junto</label>
+    <input type="text" id="nome" name="nome" maxlength="60" placeholder="Nome de quem vai junto" required>
+    <button class="btn btn-escuro" type="submit">Adicionar</button>
+  </form>
+  <p class="nota">Não precisa ter conta no Farol para entrar na divisão dos gastos. Convidar
+    alguém para ver a viagem no próprio celular é um passo mais para a frente.</p>
 
-<a class="btn btn-outline" href="/painel">Sair da viagem</a>
-
+{% elif aba == 'ajustes' %}
+  <div class="ajustes-card">
+    <dl>
+      <dt>Destino</dt><dd>{{ v.destino }}</dd>
+      <dt>Datas</dt><dd>{{ v | periodo }}</dd>
+      <dt>Pessoas</dt><dd>{{ 1 + pessoas | length }}</dd>
+    </dl>
+  </div>
+  <form class="perigo" method="POST" action="{{ base }}/apagar">
+    <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+    <h2>Apagar esta viagem</h2>
+    <p>Some tudo o que está nela, e não tem como desfazer.</p>
+    {% if erro == 'confirmar' %}<div class="erro" role="alert">Marque a confirmação abaixo para apagar.</div>{% endif %}
+    <label><input type="checkbox" name="confirmo" value="sim"> Sim, quero apagar a viagem para {{ v.destino }}.</label>
+    <button class="btn btn-perigo" type="submit">Apagar viagem</button>
+  </form>
+{% endif %}
 {% endblock %}
-

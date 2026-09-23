@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% set page = 'conta' %}
-{% block title %}Sua conta — Farol{% endblock %}
+{% block title %}Conta — Farol{% endblock %}
 
 {% block head_extra %}
 <style>
@@ -56,11 +56,11 @@
       <span class="txt"><b>Trocar senha</b><span class="sub">Pede a senha atual e a nova</span></span>
       <span aria-hidden="true">›</span>
     </a>
-    <a class="opcao" href="/viagens#pedir">
-      <span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-6.3 7-11a7 7 0 10-14 0c0 4.7 7 11 7 11z"></path><circle cx="12" cy="10" r="2.5"></circle></svg></span>
-      <span class="txt"><b>Pedir um destino</b><span class="sub">Entra na fila para ser pesquisado</span></span>
+    <button class="opcao" type="button" data-instalar>
+      <span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="3"></rect><path d="M12 7v7M9 11l3 3 3-3"></path></svg></span>
+      <span class="txt"><b>Instalar o app</b><span class="sub">Na tela de início, abrindo em tela cheia</span></span>
       <span aria-hidden="true">›</span>
-    </a>
+    </button>
     <form method="POST" action="/sair">
       <input type="hidden" name="csrf" value="{{ csrf_token() }}">
       <button class="opcao sair" type="submit">

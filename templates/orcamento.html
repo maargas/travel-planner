@@ -1,6 +1,7 @@
 {% extends "base.html" %}
-{% set page = 'orcamento' %}
-{% block title %}Orçamento — Farol{% endblock %}
+{% from "_viagem.html" import cabecalho %}
+{% set page = 'viagem' %}
+{% block title %}Gastos — Lisboa (exemplo) — Farol{% endblock %}
 
 {% block head_extra %}
 <style>
@@ -18,10 +19,9 @@
 
 {% block content %}
 
-<div class="page-head">
-  <h1>Orçamento de Lisboa</h1>
-  <div class="sub">2 a 9 de outubro · 4 viajantes</div>
-</div>
+{{ cabecalho(exemplo.destino, exemplo | periodo, exemplo.pessoas, '/exemplo', aba, exemplo=true) }}
+<h2 class="parte-titulo">Gastos e quem deve a quem</h2>
+<div class="parte-sub">2 a 9 de outubro · 4 viajantes</div>
 
 <div class="sample-note">
   <span aria-hidden="true">🧪</span>

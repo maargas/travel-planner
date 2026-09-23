@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% from "_cenas.html" import diorama %}
 {% from "_marca.html" import foto_img %}
-{% set page = 'viagens' %}
+{% set page = 'explorar' %}
 {% block title %}{{ v.destination }} — Farol{% endblock %}
 
 {% block head_extra %}
@@ -134,9 +134,9 @@
     {{ diorama(v.scene or 'mata', 'capa') }}
   {% endif %}
 
-  <a class="voltar vidro" href="/viagens">
+  <a class="voltar vidro" href="/explorar">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg>
-    Roteiros
+    Explorar
   </a>
 
   <div class="faixa">

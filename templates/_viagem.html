@@ -1,0 +1,23 @@
+{# O cabeçalho de uma viagem: o cartão com destino e datas, e as quatro partes.
+   `base` é o começo do endereço: /viagens/12 numa viagem de verdade, /exemplo
+   na viagem de exemplo. #}
+{% macro cabecalho(destino, quando, pessoas, base, aba, exemplo=false, dias=none) -%}
+<a class="voltar-viagens" href="/viagens?todas=1">‹ Suas viagens</a>
+<div class="viagem-capa">
+  <svg class="ridge" viewBox="0 0 300 180" preserveAspectRatio="none" aria-hidden="true"><path d="M0 180 L50 90 L100 150 L150 50 L205 130 L250 70 L300 140 L300 180 Z" fill="currentColor"></path></svg>
+  <div class="inner">
+    {% if exemplo %}<span class="chip">Viagem de exemplo</span>{% endif %}
+    <h1>{{ destino }}</h1>
+    <div class="quando">{{ quando }} · {{ pessoas }} pessoa{{ 's' if pessoas != 1 }}</div>
+    {% if dias is not none %}
+      <span class="faltam">{{ 'É hoje' if dias == 0 else ('Falta 1 dia' if dias == 1 else 'Faltam ' ~ dias ~ ' dias') }}</span>
+    {% endif %}
+  </div>
+  {% if not exemplo %}<a class="ajustes vidro" href="{{ base }}/ajustes">Ajustes</a>{% endif %}
+</div>
+<nav class="viagem-abas" aria-label="Partes da viagem">
+  {% for id, nome in ABAS_VIAGEM %}
+  <a href="{{ base }}/{{ id }}" {% if aba == id %}aria-current="page"{% endif %}>{{ nome }}</a>
+  {% endfor %}
+</nav>
+{%- endmacro %}

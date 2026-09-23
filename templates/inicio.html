@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "_marca.html" import logo, conta_rodape, foto_img %}
+{% from "_marca.html" import logo, foto_img %}
 {% set page = 'inicio' %}
 {% set layout = 'site' %}
 {% block title %}Farol — Roteiros de viagem conferidos{% endblock %}
@@ -281,8 +281,8 @@
     <a class="marca" href="/"><span class="placa">{{ logo(26) }}</span><span>Farol</span></a>
     <nav class="capa-menu vidro" aria-label="Seções">
       <a href="#como-funciona">Como funciona</a>
-      <a href="/viagens">Roteiros</a>
-      <a href="/planejar">Planejar</a>
+      <a href="/explorar">Explorar</a>
+      <a href="/viagens">Organizar uma viagem</a>
       <button type="button" data-instalar>Instalar o app</button>
     </nav>
     {% if usuario() %}
@@ -302,7 +302,7 @@
     </p>
 
     <div class="capa-acoes-cel">
-      <a class="pilula vidro" href="{{ '/viagens/' ~ d.slug if d else '/viagens' }}">
+      <a class="pilula vidro" href="{{ '/explorar/' ~ d.slug if d else '/explorar' }}">
         <span class="bola"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span>
         <span class="txt">Ver um roteiro de verdade</span>
         <span class="setas" aria-hidden="true">›››</span>
@@ -312,7 +312,7 @@
 
     <div class="capa-acoes-pc">
       <button class="btn btn-primary" type="button" data-instalar>Instalar grátis</button>
-      <a class="vidro" href="{{ '/viagens/' ~ d.slug if d else '/viagens' }}">Ver um roteiro de verdade →</a>
+      <a class="vidro" href="{{ '/explorar/' ~ d.slug if d else '/explorar' }}">Ver um roteiro de verdade →</a>
     </div>
   </div>
 
@@ -343,7 +343,7 @@
       <div class="nome">{{ t[4].lugar }}</div>
       <span class="selo-parada {{ t[4].tipo }}">{{ t[4].etiqueta }}</span>
     </div>
-    <a class="trecho-legenda vidro" href="/viagens/{{ d.slug }}">Trecho real · {{ d.destination }}, {{ d.trecho_dia }} →</a>
+    <a class="trecho-legenda vidro" href="/explorar/{{ d.slug }}">Trecho real · {{ d.destination }}, {{ d.trecho_dia }} →</a>
   </div>
   {% endif %}
 
@@ -378,7 +378,7 @@
     </ol>
     <div class="trecho-rodape">
       <span>Horário, etiqueta e minutos tirados do roteiro publicado.</span>
-      <a href="/viagens/{{ d.slug }}">Ver o dia inteiro →</a>
+      <a href="/explorar/{{ d.slug }}">Ver o dia inteiro →</a>
     </div>
   </div>
 </section>
@@ -432,7 +432,7 @@
         {% if d.fontes %} · {{ d.fontes }} fontes lidas e listadas{% endif %}
         {% if d.researched_on %} · pesquisado em {{ d.researched_on.strftime('%d/%m/%Y') }}{% endif %}
       </div>
-      <a class="btn btn-primary" href="/viagens/{{ d.slug }}">Ler o roteiro inteiro</a>
+      <a class="btn btn-primary" href="/explorar/{{ d.slug }}">Ler o roteiro inteiro</a>
     </div>
   </div>
 </section>
@@ -446,19 +446,18 @@
     </div>
     <div class="botoes">
       <button class="btn btn-escuro" type="button" data-instalar>Instalar o app</button>
-      <a class="btn btn-outline" href="{{ '/viagens#pedir' if usuario() else '/criar-conta?proximo=/viagens' }}">Pedir um destino</a>
+      <a class="btn btn-outline" href="/viagens">Organizar uma viagem</a>
     </div>
   </div>
 </section>
 
 <footer class="rodape">
-  {{ conta_rodape() }}
   <div class="rodape-linha" style="margin-top:1.5rem;">
     <a class="marca" href="/">{{ logo(24) }}<span>Farol</span></a>
     <nav aria-label="Rodapé">
-      <a href="/viagens">Roteiros</a>
-      <a href="/planejar">Planejar</a>
-      {% if not usuario() %}<a href="/entrar">Entrar</a>{% endif %}
+      <a href="/explorar">Explorar</a>
+      <a href="/viagens">Viagens</a>
+      <a href="/entrar">Entrar</a>
     </nav>
   </div>
   <p class="fotos">Fotos do Unsplash, cada uma do lugar de verdade e com o nome de quem fotografou. Feito por <a href="https://github.com/maargas" target="_blank" rel="noopener">maargas</a>.</p>

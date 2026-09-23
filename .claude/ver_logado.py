@@ -30,12 +30,21 @@ from werkzeug.security import generate_password_hash  # noqa: E402
 assert db.kind() == "sqlite", "o lançador de teste só pode usar banco descartável"
 
 with db.engine.begin() as cx:
+    cx.execute(delete(db.viagem_pessoas))
+    cx.execute(delete(db.viagens))
     cx.execute(delete(db.requests_table))
     cx.execute(delete(db.users))
     uid = cx.execute(insert(db.users).values(
         username="visitante", name="Visitante",
         password_hash=generate_password_hash(secrets.token_urlsafe(32)),
     )).inserted_primary_key[0]
+    # Uma viagem de mentira, só neste banco descartável, para ver as telas cheias.
+    from datetime import date
+    vid = cx.execute(insert(db.viagens).values(
+        user_id=uid, destino="Buenos Aires, Argentina",
+        ida=date(2026, 11, 12), volta=date(2026, 11, 16),
+    )).inserted_primary_key[0]
+    cx.execute(insert(db.viagem_pessoas), [{"viagem_id": vid, "nome": n} for n in ("Maya", "Diego")])
 
 
 @app.app.before_request
