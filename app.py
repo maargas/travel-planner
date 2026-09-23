@@ -74,6 +74,9 @@ limiter = Limiter(
 )
 
 db.init()
+# Uma linha no registro do Render que responde "onde as contas estão sendo
+# guardadas?". Só o tipo do banco: o endereço tem senha e nunca é impresso.
+print(f"[banco] {db.kind()}", flush=True)
 # Os roteiros pesquisados à mão são carregados a cada arranque. É idempotente, e
 # faz com que publicar conteúdo novo seja publicar o app — sem passo manual.
 import semente

@@ -2,7 +2,8 @@
 
 App de roteiros de viagem para **quem viaja pouco** e vai a um lugar que não
 conhece. O dono (Gabriel, estudante da FGV) não programa e está aprendendo.
-O nome é **Farol** (decidido em 22/09/2026, depois de quatro rodadas). A ideia
+O nome em uso é **Farol** (escolhido em 22/09/2026, depois de quatro rodadas;
+ele ainda quer ajustar, então não é definitivo). A ideia
 vem das palavras dele: o app tem de "ser um norte pra qualquer um".
 
 A promessa, que manda em toda decisão: **precisão verificável**. O app nasceu
@@ -71,8 +72,8 @@ nome concreto que vira símbolo (a referência é a marca Caju).
 
 ## Marca
 
-**Farol.** Decidido — ele disse que não quer mais gastar tempo com nome. Não
-reabrir o assunto por conta própria.
+**Farol**, por ora. Ele disse que o nome "ainda não é fixo" e que avisa quando
+quiser voltar ao assunto — não reabrir por conta própria.
 
 - Símbolo: farol gordinho, torre vermelha com faixa creme, lanterna amarela,
   cúpula e pedra azul-marinho, facho aceso para os dois lados. Fonte da verdade:
@@ -81,7 +82,7 @@ reabrir o assunto por conta própria.
 - Nome escrito em **Fredoka 600** (arredondada) — só na marca.
 - Ícones PNG gerados a partir do mesmo desenho: `icon-192`, `icon-512`,
   `icon-maskable-512` (com margem para o Android recortar) e `apple-touch-icon`.
-- Pendente, e do dono: conferir `farol.com.br` no registro.br e a marca no INPI.
+- Domínio e INPI: só quando ele pedir. Não lembrar a cada resposta.
 
 ## Onde as coisas estão
 
@@ -101,3 +102,8 @@ Render, serviço criado à mão: **não lê o `render.yaml`**. Variável nova se
 no painel do Render. O plano grátis dorme após 15 min sem visita (~50 s para
 acordar). Banco permanente: Neon, ainda pendente — até lá, conta criada no site
 some a cada publicação.
+
+O servidor do Render fica em **Oregon** (o endereço aponta para
+`gcp-us-west1`). O banco tem de ficar perto dele, e não perto do usuário: cada
+página conversa com o banco várias vezes. No Neon, a região certa é **AWS US
+West 2 (Oregon)** — e ela não muda depois que o projeto é criado.
