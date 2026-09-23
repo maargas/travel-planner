@@ -29,17 +29,19 @@ os amigos podem ver antes de construir.
    participou, ver o saldo de cada um. *Por quê:* pilar 2, e é o que um grupo
    usa todo dia na viagem. *Perde:* exige cuidado com arredondamento e moedas
    diferentes.
-2. **Roteiro dentro da viagem (G).** Pedir o roteiro com os interesses e
-   guardá-lo na viagem. *Balança que é decisão sua:* gerar na hora pela API
-   custa dinheiro do console (cerca de US$ 0,11 por roteiro, nas medições de
-   antes); montar em conversa comigo usa o seu plano, não o console, mas não é
-   instantâneo.
-3. **Documentos (M–G).** Guardar passagens e reservas. *Balança:* documento é
-   dado sensível (passaporte), com o mesmo cuidado das senhas; e o plano grátis
-   do Render não guarda arquivos — precisaria de um serviço de arquivos.
-   Decisão sua.
-4. **Viajar junto (G).** Convidar amigos para a mesma viagem, cada um com a
-   sua conta. *Por quê:* sem isso, os gastos ficam só no celular de quem lançou.
+2. **Amigos e viajar junto (G).** Aba Amigos, amizade dos dois lados, cada
+   viagem dizendo quem vê; e chamar um amigo para dentro de uma viagem.
+   *Depende de duas respostas dele:* onde fica (aba própria, recomendado, ou
+   dentro de Explorar) e o que os amigos veem por padrão (destino e mês,
+   recomendado; nada; ou destino e datas). *Perde:* privacidade é o risco —
+   quem viaja deixa a casa vazia.
+3. **Roteiro dentro da viagem (G).** Pedir o roteiro com os interesses e
+   guardá-lo na viagem. *Decisão sua:* pela API custa dinheiro do console
+   (cerca de US$ 0,11 por roteiro, nas medições de antes); em conversa comigo
+   usa o seu plano, mas não é instantâneo.
+4. **Documentos (M–G).** Passagens e reservas. *Decisão sua:* documento é dado
+   sensível, com o cuidado das senhas, e o plano grátis do Render não guarda
+   arquivos — precisaria de um serviço de arquivos.
 
 ## Consertos pequenos (não mudam o rumo)
 
