@@ -1,0 +1,31 @@
+{# Peças que aparecem em mais de um lugar. O desenho do farol é o mesmo de
+   static/farol.svg — lá está a fonte da verdade; se mudar lá, muda aqui. #}
+
+{% macro logo(tamanho=30) -%}
+<svg width="{{ tamanho }}" height="{{ tamanho }}" viewBox="0 0 64 64" aria-hidden="true"><path d="M32 19 L2 6 L2 26 Z" fill="#ffc93c" opacity=".9"/><path d="M32 19 L62 6 L62 26 Z" fill="#ffc93c" opacity=".9"/><path d="M21 58 L25 27 L39 27 L43 58 Z" fill="#c8382e"/><path d="M23.4 38 L40.6 38 L41.5 45 L22.5 45 Z" fill="#fff6e6"/><rect x="23" y="13" width="18" height="12" rx="4" fill="#ffc93c"/><path d="M22 14 Q32 3 42 14 Z" fill="#1f3a5f"/><rect x="21" y="24" width="22" height="4" rx="2" fill="#1f3a5f"/><path d="M14 60 Q32 53 50 60 Z" fill="#1f3a5f"/></svg>
+{%- endmacro %}
+
+{# No celular, o único lugar de sair da conta: no pé da página. #}
+{% macro conta_rodape() -%}
+{% if usuario() %}
+<div class="conta-rodape">
+  <span>Você entrou como <b>@{{ usuario().username }}</b></span>
+  <form method="POST" action="/sair">
+    <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+    <button class="conta-sair" type="submit">Sair</button>
+  </form>
+</div>
+{% endif %}
+{%- endmacro %}
+
+{# Uma foto do registro em semente.FOTOS: o celular baixa a de 800 px, a tela
+   grande a de 1600. `tamanhos` diz ao navegador que largura a foto ocupa.
+   A foto principal da tela (`prioridade`) não leva decoding="async": com ele,
+   o Chrome chegou a deixar a capa em branco até alguém mexer na página. #}
+{% macro foto_img(f, tamanhos="100vw", classe="", prioridade=false) -%}
+<img class="{{ classe }}"
+     src="/static/fotos/{{ f.arquivo }}.jpg"
+     srcset="/static/fotos/{{ f.arquivo }}-800.jpg 800w, /static/fotos/{{ f.arquivo }}.jpg 1600w"
+     sizes="{{ tamanhos }}" alt="{{ f.alt }}"
+     {% if prioridade %}fetchpriority="high"{% else %}loading="lazy" decoding="async"{% endif %}>
+{%- endmacro %}

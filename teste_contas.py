@@ -134,6 +134,41 @@ html = anon.get("/viagens").get_data(as_text=True)
 check("toda pagina tem o botao de instalar", 'id="instalar"' in html)
 check("e as instrucoes para iPhone", "Adicionar à Tela de Início" in html)
 
+# ── A página que apresenta o Farol ──────────────────────────────────────────
+import semente  # noqa: E402
+
+html = anon.get("/").get_data(as_text=True)
+md = open(os.path.join("conteudo", "banff.md"), encoding="utf-8").read()
+check("a capa mostra a promessa", "Um plano que chega na hora certa" in html)
+check("e a prova: o roteiro de Banff, com o achado",
+      "Stampede" in html and "/viagens/banff-julho-2027" in html)
+check("o numero de fontes da capa e o do roteiro",
+      f"{len(semente._fontes(md))} fontes lidas" in html)
+
+# O trecho desenhado na capa é uma afirmação sobre o roteiro. Se alguém mudar
+# o .md, este teste avisa antes que a vitrine fique dizendo outra coisa.
+trecho = semente.VITRINE["banff-julho-2027"]["trecho"]
+fora = [f for passo in trecho for f in passo["no_md"] if f not in md]
+check("cada parada e deslocamento do trecho esta escrito no roteiro", not fora)
+check("e o trecho aparece na capa",
+      all((p.get("lugar") or p.get("ida")) in html for p in trecho))
+
+creditos = open(os.path.join("static", "fotos", "CREDITOS.md"), encoding="utf-8").read()
+fotos_ok = all(
+    os.path.exists(os.path.join("static", "fotos", f["arquivo"] + sufixo + ".jpg"))
+    for f in semente.FOTOS.values() for sufixo in ("", "-800")
+)
+check("toda foto existe nos dois tamanhos", fotos_ok)
+check("toda foto esta na lista de creditos",
+      all(f["arquivo"] in creditos for f in semente.FOTOS.values()))
+check("e o fotografo aparece na capa",
+      all(semente.FOTOS[k]["autor"] in html for k in ("louise", "moraine", "moraine-nublado")))
+
+check("o formulario de roteiro mudou para /planejar",
+      'action="/plan"' in anon.get("/planejar").get_data(as_text=True))
+check("quem esta logado tem como sair, tambem no celular",
+      'class="conta-rodape"' in c.get("/viagens").get_data(as_text=True))
+
 # ── Resultado ───────────────────────────────────────────────────────────────
 print()
 for label, ok in checks:

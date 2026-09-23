@@ -4,10 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>{% block title %}Farol — Roteiros de viagem{% endblock %}</title>
-  <meta name="description" content="Roteiro de viagem verificado nas suas datas reais.">
+  <meta name="description" content="Roteiros de viagem conferidos nas suas datas: horário de abertura, o que acontece na cidade e os minutos entre cada parada.">
 
   <link rel="manifest" href="/static/manifest.json">
-  <meta name="theme-color" content="#1a1020">
+  <meta name="theme-color" content="#0f1b2d">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Farol">
@@ -18,93 +18,104 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Caprasimo&family=Figtree:wght@400;600;700&family=Fredoka:wght@600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
   <style>
-    /* ── Palettes, straight from the original app design ───────────────────────
-       Every colour on the page reads from a --t-* token, so switching the theme
-       attribute on <html> repaints the whole app with no other change. */
-    :root,
-    [data-theme="plum"] {
-      --t-bg:#1a1020; --t-surface:#251630; --t-surface-2:#35213f; --t-text:#f6edf6; --t-muted:#b49bb8;
-      --t-chrome:#120a17; --t-border:rgba(246,237,246,0.11);
-      --t-accent:#eb9a5c; --t-accent-soft:#f7c294; --t-accent-deep:#8a4a22; --t-accent-ink:#1a1020; --t-accent-text:#f7c294;
-      --t-ink-wash:rgba(255,255,255,0.045);
-    }
-    [data-theme="ember"] {
-      --t-bg:#14110f; --t-surface:#1d1917; --t-surface-2:#2b2421; --t-text:#f7f1ea; --t-muted:#ab9d90;
-      --t-chrome:#0e0c0b; --t-border:rgba(247,241,234,0.10);
-      --t-accent:#e0a32e; --t-accent-soft:#f3c96a; --t-accent-deep:#8a5f10; --t-accent-ink:#171310; --t-accent-text:#f3c96a;
-      --t-ink-wash:rgba(255,255,255,0.045);
-    }
-    [data-theme="blueprint"] {
-      --t-bg:#10172e; --t-surface:#182142; --t-surface-2:#24305c; --t-text:#edf1ff; --t-muted:#9aa7cf;
-      --t-chrome:#0b1122; --t-border:rgba(237,241,255,0.11);
-      --t-accent:#59c1f5; --t-accent-soft:#9adcff; --t-accent-deep:#1d5c85; --t-accent-ink:#0a1020; --t-accent-text:#9adcff;
-      --t-ink-wash:rgba(255,255,255,0.045);
-    }
-    [data-theme="terracotta"] {
-      --t-bg:#f6ece0; --t-surface:#fffaf2; --t-surface-2:#ecdcc7; --t-text:#241c16; --t-muted:#6b5a4a;
-      --t-chrome:#efe2d1; --t-border:rgba(36,28,22,0.14);
-      --t-accent:#b4552b; --t-accent-soft:#e39a63; --t-accent-deep:#7d3616; --t-accent-ink:#fff6ec; --t-accent-text:#7d3616;
-      --t-ink-wash:rgba(0,0,0,0.045);
-    }
-    [data-theme="seaglass"] {
-      --t-bg:#eef3ee; --t-surface:#ffffff; --t-surface-2:#dbe7e0; --t-text:#10201c; --t-muted:#4b5f58;
-      --t-chrome:#e3ede7; --t-border:rgba(16,32,28,0.13);
-      --t-accent:#14655a; --t-accent-soft:#6fb3a4; --t-accent-deep:#0b453d; --t-accent-ink:#f2fbf8; --t-accent-text:#0b453d;
-      --t-ink-wash:rgba(0,0,0,0.045);
-    }
-
-    /* The design defines no error colour, so one is added per light/dark ground. */
-    :root { --t-danger: #e8806f; --t-danger-bg: rgba(232,128,111,0.12); }
-    [data-theme="terracotta"], [data-theme="seaglass"] {
-      --t-danger: #a8321f; --t-danger-bg: rgba(168,50,31,0.09);
-    }
-
+    /* ── A direção "Foto e vidro" ──────────────────────────────────────────
+       Foto de verdade, vidro fosco por cima, marinho no texto e verde-limão
+       no que se toca. Toda cor da página lê um token --t-*, então mudar a
+       paleta é mudar só este bloco. */
     :root {
-      --font-heading: "Caprasimo", Georgia, serif;
-      --font-body:    "Figtree", system-ui, -apple-system, sans-serif;
+      --navy: #0f1b2d;
+      --lima: #c6f36a;
+      --menta: #9fe0d0;
+      --ambar: #ffd98a;
 
-      --t-radius-sm: 11px;
+      --t-bg: #f3f6f9;
+      --t-surface: #ffffff;
+      --t-surface-2: #eef2f6;
+      --t-text: var(--navy);
+      --t-muted: #5a6b7d;
+      --t-chrome: #ffffff;
+      --t-border: rgba(15, 27, 45, 0.10);
+
+      --t-accent: var(--lima);
+      --t-accent-soft: #e6f9c2;
+      --t-accent-deep: var(--menta);
+      --t-accent-ink: var(--navy);
+      /* Limão sobre branco não se lê. Texto de destaque usa este verde escuro. */
+      --t-accent-text: #3f6212;
+      --t-ink-wash: rgba(15, 27, 45, 0.05);
+
+      --t-danger: #b42318;
+      --t-danger-bg: rgba(180, 35, 24, 0.08);
+
+      --font-heading: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+      --font-body:    "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+      /* A Fredoka é só da marca: o nome Farol, e nada mais. */
+      --font-marca:   "Fredoka", "Plus Jakarta Sans", sans-serif;
+
+      --t-radius-sm: 12px;
       --t-radius: 18px;
-      --t-radius-lg: 28px;
+      --t-radius-lg: 22px;
       --t-pill: 999px;
 
-      --shadow-md: 0 3px 10px rgba(0,0,0,0.28);
-      --shadow-lg: 0 12px 32px rgba(0,0,0,0.34);
+      --shadow-md: 0 6px 18px rgba(15, 27, 45, 0.07);
+      --shadow-lg: 0 18px 40px rgba(15, 27, 45, 0.16);
 
-      --nav-h: 4.5rem;
-      /* 232px in the design, which is where the sidebar's proportions come from. */
+      /* A barra de abas do celular flutua: 64px de altura mais 10px de folga. */
+      --nav-h: 5.25rem;
       --side-w: 14.5rem;
+      --topo-seguro: env(safe-area-inset-top, 0px);
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       background: var(--t-bg);
-      /* The "topo" texture from the design: faint concentric contour rings. */
-      background-image: repeating-radial-gradient(circle at 82% 8%, transparent 0 26px, var(--t-ink-wash) 26px 27px);
-      background-attachment: fixed;
       color: var(--t-text);
       font-family: var(--font-body);
       font-size: 15px;
       line-height: 1.55;
       -webkit-font-smoothing: antialiased;
-      padding: 0 max(1rem, env(safe-area-inset-left));
-      padding-bottom: calc(var(--nav-h) + env(safe-area-inset-bottom));
-      /* `clip`, not `hidden`: hidden turns body into a scroll container, and the
-         sticky top bar then pins to that instead of the viewport. */
+      /* `clip`, e não `hidden`: hidden transforma o body num lugar de rolagem. */
       overflow-x: clip;
-      transition: background-color 0.2s, color 0.2s;
     }
 
-    h1, h2, h3 { font-family: var(--font-heading); font-weight: 400; line-height: 1.12; letter-spacing: -0.015em; }
+    /* App instalado no iPhone: a página desenha por baixo da barra de status,
+       cujo texto é sempre branco. Nas telas claras, uma faixa marinho atrás
+       dela; na capa, a foto faz esse papel. */
+    body.app::before {
+      content: ""; position: fixed; top: 0; left: 0; right: 0; z-index: 30;
+      height: var(--topo-seguro); background: var(--navy);
+    }
+
+    h1, h2, h3 { font-family: var(--font-heading); font-weight: 800; line-height: 1.12; letter-spacing: -0.02em; }
     a { color: var(--t-accent-text); }
 
-    .wrap { max-width: 38rem; margin: 0 auto; }
+    .wrap {
+      max-width: 38rem; margin: 0 auto;
+      padding: var(--topo-seguro) 1rem calc(var(--nav-h) + 1.5rem + env(safe-area-inset-bottom));
+    }
 
-    /* ── Shared pieces ─────────────────────────────────────────────────── */
+    /* ── Vidro ─────────────────────────────────────────────────────────── */
+    .vidro {
+      background: rgba(255, 255, 255, 0.18); border: 1px solid rgba(255, 255, 255, 0.38);
+      -webkit-backdrop-filter: blur(16px) saturate(1.35); backdrop-filter: blur(16px) saturate(1.35);
+      color: #fff;
+    }
+    .vidro-claro {
+      background: rgba(255, 255, 255, 0.82); border: 1px solid rgba(255, 255, 255, 0.9);
+      -webkit-backdrop-filter: blur(16px) saturate(1.3); backdrop-filter: blur(16px) saturate(1.3);
+      color: var(--navy);
+    }
+    .credito-foto {
+      position: absolute; right: 0.75rem; bottom: 0.625rem; z-index: 3;
+      font-size: 0.625rem; color: rgba(255, 255, 255, 0.85);
+      background: rgba(0, 0, 0, 0.3); padding: 0.1875rem 0.5rem; border-radius: var(--t-pill);
+    }
+
+    /* ── Peças comuns ──────────────────────────────────────────────────── */
 
     .card {
       background: var(--t-surface);
@@ -117,6 +128,11 @@
     .page-head { padding: 1.75rem 0 1.25rem; }
     .page-head h1 { font-size: 1.75rem; margin-bottom: 0.25rem; }
     .page-head .sub { font-size: 0.8125rem; color: var(--t-muted); }
+
+    .eyebrow {
+      font-size: 0.6875rem; letter-spacing: 0.2em; text-transform: uppercase;
+      font-weight: 700; color: var(--t-muted);
+    }
 
     .section-head {
       display: flex; align-items: baseline; justify-content: space-between;
@@ -134,27 +150,22 @@
       width: 2.75rem; height: 2.75rem; flex: none;
       border-radius: var(--t-radius-sm);
       display: flex; align-items: center; justify-content: center;
-      background: var(--t-surface-2); color: var(--t-accent);
+      background: var(--t-accent-soft); color: var(--t-accent-text);
     }
     .row-main { flex: 1; min-width: 0; }
     .row-title { font-size: 0.875rem; font-weight: 700; }
     .row-sub { font-size: 0.75rem; color: var(--t-muted); }
     .row-value { font-size: 0.875rem; font-weight: 700; }
     a.row-item { text-decoration: none; color: inherit; }
-    a.row-item:hover { border-color: var(--t-accent); }
-    .row-icon.tint-1 { color: var(--t-accent); }
-    .row-icon.tint-2 { color: var(--t-accent-soft); }
+    a.row-item:hover { border-color: var(--t-text); }
+    .row-icon.tint-1 { color: var(--t-accent-text); }
+    .row-icon.tint-2 { color: var(--t-muted); }
     .row-time { font-size: 0.75rem; color: var(--t-muted); font-variant-numeric: tabular-nums; }
 
     .stack { display: flex; flex-direction: column; gap: 0.625rem; }
 
-    /* The design lays the dashboard out on a 4-column grid at desktop width.
-       On a phone there is only ever one column, so the spans below do nothing
-       until the 60rem rule turns the grid on. */
+    /* Uma coluna no celular; a regra de 60rem liga a grade no computador. */
     .dash-grid { display: grid; grid-template-columns: 1fr; gap: 0.875rem; }
-
-    /* One column under a thumb, two across a monitor. Used by the sample
-       screens that are just a list of cards. */
     .two-col { display: grid; grid-template-columns: 1fr; gap: 0.75rem; }
 
     .tag {
@@ -162,78 +173,96 @@
       font-size: 0.6875rem; font-weight: 700;
       padding: 0.1875rem 0.625rem; border-radius: var(--t-pill);
     }
-    .tag-soft { background: var(--t-surface-2); color: var(--t-accent-text); }
-    .tag-outline { border: 1px solid var(--t-accent); color: var(--t-accent-text); }
+    .tag-soft { background: var(--t-accent-soft); color: var(--t-accent-text); }
+    .tag-outline { border: 1px solid var(--t-border); color: var(--t-muted); }
 
+    /* Etiqueta de uma parada: o que foi conferido, o que é estimativa. */
+    .selo-parada {
+      display: inline-block; border-radius: var(--t-pill);
+      padding: 0.0625rem 0.5rem; font-size: 0.625rem; font-weight: 800;
+      color: var(--navy); background: var(--lima);
+    }
+    .selo-parada.estimativa { background: var(--ambar); }
+    .selo-parada.info { background: #d7e6f7; }
 
-    /* ── Hero panel (design: "Departs in / 12 days") ─────────────────────
-       A gradient from the accent to its deep end, with a ridge silhouette
-       running out of the bottom-right corner. The phone gets the tighter
-       version; the desktop rule further down opens it up. */
+    /* ── O cartão de destaque das telas de exemplo ─────────────────────── */
     .hero {
       position: relative; overflow: hidden;
-      background: linear-gradient(150deg, var(--t-accent), var(--t-accent-deep));
-      color: var(--t-accent-ink);
-      border-radius: 1.625rem; padding: 1.25rem;
+      background: linear-gradient(150deg, #1c3150, var(--navy));
+      color: #fff;
+      border-radius: var(--t-radius-lg); padding: 1.25rem;
       box-shadow: var(--shadow-md);
     }
     .hero > .ridge {
       position: absolute; right: -0.875rem; bottom: -1.125rem;
-      width: 11.25rem; height: 7.5rem; opacity: 0.22; pointer-events: none;
+      width: 11.25rem; height: 7.5rem; opacity: 0.1; pointer-events: none;
     }
     .hero > .inner { position: relative; }
     .hero .kicker-sm {
-      font-size: 0.6875rem; letter-spacing: 0.09em; text-transform: uppercase;
-      opacity: 0.85; font-weight: 700;
+      font-size: 0.6875rem; letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--lima); font-weight: 700;
     }
-    .hero .count { font-family: var(--font-heading); font-size: 2.625rem; line-height: 1; margin: 0.3125rem 0 0.1875rem; }
-    .hero .where { font-size: 0.875rem; opacity: 0.9; margin-bottom: 0.9375rem; }
+    .hero .count { font-family: var(--font-heading); font-weight: 800; letter-spacing: -0.03em; font-size: 2.625rem; line-height: 1; margin: 0.3125rem 0 0.1875rem; }
+    .hero .where { font-size: 0.875rem; opacity: 0.85; margin-bottom: 0.9375rem; }
     .hero .actions { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
-
-    /* The design inverts the button inside the hero: ink ground, accent type. */
     .hero-btn {
-      background: var(--t-accent-ink); color: var(--t-accent);
+      background: var(--lima); color: var(--navy);
       border: none; font-family: inherit; text-decoration: none;
       border-radius: var(--t-pill); padding: 0.5rem 0.9375rem;
-      font-size: 0.75rem; font-weight: 700; cursor: pointer;
+      font-size: 0.75rem; font-weight: 800; cursor: pointer;
     }
-    .hero-btn.ghost { background: transparent; color: inherit; border: 1px solid currentColor; opacity: 0.9; font-weight: 600; }
+    .hero-btn.ghost { background: transparent; color: #fff; border: 1px solid rgba(255, 255, 255, 0.45); font-weight: 600; }
 
-    /* ── Meter ───────────────────────────────────────────────────────────
-       The design's budget bar: a 7px track with a flat accent fill. */
     .meter { height: 7px; border-radius: var(--t-pill); background: var(--t-surface-2); overflow: hidden; }
-    .meter > span { display: block; height: 100%; background: var(--t-accent); }
+    .meter > span { display: block; height: 100%; background: var(--navy); }
 
     .btn {
       display: inline-flex; align-items: center; justify-content: center; gap: 0.375rem;
-      width: 100%; padding: 0.875rem;
+      width: 100%; padding: 0.875rem 1.25rem;
       border: 1px solid transparent; border-radius: var(--t-pill);
-      font-family: var(--font-heading); font-size: 0.9375rem;
+      font-family: var(--font-body); font-size: 0.9375rem; font-weight: 800;
       cursor: pointer; text-decoration: none;
+      transition: transform 0.1s, background 0.15s;
     }
-    .btn-primary { background: var(--t-accent); color: var(--t-accent-ink); }
-    .btn-primary:hover { background: var(--t-accent-soft); }
-    .btn-outline { border-color: var(--t-border); color: var(--t-accent); background: transparent; }
-    .btn-outline:hover { background: var(--t-surface-2); }
-    .btn:focus-visible { outline: 2px solid var(--t-accent); outline-offset: 2px; }
+    .btn:active { transform: scale(0.98); }
+    .btn-primary { background: var(--lima); color: var(--navy); }
+    .btn-primary:hover { background: #b6e851; }
+    .btn-escuro { background: var(--navy); color: #fff; }
+    .btn-escuro:hover { background: #1c3150; }
+    .btn-outline { border-color: var(--t-border); color: var(--t-text); background: var(--t-surface); }
+    .btn-outline:hover { border-color: var(--t-text); }
+    .btn:focus-visible { outline: 2px solid var(--navy); outline-offset: 2px; }
 
+    .sample-note {
+      display: flex; align-items: center; gap: 0.5rem;
+      background: var(--t-surface); border: 1px dashed rgba(15, 27, 45, 0.25);
+      border-radius: var(--t-radius);
+      padding: 0.625rem 0.875rem; margin: 0.5rem 0 1rem;
+      font-size: 0.75rem; line-height: 1.4; color: var(--t-muted);
+    }
+    .sample-note strong { color: var(--t-text); }
+
+    /* ── Instalar: um cartão de vidro que flutua ───────────────────────── */
     .instalar {
+      position: fixed; z-index: 40;
+      left: 0.75rem; right: 0.75rem;
+      bottom: calc(var(--nav-h) + 0.5rem + env(safe-area-inset-bottom));
       display: flex; align-items: center; gap: 0.75rem;
-      background: var(--t-surface); border: 1px solid var(--t-accent);
-      border-radius: var(--t-radius); padding: 0.75rem 0.75rem 0.75rem 0.875rem;
-      margin: 1rem 0 0.25rem; box-shadow: var(--shadow-md);
+      border-radius: var(--t-radius); padding: 0.75rem 0.625rem 0.75rem 0.75rem;
+      box-shadow: var(--shadow-lg);
     }
     .instalar[hidden] { display: none; }
     .instalar-icone img { display: block; border-radius: 10px; }
     .instalar-texto { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 0.125rem; }
     .instalar-texto strong { font-size: 0.8125rem; }
     .instalar-texto span { font-size: 0.71875rem; color: var(--t-muted); line-height: 1.4; }
+    .instalar-texto span[hidden] { display: none; }
     .instalar-texto b { color: var(--t-text); font-weight: 700; }
-    .icone-compartilhar { vertical-align: -2px; color: var(--t-accent-text); }
+    .icone-compartilhar { vertical-align: -2px; color: var(--navy); }
     .instalar-sim {
-      flex: none; background: var(--t-accent); color: var(--t-accent-ink);
+      flex: none; background: var(--lima); color: var(--navy);
       border: none; border-radius: var(--t-pill); padding: 0.5rem 0.9375rem;
-      font-family: inherit; font-size: 0.8125rem; font-weight: 700; cursor: pointer;
+      font-family: inherit; font-size: 0.8125rem; font-weight: 800; cursor: pointer;
     }
     .instalar-sim[hidden] { display: none; }
     .instalar-fechar {
@@ -241,163 +270,138 @@
       padding: 0.25rem; cursor: pointer; border-radius: 50%;
     }
     .instalar-fechar:hover { color: var(--t-text); }
-    .instalar button:focus-visible { outline: 2px solid var(--t-accent); outline-offset: 2px; }
+    .instalar button:focus-visible { outline: 2px solid var(--navy); outline-offset: 2px; }
+    /* Quem abriu pelo ícone já instalou: nenhum botão de instalar faz sentido. */
+    .instalado [data-instalar] { display: none !important; }
 
-    .sample-note {
-      display: flex; align-items: center; gap: 0.5rem;
-      background: var(--t-surface-2); border: 1px solid var(--t-accent);
-      border-radius: var(--t-radius);
-      padding: 0.625rem 0.875rem; margin: 0.5rem 0 1rem;
-      font-size: 0.75rem; line-height: 1.4;
-    }
-    .sample-note strong { color: var(--t-accent); }
-
-    /* ── Mobile tab bar ─────────────────────────────────────────────────── */
-
+    /* ── A barra de abas do celular: vidro, flutuando ──────────────────── */
     .tabbar {
-      position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
+      position: fixed; z-index: 20;
+      left: 0.75rem; right: 0.75rem; bottom: calc(0.625rem + env(safe-area-inset-bottom));
+      height: 4rem;
       display: flex; justify-content: space-around; align-items: center;
-      background: var(--t-chrome); border-top: 1px solid var(--t-border);
-      padding: 0.625rem 0 calc(0.625rem + env(safe-area-inset-bottom));
+      border-radius: 1.375rem;
+      background: rgba(255, 255, 255, 0.8); border: 1px solid rgba(255, 255, 255, 0.9);
+      -webkit-backdrop-filter: blur(18px) saturate(1.4); backdrop-filter: blur(18px) saturate(1.4);
+      box-shadow: 0 10px 30px rgba(15, 27, 45, 0.18);
     }
     .tab {
-      display: flex; flex-direction: column; align-items: center; gap: 0.1875rem;
+      display: flex; flex-direction: column; align-items: center; gap: 0.125rem;
       color: var(--t-muted); text-decoration: none;
-      font-size: 0.625rem; font-weight: 600;
-      padding: 0.125rem 0.75rem; min-width: 3.5rem;
+      font-size: 0.65625rem; font-weight: 700;
+      padding: 0.125rem 0.25rem; min-width: 4rem;
     }
-    .tab[aria-current="page"] { color: var(--t-accent-text); }
+    .tab-ico {
+      display: flex; align-items: center; justify-content: center;
+      width: 3rem; height: 1.75rem; border-radius: var(--t-pill);
+      transition: background 0.15s;
+    }
+    .tab[aria-current="page"] { color: var(--navy); }
+    .tab[aria-current="page"] .tab-ico { background: var(--lima); }
+    .tab svg { display: block; }
+    .tab:focus-visible { outline: 2px solid var(--navy); outline-offset: 2px; border-radius: 0.75rem; }
 
-    .side-brand { display: none; align-items: center; gap: 0.625rem; padding: 0 0.5rem 1rem; }
-    .side-mark { width: 1.875rem; height: 1.875rem; flex: none; display: flex; }
-    .side-mark svg { width: 100%; height: 100%; }
-    /* A letra do nome é a Fredoka, arredondada — a mesma da proposta que ele
-       aprovou. Só a marca usa esta fonte; o resto do app continua igual. */
-    .side-brand span { font-family: "Fredoka", var(--font-body); font-weight: 600; font-size: 1.3rem; letter-spacing: -0.01em; }
-
+    /* A marca mora no trilho do computador; na barra do celular não cabe. */
+    .tabbar .side-brand { display: none; }
     .side-group { display: none; }
     .tab-extra { display: none; }
     /* No celular a conta é uma aba; no computador vira a caixa do pé do trilho. */
     .conta-box { display: none; }
     .conta-nome { font-size: 0.8125rem; font-weight: 700; }
-    .conta-email { font-size: 0.6875rem; color: var(--t-muted); word-break: break-all; }
+    .conta-usuario { font-size: 0.6875rem; color: var(--t-muted); word-break: break-all; }
     .conta-sair {
-      width: 100%; padding: 0.375rem; border-radius: var(--t-radius-sm);
-      background: transparent; border: 1px solid var(--t-border);
-      color: var(--t-muted); font-family: inherit; font-size: 0.71875rem;
-      font-weight: 600; cursor: pointer;
+      width: 100%; padding: 0.4375rem; border-radius: var(--t-radius-sm);
+      background: var(--t-surface); border: 1px solid var(--t-border);
+      color: var(--t-muted); font-family: inherit; font-size: 0.75rem;
+      font-weight: 700; cursor: pointer;
     }
-    .conta-sair:hover { color: var(--t-accent-text); border-color: var(--t-accent); }
-    .tab svg { display: block; }
-    .tab:focus-visible { outline: 2px solid var(--t-accent); outline-offset: 2px; border-radius: 0.5rem; }
+    .conta-sair:hover { color: var(--t-text); border-color: var(--t-text); }
 
-    /* ── Theme picker ───────────────────────────────────────────────────── */
+    /* No celular, o único lugar de sair da conta: no pé de toda página. */
+    .conta-rodape {
+      display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;
+      margin-top: 2rem; padding: 0.75rem 0.875rem;
+      border: 1px solid var(--t-border); border-radius: var(--t-radius);
+      background: var(--t-surface); font-size: 0.8125rem;
+    }
+    .conta-rodape .conta-sair { width: auto; padding: 0.375rem 0.875rem; }
 
-    .theme-bar {
-      display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;
-      padding: 0.75rem 0 0.25rem;
-    }
-    .theme-bar .lbl {
-      font-size: 0.625rem; letter-spacing: 0.09em; text-transform: uppercase;
-      color: var(--t-muted); font-weight: 700;
-    }
-    .swatch {
-      width: 1.75rem; height: 1.75rem; border-radius: 50%;
-      border: 2px solid transparent; cursor: pointer; padding: 0;
-      position: relative;
-    }
-    .swatch[aria-pressed="true"] { border-color: var(--t-accent); }
-    .swatch:focus-visible { outline: 2px solid var(--t-accent); outline-offset: 2px; }
-
-    #theme-bar-nav { display: none; }
-    #theme-bar-page {
-      justify-content: center; gap: 0.625rem;
-      margin: 2rem 0 0.5rem; padding-top: 1.25rem;
-      border-top: 1px solid var(--t-border);
-    }
+    .marca { display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none; color: inherit; }
+    .marca svg { flex: none; }
+    .marca span { font-family: var(--font-marca); font-weight: 600; font-size: 1.3rem; letter-spacing: -0.01em; line-height: 1; }
 
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 3s !important; }
     }
 
-    /* ── Desktop ────────────────────────────────────────────────────────
-       A sidebar is app-shell furniture this MVP does not need: it is one form
-       and one result. The same links become a top bar instead. */
+    /* ── Computador ───────────────────────────────────────────────────────
+       As telas do app ganham o trilho da esquerda. A página que apresenta o
+       Farol (layout "site") tem o próprio menu no alto e não usa o trilho. */
     @media (min-width: 60rem) {
       :root { --nav-h: 0rem; }
-      body { padding-bottom: 2rem; }
 
-      /* The design's left rail: 232px of chrome against the page, the links
-         stacked down it, everything else pinned to the bottom. */
-      body { padding-left: calc(var(--side-w) + 2rem); padding-right: 2rem; }
+      body.app { padding-left: var(--side-w); }
+      .wrap { max-width: 58rem; padding: var(--topo-seguro) 2rem 3rem; }
+
+      body.site .tabbar { display: none; }
 
       .tabbar {
-        position: fixed; top: 0; bottom: 0; left: 0; right: auto;
+        top: 0; bottom: 0; left: 0; right: auto; height: auto;
         width: var(--side-w);
         flex-direction: column; align-items: stretch; justify-content: flex-start;
         gap: 0.125rem;
+        border-radius: 0; box-shadow: none;
         background: var(--t-chrome);
-        border-top: none; border-right: 1px solid var(--t-border);
-        padding: 1rem 0.75rem;
+        -webkit-backdrop-filter: none; backdrop-filter: none;
+        border: none; border-right: 1px solid var(--t-border);
+        padding: 1.25rem 0.75rem 1rem;
         overflow-y: auto;
       }
 
-      .side-brand { display: flex; }
+      .tabbar .side-brand { display: flex; padding: 0 0.5rem 1rem; color: var(--navy); }
       .tab-extra { display: flex; }
       .side-group {
-        display: block; font-size: 0.65625rem; letter-spacing: 0.09em;
+        display: block; font-size: 0.65625rem; letter-spacing: 0.1em;
         text-transform: uppercase; color: var(--t-muted); font-weight: 700;
-        padding: 0.75rem 0.75rem 0.4375rem;
+        padding: 0.875rem 0.75rem 0.4375rem;
       }
 
       .tab {
-        flex-direction: row; justify-content: flex-start; gap: 0.6875rem;
-        font-size: 0.8125rem; font-weight: 500;
-        padding: 0.5625rem 0.75rem;
+        flex-direction: row; justify-content: flex-start; gap: 0.5rem;
+        font-size: 0.8125rem; font-weight: 600;
+        padding: 0.375rem 0.5rem;
         border-radius: var(--t-radius-sm);
         min-width: 0; width: 100%;
       }
-      .tab:hover { color: var(--t-text); }
-      .tab[aria-current="page"] { font-weight: 700; background: var(--t-ink-wash); }
+      .tab-ico { width: 1.75rem; height: 1.75rem; }
+      .tab svg { width: 18px; height: 18px; }
+      .tab:hover { color: var(--t-text); background: var(--t-surface-2); }
+      .tab[aria-current="page"] { background: var(--lima); color: var(--navy); font-weight: 800; }
+      .tab[aria-current="page"] .tab-ico { background: none; }
 
-      /* Pinned to the foot of the rail, where the design keeps its sync box. */
       .conta-tab { display: none; }
       .conta-box {
-        display: block; margin-top: auto; margin-bottom: 0.5rem;
+        display: block; margin-top: auto;
         background: var(--t-surface-2); border-radius: var(--t-radius-sm);
         padding: 0.75rem;
       }
+      .conta-rodape { display: none; }
 
-      #theme-bar-nav {
-        display: flex; justify-content: center;
-        gap: 0.4375rem; padding: 0.75rem 0.5rem;
-        background: var(--t-surface-2); border-radius: var(--t-radius-sm);
-      }
-      #theme-bar-nav .lbl { display: none; }
-      #theme-bar-nav .swatch { width: 1.4375rem; height: 1.4375rem; }
-      #theme-bar-page { display: none; }
+      .instalar { left: auto; right: 1.5rem; bottom: 1.5rem; width: 23rem; }
 
-      .wrap { max-width: 58rem; }
+      .btn { width: auto; min-width: 13rem; padding-inline: 1.5rem; }
 
-      /* Full width is right under a thumb; across 58rem it just looks stretched. */
-      .btn { width: auto; min-width: 15rem; padding-inline: 1.5rem; }
-
-      /* The design's desktop hero is roomier and its number much larger — it
-         anchors a 4-column grid rather than sitting alone above a phone list. */
       .dash-grid { grid-template-columns: repeat(4, 1fr); gap: 0.875rem; }
       .two-col { grid-template-columns: repeat(2, 1fr); gap: 0.875rem; }
       .span-2 { grid-column: span 2; }
       .span-4 { grid-column: span 4; }
 
-      .hero { border-radius: var(--t-radius); padding: 1.5rem; min-height: 11.625rem; }
+      .hero { padding: 1.5rem; min-height: 11.625rem; }
       .hero > .ridge { width: 20rem; height: 11.875rem; right: -1.25rem; bottom: -1.625rem; }
       .hero .count { font-size: 3.25rem; margin: 0.5rem 0 0.375rem; }
       .hero .where { font-size: 0.84375rem; margin-bottom: 1.125rem; }
-      .hero .actions { margin-top: 0; }
 
-      /* On a phone each row is its own rounded card, thumb-sized. On a desktop
-         the design drops the card chrome and rules them off with a hairline
-         instead, with the time in a fixed column on the left. */
+      /* No celular cada linha é um cartão; no computador, uma linha fina. */
       .row-item {
         background: transparent; border: none; border-radius: 0;
         border-bottom: 1px solid var(--t-border);
@@ -409,65 +413,66 @@
       .row-sub { font-size: 0.71875rem; }
       .row-time { order: -1; width: 3rem; flex: none; }
     }
-
   </style>
   {% block head_extra %}{% endblock %}
 </head>
-<body>
+{% from "_marca.html" import logo, conta_rodape %}
+<body class="{{ 'site' if layout == 'site' else 'app' }}"{% if layout == 'site' %} data-instalar-auto="0"{% endif %}>
 
-<!-- One element, two shapes: the tab bar across the foot of a phone, the
-     design's left rail on a desktop. -->
+<!-- Um elemento, duas formas: a barra de vidro no pé do celular, o trilho da
+     esquerda no computador. -->
 <nav class="tabbar" aria-label="Navegação principal">
-  <div class="side-brand">
-    <div class="side-mark" aria-hidden="true">
-      <svg width="30" height="30" viewBox="0 0 64 64" aria-hidden="true"><path d="M32 19 L2 6 L2 26 Z" fill="#ffc93c" opacity=".9"/><path d="M32 19 L62 6 L62 26 Z" fill="#ffc93c" opacity=".9"/><path d="M21 58 L25 27 L39 27 L43 58 Z" fill="#c8382e"/><path d="M23.4 38 L40.6 38 L41.5 45 L22.5 45 Z" fill="#fff6e6"/><rect x="23" y="13" width="18" height="12" rx="4" fill="#ffc93c"/><path d="M22 14 Q32 3 42 14 Z" fill="#1f3a5f"/><rect x="21" y="24" width="22" height="4" rx="2" fill="#1f3a5f"/><path d="M14 60 Q32 53 50 60 Z" fill="#1f3a5f"/></svg>
-    </div>
-    <span>Farol</span>
-  </div>
-  <div class="side-group">Esta viagem</div>
-  <a class="tab" href="/painel" {% if page == 'painel' %}aria-current="page"{% endif %}>
-    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8"></path><path d="M5 10v9a1 1 0 001 1h4v-6h4v6h4a1 1 0 001-1v-9"></path></svg>
+  <a class="marca side-brand" href="/">{{ logo(30) }}<span>Farol</span></a>
+
+  <a class="tab" href="/" {% if page == 'inicio' %}aria-current="page"{% endif %}>
+    <span class="tab-ico"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8"></path><path d="M5 10v9a1 1 0 001 1h4v-6h4v6h4a1 1 0 001-1v-9"></path></svg></span>
     <span>Início</span>
   </a>
-  <a class="tab" href="/" {% if page == 'planejar' %}aria-current="page"{% endif %}>
-    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M16 8l-5 3-3 5 5-3 3-5z"></path></svg>
-    <span>Roteiro</span>
+  <a class="tab" href="/viagens" {% if page == 'viagens' %}aria-current="page"{% endif %}>
+    <span class="tab-ico"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-6.3 7-11a7 7 0 10-14 0c0 4.7 7 11 7 11z"></path><circle cx="12" cy="10" r="2.5"></circle></svg></span>
+    <span>Roteiros</span>
+  </a>
+  <a class="tab" href="/planejar" {% if page == 'planejar' %}aria-current="page"{% endif %}>
+    <span class="tab-ico"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M16 8l-5 3-3 5 5-3 3-5z"></path></svg></span>
+    <span>Planejar</span>
+  </a>
+
+  <div class="side-group">Sua viagem · exemplo</div>
+  <a class="tab tab-extra" href="/painel" {% if page == 'painel' %}aria-current="page"{% endif %}>
+    <span class="tab-ico"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"></rect><rect x="14" y="3" width="7" height="5" rx="1.5"></rect><rect x="14" y="12" width="7" height="9" rx="1.5"></rect><rect x="3" y="16" width="7" height="5" rx="1.5"></rect></svg></span>
+    <span>Painel</span>
   </a>
   <a class="tab tab-extra" href="/lugares" {% if page == 'lugares' %}aria-current="page"{% endif %}>
-    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-6.3 7-11a7 7 0 10-14 0c0 4.7 7 11 7 11z"></path><circle cx="12" cy="10" r="2.5"></circle></svg>
+    <span class="tab-ico"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"></path><path d="M9 4v14M15 6v14"></path></svg></span>
     <span>Lugares</span>
   </a>
-  <a class="tab" href="/viagens" {% if page == 'viagens' %}aria-current="page"{% endif %}>
-    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-6.3 7-11a7 7 0 10-14 0c0 4.7 7 11 7 11z"></path><circle cx="12" cy="10" r="2.5"></circle></svg>
-    <span>Viagens</span>
-  </a>
   <a class="tab tab-extra" href="/orcamento" {% if page == 'orcamento' %}aria-current="page"{% endif %}>
-    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"></rect><path d="M3 11h18M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2"></path></svg>
+    <span class="tab-ico"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"></rect><path d="M3 11h18M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2"></path></svg></span>
     <span>Orçamento</span>
   </a>
   <a class="tab tab-extra" href="/documentos" {% if page == 'documentos' %}aria-current="page"{% endif %}>
-    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8z"></path><path d="M14 3v5h5"></path></svg>
+    <span class="tab-ico"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8z"></path><path d="M14 3v5h5"></path></svg></span>
     <span>Documentos</span>
   </a>
   <a class="tab tab-extra" href="/viajantes" {% if page == 'viajantes' %}aria-current="page"{% endif %}>
-    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="7" r="4"></circle><path d="M2 21c0-3.5 3-5.5 7-5.5s7 2 7 5.5"></path><path d="M17 7a3 3 0 110 6"></path></svg>
+    <span class="tab-ico"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="7" r="4"></circle><path d="M2 21c0-3.5 3-5.5 7-5.5s7 2 7 5.5"></path><path d="M17 7a3 3 0 110 6"></path></svg></span>
     <span>Viajantes</span>
   </a>
-  <div class="side-group">Ajustes</div>
   <a class="tab tab-extra" href="/viagem" {% if page == 'viagem' %}aria-current="page"{% endif %}>
-    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="3"></rect><path d="M3 10h18M8 2v4M16 2v4"></path></svg>
-    <span>Viagem</span>
+    <span class="tab-ico"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="3"></rect><path d="M3 10h18M8 2v4M16 2v4"></path></svg></span>
+    <span>Ajustes</span>
   </a>
+
   <a class="tab conta-tab" href="{{ '/painel' if usuario() else '/entrar' }}"
      {% if page == 'entrar' %}aria-current="page"{% endif %}>
-    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 20c0-4 3.6-6 8-6s8 2 8 6"></path></svg>
+    <span class="tab-ico"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 20c0-4 3.6-6 8-6s8 2 8 6"></path></svg></span>
     <span>{{ usuario().name.split()[0][:9] if usuario() else 'Entrar' }}</span>
   </a>
 
   <div class="conta-box">
     {% if usuario() %}
       <div class="conta-nome">{{ usuario().name }}</div>
-      <div class="conta-email">@{{ usuario().username }}</div>
+      <div class="conta-usuario">@{{ usuario().username }}</div>
       <form method="POST" action="/sair" style="margin-top:0.5rem;">
         <input type="hidden" name="csrf" value="{{ csrf_token() }}">
         <button class="conta-sair" type="submit">Sair</button>
@@ -476,17 +481,13 @@
       <a class="conta-sair" href="/entrar" style="display:block;text-align:center;text-decoration:none;">Entrar</a>
     {% endif %}
   </div>
-
-  <div class="theme-bar" id="theme-bar-nav"></div>
 </nav>
-
-<div class="wrap">
 
 <!-- Instalar o app. Nenhum celular oferece isso sozinho de um jeito que as
      pessoas vejam: o Android esconde a opção no menu do navegador e o iPhone
-     nunca oferece. Por isso o botão fica na própria página. Nasce escondido, e
-     o script só o mostra onde dá para instalar e ainda não foi instalado. -->
-<div class="instalar" id="instalar" hidden>
+     nunca oferece. Nasce escondido; o script só o mostra onde dá para instalar
+     e ainda não foi instalado, ou quando alguém toca num botão de instalar. -->
+<div class="instalar vidro-claro" id="instalar" role="dialog" aria-label="Instalar o Farol" hidden>
   <div class="instalar-icone" aria-hidden="true">
     <img src="/static/icon-192.png" alt="" width="40" height="40">
   </div>
@@ -498,6 +499,10 @@
       <svg class="icone-compartilhar" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-label="Compartilhar"><path d="M12 3v13"></path><path d="M7 8l5-5 5 5"></path><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"></path></svg>
       <b>Compartilhar</b> e depois em <b>Adicionar à Tela de Início</b>.
     </span>
+    <span id="instalar-outro" hidden>
+      Este navegador não instala apps. No celular, abra este endereço no
+      <b>Chrome</b> (Android) ou no <b>Safari</b> (iPhone).
+    </span>
   </div>
   <button class="instalar-sim" id="instalar-sim" type="button">Instalar</button>
   <button class="instalar-fechar" id="instalar-fechar" type="button" aria-label="Agora não">
@@ -505,60 +510,19 @@
   </button>
 </div>
 
-{% block content %}{% endblock %}
 
-<!-- Phone only; on desktop the same picker rides in the top bar instead. -->
-<div class="theme-bar" id="theme-bar-page"></div>
+{% if layout == 'site' %}
+  {% block site %}{% endblock %}
+{% else %}
+<div class="wrap">
+  {% block content %}{% endblock %}
+  {{ conta_rodape() }}
 </div>
+{% endif %}
 
 <script>
-  // ── Theme switching ────────────────────────────────────────────────────
-  // The five palettes from the original app design. Stored per browser, because a
-  // prototype has no account to hang a preference on.
-  const THEMES = [
-    { id: 'plum',       name: 'Midnight Plum',   bg: '#1a1020', accent: '#eb9a5c' },
-    { id: 'ember',      name: 'Ember Charcoal',  bg: '#14110f', accent: '#e0a32e' },
-    { id: 'blueprint',  name: 'Blueprint',       bg: '#10172e', accent: '#59c1f5' },
-    { id: 'terracotta', name: 'Terracotta Dusk', bg: '#f6ece0', accent: '#b4552b' },
-    { id: 'seaglass',   name: 'Sea Glass',       bg: '#eef3ee', accent: '#14655a' },
-  ];
-
-  function readTheme() {
-    try { return localStorage.getItem('compass-theme'); } catch (e) { return null; }
-  }
-  function applyTheme(id) {
-    document.documentElement.setAttribute('data-theme', id);
-    try { localStorage.setItem('compass-theme', id); } catch (e) { /* private mode */ }
-    document.querySelectorAll('.swatch').forEach(s =>
-      s.setAttribute('aria-pressed', String(s.dataset.theme === id)));
-    const meta = document.querySelector('meta[name="theme-color"]');
-    const t = THEMES.find(t => t.id === id);
-    if (meta && t) meta.setAttribute('content', t.bg);
-  }
-
-  function buildThemeBar(host) {
-    if (!host) return;
-    host.innerHTML = '<span class="lbl">Aparência</span>';
-    THEMES.forEach(t => {
-      const b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'swatch';
-      b.dataset.theme = t.id;
-      b.title = t.name;
-      b.setAttribute('aria-label', 'Tema ' + t.name);
-      b.style.background = 'linear-gradient(135deg, ' + t.bg + ' 50%, ' + t.accent + ' 50%)';
-      b.addEventListener('click', () => applyTheme(t.id));
-      host.appendChild(b);
-    });
-  }
-
-  buildThemeBar(document.getElementById('theme-bar-nav'));
-  buildThemeBar(document.getElementById('theme-bar-page'));
-  applyTheme(readTheme() || 'plum');
-
-  // ── Prototype controls ─────────────────────────────────────────────────
-  // They react so the interaction reads as real, but nothing is stored —
-  // there is no account yet to store it against.
+  // ── Botões de exemplo ──────────────────────────────────────────────────
+  // Reagem ao toque para a tela parecer de verdade, mas não guardam nada.
   document.querySelectorAll('[data-soon]').forEach((el) => {
     const label = el.querySelector('span') || el;
     const original = label.textContent;
@@ -568,63 +532,88 @@
     });
   });
 
-  // ── O botão de instalar ─────────────────────────────────────────────────
+  document.querySelectorAll('.switch').forEach((sw) => {
+    sw.addEventListener('click', () => {
+      sw.setAttribute('aria-checked', sw.getAttribute('aria-checked') === 'true' ? 'false' : 'true');
+    });
+  });
+
+  // ── Instalar ────────────────────────────────────────────────────────────
+  // Dois caminhos até aqui: o cartão aparece sozinho (uma vez por semana, no
+  // máximo), ou a pessoa toca num botão marcado com data-instalar.
   (function () {
     const caixa = document.getElementById('instalar');
+    if (!caixa) return;
     const sim = document.getElementById('instalar-sim');
     const fechar = document.getElementById('instalar-fechar');
-    if (!caixa) return;
 
     // Já instalado: abriu pelo ícone, em tela cheia. Nada a oferecer.
     const instalado = window.matchMedia('(display-mode: standalone)').matches
                       || window.navigator.standalone === true;
-    if (instalado) return;
+    if (instalado) { document.documentElement.classList.add('instalado'); return; }
+
+    // iPhone e iPad: não existe botão que instale por nós, só dá para ensinar
+    // o caminho. (iPad novo se apresenta como Mac, daí o teste de toque.)
+    const ios = /iphone|ipad|ipod/i.test(navigator.userAgent)
+                || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
     // "Agora não" vale por uma semana, para não virar cobrança a cada tela.
     const CHAVE = 'compass-instalar-dispensado';
-    try {
-      const quando = Number(localStorage.getItem(CHAVE) || 0);
-      if (Date.now() - quando < 7 * 864e5) return;
-    } catch (e) { /* janela anônima: mostra de novo, sem problema */ }
+    let dispensado = false;
+    try { dispensado = Date.now() - Number(localStorage.getItem(CHAVE) || 0) < 7 * 864e5; }
+    catch (e) { /* janela anônima: mostra de novo, sem problema */ }
+    // A capa do site tem os próprios botões de instalar; lá o cartão não
+    // aparece sozinho, para não cobrir a foto e o botão de começar.
+    const sozinho = !dispensado && document.body.dataset.instalarAuto !== '0';
+
+    function mostrar(modo) {
+      ['android', 'ios', 'outro'].forEach((m) => {
+        document.getElementById('instalar-' + m).hidden = (m !== modo);
+      });
+      sim.hidden = (modo !== 'android');
+      caixa.hidden = false;
+    }
 
     fechar.addEventListener('click', () => {
       caixa.hidden = true;
       try { localStorage.setItem(CHAVE, String(Date.now())); } catch (e) {}
     });
 
-    // iPhone e iPad: não existe botão que instale por nós, só dá para ensinar
-    // o caminho. (iPad novo se apresenta como Mac, daí o teste de toque.)
-    const ios = /iphone|ipad|ipod/i.test(navigator.userAgent)
-                || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-    if (ios) {
-      document.getElementById('instalar-android').hidden = true;
-      document.getElementById('instalar-ios').hidden = false;
-      sim.hidden = true;
-      caixa.hidden = false;
-      return;
-    }
-
     // Android e computador: o navegador avisa quando o app é instalável, e
-    // guardamos esse aviso para disparar no clique do botão.
+    // guardamos esse aviso para disparar no clique.
     let pedido = null;
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       pedido = e;
-      caixa.hidden = false;
+      if (sozinho) mostrar('android');
     });
-    sim.addEventListener('click', async () => {
-      if (!pedido) return;
-      pedido.prompt();
-      await pedido.userChoice;
-      pedido = null;
+
+    async function instalar() {
+      if (pedido) {
+        pedido.prompt();
+        await pedido.userChoice;
+        pedido = null;
+        caixa.hidden = true;
+        return;
+      }
+      mostrar(ios ? 'ios' : 'outro');
+    }
+    sim.addEventListener('click', instalar);
+    document.querySelectorAll('[data-instalar]').forEach((b) => {
+      b.addEventListener('click', (e) => { e.preventDefault(); instalar(); });
+    });
+
+    window.addEventListener('appinstalled', () => {
       caixa.hidden = true;
+      document.documentElement.classList.add('instalado');
     });
-    window.addEventListener('appinstalled', () => { caixa.hidden = true; });
+
+    if (ios && sozinho) mostrar('ios');
   })();
 
-  // ── Instalar no celular ────────────────────────────────────────────────
-  // Sem isto o app é só um site: é o registro abaixo que permite adicionar o
-  // Farol à tela de início e abri-lo em tela cheia, sem barra de navegador.
+  // ── Registro do app ──────────────────────────────────────────────────────
+  // Sem isto o Farol é só um site: é o registro que permite pô-lo na tela de
+  // início e abri-lo em tela cheia, sem barra de navegador.
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(() => {
@@ -632,12 +621,6 @@
       });
     });
   }
-
-  document.querySelectorAll('.switch').forEach((sw) => {
-    sw.addEventListener('click', () => {
-      sw.setAttribute('aria-checked', sw.getAttribute('aria-checked') === 'true' ? 'false' : 'true');
-    });
-  });
 </script>
 
 {% block scripts %}{% endblock %}

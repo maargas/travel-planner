@@ -111,7 +111,7 @@ def _destino_seguro(proximo):
     """
     if proximo and proximo.startswith("/") and not proximo.startswith("//"):
         return proximo
-    return "/painel"
+    return "/viagens"
 
 
 # ── Telas ───────────────────────────────────────────────────────────────────

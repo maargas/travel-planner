@@ -59,6 +59,15 @@ nome concreto que vira símbolo (a referência é a marca Caju).
   roteiro com horários e minutos entre paradas — vende o produto, tem caráter
   de negócio) com a beleza de "Foto e vidro", para bater com o app.
 - Esboços publicados em https://claude.ai/artifact/XrZafrc9AQLpdmsCGiVTrc
+- **Construído em 22/09/2026.** `/` é a página que vende (capa com foto, como
+  funciona, a prova de Banff, o convite); o formulário foi para `/planejar`.
+  Cores: marinho `#0f1b2d`, limão `#c6f36a`, fundo `#f3f6f9`; letra Plus
+  Jakarta Sans. Os cinco temas antigos saíram — o visual agora é um só.
+- O trecho da capa (`semente.VITRINE`) é afirmação sobre o roteiro: cada
+  parada traz as frases do .md que a sustentam, e o teste confere. Etiqueta
+  diz só o que o roteiro diz ("aberto sempre", "horário estimado").
+- Foto: sempre do lugar de verdade, em dois tamanhos (1600 e `-800`), com o
+  crédito visível na tela e em `static/fotos/CREDITOS.md`.
 
 ## Marca
 
@@ -79,7 +88,10 @@ reabrir o assunto por conta própria.
 - `app.py` — rotas, modo real vs demonstração, tetos de gasto
 - `contas.py` — conta só com nome de usuário e senha (sem e-mail, de propósito)
 - `db.py` — `DATABASE_URL` escolhe o banco: sem ela, SQLite local
-- `semente.py` + `conteudo/` — roteiros reais, carregados a cada arranque
+- `semente.py` + `conteudo/` — roteiros reais, carregados a cada arranque;
+  `FOTOS` e `VITRINE` dizem a foto e o trecho de vitrine de cada um
+- `templates/inicio.html` — a página que vende; `planejar.html` — o formulário
+- `templates/_marca.html` — o farol em SVG, a foto com os dois tamanhos, o sair
 - `templates/_cenas.html` — dioramas em SVG, cada cena com as cores dela
 - `static/sw.js` — instalação no celular; **nunca** guarda página, só `/static/`
 

@@ -1,19 +1,31 @@
 {% extends "base.html" %}
-{% from "_cenas.html" import diorama %}
+{% from "_marca.html" import foto_img %}
 {% set page = 'entrar' %}
 {% block title %}{{ 'Criar conta' if aba == 'criar' else 'Entrar' }} — Farol{% endblock %}
 
 {% block head_extra %}
 <style>
-  .porta { display: grid; gap: 1.5rem; padding: 1.5rem 0 2rem; }
+  /* No celular, uma faixa de foto no alto com a frase, e o formulário subindo
+     por cima dela. No computador, a foto vira um painel alto à esquerda. */
+  .porta { display: grid; gap: 0; padding-bottom: 1rem; }
 
-  .porta .arte { display: none; }
-  .diorama { width: 100%; height: auto; display: block; }
+  .arte {
+    position: relative; overflow: hidden; color: #fff; background: var(--navy);
+    margin: calc(-1 * var(--topo-seguro)) -1rem 0;
+    height: 40vh; min-height: 17rem; max-height: 24rem;
+  }
+  .arte img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .arte::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(180deg, rgba(8, 20, 36, 0.35), transparent 35%, rgba(8, 20, 36, 0.8));
+  }
+  .lema { position: absolute; z-index: 2; left: 1.25rem; right: 1.25rem; bottom: 3.25rem; }
+  .lema h1 { font-size: 1.75rem; line-height: 1.08; letter-spacing: -0.03em; margin-bottom: 0.375rem; text-wrap: balance; }
+  .lema p { font-size: 0.8125rem; opacity: 0.9; max-width: 24rem; line-height: 1.5; }
+  .lema p.longo { display: none; }
+  .arte .credito-foto { top: calc(var(--topo-seguro) + 0.75rem); bottom: auto; }
 
-  .lema { text-align: center; }
-  .lema h1 { font-size: 1.875rem; margin-bottom: 0.5rem; text-wrap: balance; }
-  .lema h1 em { font-style: normal; color: var(--t-accent-text); }
-  .lema p { font-size: 0.875rem; color: var(--t-muted); max-width: 24rem; margin: 0 auto; }
+  .porta .card { position: relative; z-index: 3; margin-top: -2rem; box-shadow: var(--shadow-lg); }
 
   .abas {
     display: flex; gap: 0.25rem; padding: 0.25rem;
@@ -25,7 +37,7 @@
     padding: 0.5rem; border-radius: var(--t-pill);
     font-size: 0.8125rem; font-weight: 700; color: var(--t-muted);
   }
-  .abas a[aria-current="page"] { background: var(--t-accent); color: var(--t-accent-ink); }
+  .abas a[aria-current="page"] { background: var(--navy); color: #fff; }
 
   .campos { display: flex; flex-direction: column; gap: 0.875rem; }
   .campo { display: flex; flex-direction: column; gap: 0.375rem; }
@@ -34,11 +46,11 @@
     width: 100%; background: var(--t-surface-2);
     border: 1px solid var(--t-border); border-radius: var(--t-pill);
     color: var(--t-text); font-family: inherit; font-size: 1rem;
-    padding: 0.75rem 1rem; caret-color: var(--t-accent);
+    padding: 0.75rem 1rem; caret-color: var(--navy);
   }
   .campo input:focus-visible {
-    outline: none; border-color: var(--t-accent);
-    box-shadow: 0 0 0 3px var(--t-surface-2);
+    outline: none; border-color: var(--navy);
+    box-shadow: 0 0 0 3px var(--t-accent-soft);
   }
   .dica { font-size: 0.6875rem; color: var(--t-muted); }
 
@@ -56,11 +68,18 @@
   }
 
   @media (min-width: 60rem) {
-    .porta { grid-template-columns: 1fr 24rem; align-items: center; gap: 3.5rem; min-height: 78vh; }
-    .porta .arte { display: block; }
-    .lema { text-align: left; }
+    .porta {
+      grid-template-columns: 1fr 25rem; align-items: center; gap: 3rem;
+      min-height: calc(100vh - 3rem); padding: 1.5rem 0;
+    }
+    .arte { margin: 0; height: min(40rem, calc(100vh - 3rem)); max-height: none; border-radius: var(--t-radius-lg); }
+    .lema { left: 2rem; right: 2rem; bottom: 2.5rem; }
     .lema h1 { font-size: 2.5rem; }
-    .lema p { margin: 0; }
+    .lema p.longo { display: block; font-size: 0.9375rem; }
+    .lema p.curto { display: none; }
+    .arte .credito-foto { top: auto; bottom: 0.75rem; }
+    .porta .card { margin-top: 0; }
+    .btn { width: 100%; }
   }
 </style>
 {% endblock %}
@@ -69,12 +88,15 @@
 
 <div class="porta">
 
+  {% set f = foto('louise') %}
   <div class="arte">
-    {{ diorama('mata', 'entrada') }}
-    <div class="lema" style="margin-top:1.5rem;">
-      <h1>Vá para onde <em>você não conhece</em>.<br>Com um plano que confere.</h1>
-      <p>Horários, fechamentos e o que está acontecendo nas suas datas — e o tempo
-         de deslocamento entre cada parada.</p>
+    {{ foto_img(f, "(min-width: 60rem) 50vw, 100vw", prioridade=true) }}
+    <span class="credito-foto">{{ f.lugar }} · foto: {{ f.autor }} / Unsplash</span>
+    <div class="lema">
+      <h1>Um plano que chega na hora certa.</h1>
+      <p class="curto">Sua conta guarda os roteiros e os destinos que você pedir.</p>
+      <p class="longo">Horários, fechamentos e o que está acontecendo nas suas datas — e o tempo
+         de deslocamento entre cada parada. Sua conta guarda os roteiros e os destinos que você pedir.</p>
     </div>
   </div>
 

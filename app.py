@@ -76,8 +76,8 @@ limiter = Limiter(
 db.init()
 # Os roteiros pesquisados à mão são carregados a cada arranque. É idempotente, e
 # faz com que publicar conteúdo novo seja publicar o app — sem passo manual.
+import semente
 try:
-    import semente
     semente.carregar()
 except Exception as exc:
     print(f"[semente] não carregou: {exc}", flush=True)
@@ -93,6 +93,10 @@ app.register_blueprint(contas.bp)
 # formulário de login foi passado com esse nome.)
 app.jinja_env.globals["usuario"] = contas.usuario_atual
 app.jinja_env.globals["csrf_token"] = contas.csrf_token
+# A foto e o trecho de vitrine de cada roteiro, e o registro das fotos com o
+# crédito de cada uma. Ficam no semente.py, junto do catálogo.
+app.jinja_env.globals["vitrine"] = semente.vitrine
+app.jinja_env.globals["foto"] = semente.FOTOS.get
 
 # Tentar senha atrás de senha é o ataque óbvio contra uma tela de login, e o
 # limite por endereço é a defesa mais simples que existe contra ele.
@@ -542,11 +546,41 @@ def validate(start_date, days, budget):
     return None
 
 
-@app.route("/", methods=["GET"])
-def index():
+# O roteiro que o site mostra como prova. É um roteiro publicado de verdade,
+# lido do banco — o que a página de venda diz dele vem do mesmo lugar que o
+# próprio roteiro, e não de um texto copiado que pode ficar para trás.
+DESTAQUE = "banff-julho-2027"
+MESES = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho",
+         "agosto", "setembro", "outubro", "novembro", "dezembro"]
+
+
+@app.route("/")
+def inicio():
+    """A página que apresenta o Farol: a promessa, como funciona, a prova."""
+    from sqlalchemy import select as _sel, func as _func
+    destaque = None
+    with db.engine.connect() as cx:
+        v = cx.execute(_sel(db.trips).where(db.trips.c.slug == DESTAQUE)).mappings().first()
+        if v is not None:
+            n_fontes = cx.execute(
+                _sel(_func.count()).select_from(db.trip_sources)
+                .where(db.trip_sources.c.trip_id == v["id"])
+            ).scalar()
+            destaque = {
+                **v,
+                "fontes": n_fontes,
+                "quando": (f"{MESES[v['start_date'].month - 1]} de {v['start_date'].year}"
+                           if v["start_date"] else ""),
+                **semente.vitrine(DESTAQUE),
+            }
+    return render_template("inicio.html", destaque=destaque)
+
+
+@app.route("/planejar", methods=["GET"])
+def planejar():
     today, latest = date_bounds()
     return render_template(
-        "index.html",
+        "planejar.html",
         today=today.isoformat(),
         max_date=latest.isoformat(),
         demo=MOCK_MODE,
@@ -571,15 +605,15 @@ def plan():
     )
 
     if not destination or not start_date or not days or not budget:
-        return render_template("index.html", error="Preencha destino, data de ida, duração e orçamento.", **form_values)
+        return render_template("planejar.html", error="Preencha destino, data de ida, duração e orçamento.", **form_values)
 
     problem = validate(start_date, days, budget)
     if problem:
-        return render_template("index.html", error=problem, **form_values)
+        return render_template("planejar.html", error=problem, **form_values)
 
     if MOCK_MODE:
         return render_template(
-            "index.html",
+            "planejar.html",
             itinerary=demo_itinerary(destination, start_date, days, budget, interests),
             sources=MOCK_SOURCES,
             **form_values,
@@ -587,7 +621,7 @@ def plan():
 
     reserva = MAX_ROUNDS * estimated_call_cost()
     if SPEND["runs"] >= MAX_RUNS or SPEND["usd"] + reserva > MAX_USD:
-        return render_template("index.html", error=(
+        return render_template("planejar.html", error=(
             f"Limite de segurança atingido: {SPEND['runs']} de {MAX_RUNS} roteiros e cerca de "
             f"US${SPEND['usd']:.2f} de US${MAX_USD:.2f} gastos desde que o servidor ligou. "
             f"Este roteiro precisaria de até US${reserva:.2f} reservados e não cabe. "
@@ -657,31 +691,31 @@ def plan():
         if not itinerary.strip():
             # Billed and nothing to show. Say exactly that, rather than rendering
             # a blank page and letting the reader guess.
-            return render_template("index.html", error=(
+            return render_template("planejar.html", error=(
                 f"A IA fez as buscas mas parou antes de escrever o roteiro (motivo: {stop}). "
                 f"O que veio está salvo em '{saved}'. Tente de novo com menos dias."
             ), **form_values)
 
-        return render_template("index.html", itinerary=itinerary, sources=source_list,
+        return render_template("planejar.html", itinerary=itinerary, sources=source_list,
                                saved=saved, **form_values)
 
     except anthropic.APITimeoutError:
-        return render_template("index.html",
+        return render_template("planejar.html",
             error="A busca demorou demais e foi interrompida. Tente de novo, ou reduza o número de dias.",
             **form_values)
     except anthropic.RateLimitError:
-        return render_template("index.html", error="Muitos pedidos ao mesmo tempo. Tente de novo em um minuto.", **form_values)
+        return render_template("planejar.html", error="Muitos pedidos ao mesmo tempo. Tente de novo em um minuto.", **form_values)
     except anthropic.AuthenticationError:
-        return render_template("index.html", error="Chave de API inválida ou sem crédito.", **form_values)
+        return render_template("planejar.html", error="Chave de API inválida ou sem crédito.", **form_values)
     except anthropic.APIStatusError as e:
-        return render_template("index.html", error=f"O serviço de IA retornou um erro ({e.status_code}). Tente de novo.", **form_values)
+        return render_template("planejar.html", error=f"O serviço de IA retornou um erro ({e.status_code}). Tente de novo.", **form_values)
     except anthropic.APIConnectionError:
-        return render_template("index.html", error="Não foi possível conectar ao serviço de IA. Verifique sua internet.", **form_values)
+        return render_template("planejar.html", error="Não foi possível conectar ao serviço de IA. Verifique sua internet.", **form_values)
     except Exception as exc:
         # Anything unforeseen after the call still owes the reader an answer, and
         # the file on disk is that answer. A bare 500 would hide both.
         print(f"[erro] falha depois da resposta da API: {exc!r}", flush=True)
-        return render_template("index.html", error=(
+        return render_template("planejar.html", error=(
             "O roteiro foi gerado, mas deu erro ao montar a página. "
             f"Ele está salvo na pasta '{SAVE_DIR}' do projeto — nada foi perdido."
         ), **form_values)
@@ -802,7 +836,7 @@ def rate_limit_exceeded(e):
         message = ("Muitos acessos em pouco tempo, então o site pausou por um "
                    "momento. Espere um minuto e recarregue.")
     today, latest = date_bounds()
-    return render_template("index.html",
+    return render_template("planejar.html",
         error=message,
         today=today.isoformat(), max_date=latest.isoformat(), demo=MOCK_MODE,
     ), 429

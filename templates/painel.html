@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% set page = 'painel' %}
-{% block title %}Início — Farol{% endblock %}
+{% block title %}Painel — Farol{% endblock %}
 
 {% block head_extra %}
 <style>
@@ -20,7 +20,7 @@
     display: flex; flex-direction: column;
   }
   .panel .k { font-size: 0.71875rem; color: var(--t-muted); margin-bottom: 0.5rem; }
-  .panel .v { font-family: var(--font-heading); font-size: 1.6875rem; }
+  .panel .v { font-family: var(--font-heading); font-weight: 800; letter-spacing: -0.02em; font-size: 1.6875rem; }
   .panel .of { font-size: 0.71875rem; color: var(--t-muted); }
   .panel .foot { margin-top: auto; padding-top: 0.75rem; display: flex; flex-direction: column; gap: 0.375rem; }
   .panel .foot div { display: flex; justify-content: space-between; font-size: 0.71875rem; color: var(--t-muted); }
@@ -38,7 +38,7 @@
   .trip-card {
     flex: none; width: 9.5rem; height: 6.25rem;
     border-radius: 1.25rem; padding: 0.625rem; position: relative; overflow: hidden;
-    color: #fff; text-decoration: none;
+    color: var(--navy); text-decoration: none;
   }
   .trip-card .n { font-size: 0.75rem; font-weight: 700; position: relative; }
   .trip-card .d { font-size: 0.625rem; opacity: 0.85; position: relative; }
@@ -92,7 +92,7 @@
       <div class="count">12 dias</div>
       <div class="where">Lisboa, Portugal · 2 a 9 de outubro · 7 noites</div>
       <div class="actions">
-        <a class="hero-btn" href="/">Ver roteiro</a>
+        <a class="hero-btn" href="/planejar">Ver roteiro</a>
         <a class="hero-btn ghost" href="/viagem">Detalhes</a>
       </div>
     </div>
@@ -123,7 +123,7 @@
   <div class="panel span-4 agenda">
     <div class="panel-head">
       <h2>Hoje em Lisboa</h2>
-      <a class="more" href="/">Ver roteiro</a>
+      <a class="more" href="/planejar">Ver roteiro</a>
     </div>
     <div class="stack">
       <div class="row-item">
@@ -175,7 +175,7 @@
 </div>
 
 <div style="margin-top:1.5rem;">
-  <a class="btn btn-primary" href="/">Planejar uma viagem nova</a>
+  <a class="btn btn-primary" href="/planejar">Planejar uma viagem nova</a>
 </div>
 
 <div class="section-head"><h2>Seções</h2></div>

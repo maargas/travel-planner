@@ -13,4 +13,6 @@ foi conferida na página do Unsplash e a imagem foi olhada antes de entrar aqui.
 | `moraine-lake-khandelwal.jpg` | Moraine Lake, Canadá — dia nublado | Nandini Khandelwal | https://unsplash.com/photos/KVqg3os3Wcc |
 | `lake-louise-vanermen.jpg` | Lake Louise, Alberta, Canadá — geleira Victoria ao nascer do sol | Febe Vanermen | https://unsplash.com/photos/a-body-of-water-with-mountains-in-the-background-8p01hb2K1Es |
 
-Baixadas em 22/09/2026, 1600 px de largura.
+Baixadas em 22/09/2026, 1600 px de largura. Cada uma tem também uma cópia de
+800 px, com o sufixo `-800`, que é a que o celular baixa. Foto nova precisa dos
+dois tamanhos e de uma entrada em `FOTOS`, no `semente.py` — o teste confere.
