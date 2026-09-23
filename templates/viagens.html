@@ -94,7 +94,8 @@
   <a class="cartao" href="/viagens/{{ v.slug }}">
     <div class="imagem">
       {% if vit.foto %}
-        {{ foto_img(vit.foto, "(min-width: 60rem) 28rem, 100vw") }}
+        {# A primeira foto já está na tela ao abrir: não espera rolar. #}
+        {{ foto_img(vit.foto, "(min-width: 60rem) 28rem, 100vw", prioridade=loop.first) }}
         <span class="credito-foto">{{ vit.foto.lugar }} · foto: {{ vit.foto.autor }} / Unsplash</span>
       {% else %}
         {{ diorama(v.scene or 'mata', v.slug) }}

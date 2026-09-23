@@ -199,6 +199,17 @@ def sair():
     return redirect("/")
 
 
+@bp.route("/conta")
+@precisa_login
+def conta():
+    """O lugar de tudo que é da pessoa: quem ela é, trocar a senha, sair.
+
+    Antes, a aba com o nome dela levava ao painel de exemplo, e trocar a senha
+    era um link escondido no pé da página — ninguém achava.
+    """
+    return render_template("conta.html")
+
+
 @bp.route("/conta/senha", methods=["GET", "POST"])
 @precisa_login
 def trocar_senha():

@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% set page = 'conta' %}
+{% block title %}Sua conta — Farol{% endblock %}
+
+{% block head_extra %}
+<style>
+  .conta { max-width: 30rem; margin: 0 auto; padding: 1.75rem 0 1rem; }
+  .quem {
+    display: flex; align-items: center; gap: 0.875rem;
+    background: var(--navy); color: #fff; border-radius: var(--t-radius-lg);
+    padding: 1.25rem; margin-bottom: 1rem;
+  }
+  .quem .bola {
+    width: 3rem; height: 3rem; border-radius: 50%; flex: none;
+    background: var(--lima); color: var(--navy);
+    display: grid; place-items: center; font-weight: 800; font-size: 1.25rem;
+  }
+  .quem h1 { font-size: 1.375rem; }
+  .quem .arroba { font-size: 0.8125rem; opacity: 0.8; }
+
+  .opcoes { background: var(--t-surface); border-radius: var(--t-radius-lg); box-shadow: var(--shadow-md); overflow: hidden; }
+  .opcao {
+    display: flex; align-items: center; gap: 0.75rem; width: 100%;
+    padding: 1rem 1.125rem; text-decoration: none; color: inherit;
+    background: none; border: none; font: inherit; text-align: left; cursor: pointer;
+  }
+  .opcao + .opcao, .opcoes form { border-top: 1px solid var(--t-border); }
+  .opcao:hover { background: var(--t-surface-2); }
+  .opcao .ico {
+    width: 2.25rem; height: 2.25rem; border-radius: 0.75rem; flex: none;
+    background: var(--t-accent-soft); color: var(--t-accent-text); display: grid; place-items: center;
+  }
+  .opcao .txt { flex: 1; }
+  .opcao b { display: block; font-size: 0.9375rem; }
+  .opcao span.sub { font-size: 0.75rem; color: var(--t-muted); }
+  .opcao.sair .ico { background: var(--t-danger-bg); color: var(--t-danger); }
+
+  .nota { font-size: 0.75rem; color: var(--t-muted); line-height: 1.5; margin-top: 1rem; padding: 0 0.25rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+{% set eu = usuario() %}
+<div class="conta">
+  <div class="quem">
+    <div class="bola" aria-hidden="true">{{ eu.name[:1] | upper }}</div>
+    <div>
+      <h1>{{ eu.name }}</h1>
+      <div class="arroba">@{{ eu.username }}</div>
+    </div>
+  </div>
+
+  <div class="opcoes">
+    <a class="opcao" href="/conta/senha">
+      <span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 018 0v4"></path></svg></span>
+      <span class="txt"><b>Trocar senha</b><span class="sub">Pede a senha atual e a nova</span></span>
+      <span aria-hidden="true">›</span>
+    </a>
+    <a class="opcao" href="/viagens#pedir">
+      <span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-6.3 7-11a7 7 0 10-14 0c0 4.7 7 11 7 11z"></path><circle cx="12" cy="10" r="2.5"></circle></svg></span>
+      <span class="txt"><b>Pedir um destino</b><span class="sub">Entra na fila para ser pesquisado</span></span>
+      <span aria-hidden="true">›</span>
+    </a>
+    <form method="POST" action="/sair">
+      <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+      <button class="opcao sair" type="submit">
+        <span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 12H4M8 8l-4 4 4 4"></path><path d="M13 4h5a2 2 0 012 2v12a2 2 0 01-2 2h-5"></path></svg></span>
+        <span class="txt"><b>Sair</b><span class="sub">Desconecta este aparelho</span></span>
+      </button>
+    </form>
+  </div>
+
+  <p class="nota">O Farol não pede e-mail, então não tem como mandar uma senha nova
+    se você esquecer a sua. Guarde-a no gerenciador de senhas do navegador.</p>
+</div>
+{% endblock %}

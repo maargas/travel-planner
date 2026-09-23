@@ -71,11 +71,15 @@ e os minutos. Chegada nunca antes de abrir.
 
 # Como revisar
 
-Comece rodando `python teste_modo_real.py`. Se ele falhar, isso é o item nº 1 da
-sua lista e o resto vem depois.
+Comece rodando `python teste_modo_real.py` e `python teste_contas.py`. Se algum
+falhar, isso é o item nº 1 da sua lista e o resto vem depois.
 
 Depois olhe, nesta ordem de prioridade:
 
+0. **Senha.** Risco de vazamento zero — não está em discussão. Procure
+   qualquer caminho por onde uma senha de usuário possa aparecer: `print`,
+   log, mensagem de erro, endereço (formulário GET), cookie, página, cache do
+   service worker. Achou um, é o item nº 1, acima de tudo.
 1. **Gasto.** Alguma coisa pode chamar a API sem querer, ou chamar mais vezes do
    que devia? Os tetos (`MAX_RUNS`, `MAX_USD`, `MAX_ROUNDS`) ainda fazem sentido?
    O caminho pago grava em disco antes de qualquer coisa que possa falhar?
@@ -94,8 +98,8 @@ Depois olhe, nesta ordem de prioridade:
 
 Use o navegador para **medir**, não para adivinhar: `javascript_tool` com
 `getBoundingClientRect` e `getComputedStyle` dá número; captura de tela pode vir
-velha. Verifique as sete rotas: `/`, `/painel`, `/orcamento`, `/viagem`,
-`/lugares`, `/documentos`, `/viajantes`.
+velha. Verifique as rotas: `/`, `/planejar`, `/viagens`, `/viagens/banff-julho-2027`,
+`/entrar`, `/painel`, `/orcamento`, `/viagem`, `/lugares`, `/documentos`, `/viajantes`.
 
 # Como entregar
 

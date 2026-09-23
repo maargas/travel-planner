@@ -9,7 +9,7 @@
 {% macro conta_rodape() -%}
 {% if usuario() %}
 <div class="conta-rodape">
-  <span>Você entrou como <b>@{{ usuario().username }}</b><br><a class="conta-link" href="/conta/senha">Trocar senha</a></span>
+  <span>Você entrou como <b>@{{ usuario().username }}</b><br><a class="conta-link" href="/conta">Sua conta e senha</a></span>
   <form method="POST" action="/sair">
     <input type="hidden" name="csrf" value="{{ csrf_token() }}">
     <button class="conta-sair" type="submit">Sair</button>

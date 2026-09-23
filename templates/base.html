@@ -307,7 +307,8 @@
     .tab-extra { display: none; }
     /* No celular a conta é uma aba; no computador vira a caixa do pé do trilho. */
     .conta-box { display: none; }
-    .conta-nome { font-size: 0.8125rem; font-weight: 700; }
+    .conta-nome { display: block; font-size: 0.8125rem; font-weight: 700; color: var(--t-text); text-decoration: none; }
+    .conta-nome:hover { text-decoration: underline; }
     .conta-usuario { font-size: 0.6875rem; color: var(--t-muted); word-break: break-all; }
     .conta-sair {
       width: 100%; padding: 0.4375rem; border-radius: var(--t-radius-sm);
@@ -465,17 +466,17 @@
     <span>Ajustes</span>
   </a>
 
-  <a class="tab conta-tab" href="{{ '/painel' if usuario() else '/entrar' }}"
-     {% if page == 'entrar' %}aria-current="page"{% endif %}>
+  <a class="tab conta-tab" href="{{ '/conta' if usuario() else '/entrar' }}"
+     {% if page in ('entrar', 'conta') %}aria-current="page"{% endif %}>
     <span class="tab-ico"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 20c0-4 3.6-6 8-6s8 2 8 6"></path></svg></span>
     <span>{{ usuario().name.split()[0][:9] if usuario() else 'Entrar' }}</span>
   </a>
 
   <div class="conta-box">
     {% if usuario() %}
-      <div class="conta-nome">{{ usuario().name }}</div>
+      <a class="conta-nome" href="/conta">{{ usuario().name }}</a>
       <div class="conta-usuario">@{{ usuario().username }}</div>
-      <a class="conta-link" href="/conta/senha">Trocar senha</a>
+      <a class="conta-link" href="/conta">Sua conta e senha</a>
       <form method="POST" action="/sair" style="margin-top:0.5rem;">
         <input type="hidden" name="csrf" value="{{ csrf_token() }}">
         <button class="conta-sair" type="submit">Sair</button>
@@ -519,7 +520,8 @@
 {% else %}
 <div class="wrap">
   {% block content %}{% endblock %}
-  {{ conta_rodape() }}
+  {# Nas telas da própria conta, a caixa repetiria o que a página já mostra. #}
+  {% if page != 'conta' %}{{ conta_rodape() }}{% endif %}
 </div>
 {% endif %}
 

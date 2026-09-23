@@ -9,6 +9,14 @@
         "import os; os.environ['MOCK_MODE']='1'; import app; app.app.run(port=5001, debug=True)"
       ],
       "port": 5001
+    },
+    {
+      "name": "farol-logado",
+      "runtimeExecutable": "python",
+      "runtimeArgs": [
+        ".claude/ver_logado.py"
+      ],
+      "port": 5002
     }
   ]
 }

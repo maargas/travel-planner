@@ -19,6 +19,31 @@ os.environ["DATABASE_URL"] = "sqlite:///" + os.path.join(_tmp, "teste.db").repla
 os.environ["MOCK_MODE"] = "1"
 os.environ["SECRET_KEY"] = "chave-de-teste"
 
+# Tudo o que o app escrever no terminal — registro, aviso, erro — passa também
+# por esta cópia. No fim, o teste procura as senhas nela: senha em log é
+# vazamento, e isso não se negocia.
+import io  # noqa: E402
+
+
+class _Copia(io.TextIOBase):
+    def __init__(self, original):
+        self.original, self.texto = original, []
+
+    def write(self, s):
+        self.texto.append(s)
+        return self.original.write(s)
+
+    def flush(self):
+        self.original.flush()
+
+
+for _fluxo in (sys.stdout, sys.stderr):
+    try:
+        _fluxo.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
+sys.stdout, sys.stderr = _Copia(sys.stdout), _Copia(sys.stderr)
+
 import db          # noqa: E402
 import app as appmod  # noqa: E402
 from sqlalchemy import select  # noqa: E402
@@ -194,6 +219,29 @@ r = outro.post("/entrar", data={"csrf": token(outro), "usuario": USUARIO, "senha
 check("a senha antiga deixa de funcionar", r.status_code == 400)
 r = outro.post("/entrar", data={"csrf": token(outro), "usuario": USUARIO, "senha": NOVA})
 check("e a nova passa a funcionar", r.status_code == 302)
+
+# ── A conta tem um lugar ────────────────────────────────────────────────────
+check("a pagina da conta exige estar logado", anon.get("/conta").status_code == 302)
+html = outro.get("/conta").get_data(as_text=True)
+check("a pagina da conta leva a trocar a senha", 'href="/conta/senha"' in html)
+check("e a aba com o nome leva a conta, nao ao painel de exemplo", 'href="/conta"' in html)
+
+# ── Senha não vaza ──────────────────────────────────────────────────────────
+# Formulário com senha enviado por GET põe a senha no endereço — e endereço
+# fica no histórico do navegador e no registro do servidor.
+import glob  # noqa: E402
+import re as _re  # noqa: E402
+ruins = []
+for arq in glob.glob(os.path.join("templates", "*.html")):
+    texto = open(arq, encoding="utf-8").read()
+    for form in _re.findall(r"<form.*?</form>", texto, flags=_re.S | _re.I):
+        if 'type="password"' in form and 'method="POST"' not in form.split(">", 1)[0]:
+            ruins.append(os.path.basename(arq))
+check("todo formulario com senha envia por POST", not ruins)
+
+escrito = "".join(sys.stdout.texto + sys.stderr.texto)
+check("nenhuma senha aparece no que o servidor escreveu",
+      all(x not in escrito for x in (SENHA, NOVA, "senhaErrada1", "chuteErrado1")))
 
 # ── Resultado ───────────────────────────────────────────────────────────────
 print()

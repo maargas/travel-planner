@@ -26,8 +26,15 @@ uma informação errada chegar ao viajante é uma regressão, por mais bonita qu
 2. **Nunca vazar segredo.** `.env`, `*.db` e `roteiros/` estão no `.gitignore` —
    conferir antes de todo commit. Endereço de banco e `SECRET_KEY` o dono cola
    direto no painel do Render; ninguém cola isso numa conversa.
-3. **Nunca criar conta nem digitar senha** em nome do dono.
-4. **Perguntar antes de decisão grande**, e dar opções com recomendação.
+3. **Senha de usuário: risco de vazamento zero. Não está em discussão.** A
+   senha só existe dentro do formulário (sempre POST, sempre https) e do
+   `check_password_hash`. Nunca é guardada (só o hash scrypt), nunca aparece em
+   log, `print`, mensagem de erro, endereço, cookie, página ou teste impresso.
+   `teste_contas.py` confere tudo isso, inclusive tudo o que o servidor
+   escreve. Qualquer mudança que toque em conta ou login passa por esse teste.
+4. **Nunca criar conta nem digitar senha** em nome do dono.
+5. **Perguntar antes de decisão grande**, e dar opções com recomendação —
+   pesando prós e contras, como uma balança.
 
 ## Como testar
 
@@ -47,6 +54,13 @@ Os dois têm de passar antes de todo commit. Para ver no navegador, o
 - Não afirmar número, preço, data ou fato sem ter conferido. Se não conferiu,
   dizer que não conferiu.
 - Ele usa PowerShell no Windows: `VAR=valor comando` não funciona lá.
+
+## Próximos passos
+
+`PROXIMOS_PASSOS.md` é a lista viva do que vem depois, em ordem, com o porquê
+de cada item. Ao terminar uma etapa (algo publicado), marque o que foi feito lá
+e chame o agente `proximos-passos` para revisar a ordem e sugerir o que falta.
+Mostre ao dono só o resumo — e a lista entra no fim da resposta, uma vez.
 
 ## Decisões de design já tomadas
 
@@ -93,6 +107,7 @@ quiser voltar ao assunto — não reabrir por conta própria.
   `FOTOS` e `VITRINE` dizem a foto e o trecho de vitrine de cada um
 - `templates/inicio.html` — a página que vende; `planejar.html` — o formulário
 - `templates/_marca.html` — o farol em SVG, a foto com os dois tamanhos, o sair
+- `templates/conta.html` + `senha.html` — a conta da pessoa e a troca de senha
 - `templates/_cenas.html` — dioramas em SVG, cada cena com as cores dela
 - `static/sw.js` — instalação no celular; **nunca** guarda página, só `/static/`
 
