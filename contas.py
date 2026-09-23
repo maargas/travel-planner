@@ -14,6 +14,7 @@ senha não tem como recuperá-la — não há para onde mandar o link. Enquanto 
 poucos amigos testando, o dono resolve isso à mão.
 """
 import hmac
+import os
 import re
 import secrets
 from functools import wraps
@@ -72,6 +73,18 @@ def usuario_atual():
         if g.user is None:
             session.pop("uid", None)
     return g.user
+
+
+def e_dono():
+    """A pessoa logada é o dono do app?
+
+    O dono é quem tem o nome de usuário escrito em `FAROL_DONO`, no painel do
+    Render. Sem a variável, ninguém é dono — as telas do dono simplesmente não
+    existem. É lido a cada vez, para trocar de dono sem publicar de novo.
+    """
+    eu = usuario_atual()
+    dono = _normaliza(os.environ.get("FAROL_DONO"))
+    return bool(eu and dono and eu["username"] == dono)
 
 
 def precisa_login(view):

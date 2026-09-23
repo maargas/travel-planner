@@ -114,6 +114,9 @@ quiser voltar ao assunto — não reabrir por conta própria.
 - `templates/inicio.html` — a página que vende; `planejar.html` — o formulário
 - `templates/_marca.html` — o farol em SVG, a foto com os dois tamanhos, o sair
 - `templates/conta.html` + `senha.html` — a conta da pessoa e a troca de senha
+- `templates/fila.html` — os pedidos de destino, só para o dono (`FAROL_DONO`)
+- `.claude/ver_logado.py` — sobe o app "logado" num banco descartável, para
+  olhar as telas de conta sem criar conta nem digitar senha (porta 5002)
 - `templates/_cenas.html` — dioramas em SVG, cada cena com as cores dela
 - `static/sw.js` — instalação no celular; **nunca** guarda página, só `/static/`
 
@@ -124,6 +127,7 @@ no painel do Render. O plano grátis dorme após 15 min sem visita (~50 s para
 acordar). Banco permanente: Neon, desde 22/09/2026 — `DATABASE_URL` e
 `SECRET_KEY` estão no painel do Render, colados pelo dono. Conta criada no site
 sobrevive às publicações, e ninguém é deslogado quando o servidor reinicia.
+`FAROL_DONO` (o nome de usuário do dono, não é segredo) liga a fila de pedidos.
 
 O servidor do Render fica em **Oregon** (o endereço aponta para
 `gcp-us-west1`). O banco tem de ficar perto dele, e não perto do usuário: cada
