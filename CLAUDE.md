@@ -49,8 +49,14 @@ Os dois têm de passar antes de todo commit. Para ver no navegador, o
 ## Como falar com o dono
 
 - Português simples. Explicar o porquê, não só o quê.
-- **Toda resposta termina com "O que você precisa fazer"**: numerado, cada item
-  com o motivo. Comando em bloco `bash` separado, um por bloco.
+- **Toda resposta que fecha um trabalho tem três partes, nesta ordem:** o que
+  foi feito (resumo curto), próximos passos (com o porquê) e, por último, "O
+  que você precisa fazer" — numerado, cada item com o motivo. Uma lista só por
+  resposta; aviso automático sem novidade ganha uma linha. Comando em bloco
+  `bash` separado, um por bloco.
+- O dono chama o agente de próximos passos digitando `/proximos` (atalho em
+  `.claude/skills/proximos/`), ou `@agent-proximos-passos`, ou pedindo em
+  palavras.
 - Não afirmar número, preço, data ou fato sem ter conferido. Se não conferiu,
   dizer que não conferiu.
 - Ele usa PowerShell no Windows: `VAR=valor comando` não funciona lá.
