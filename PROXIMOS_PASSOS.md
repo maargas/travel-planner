@@ -24,7 +24,10 @@ Tamanho: **P** = uma sessão curta · **M** = uma sessão · **G** = mais de uma
    *Perde:* tempo de conversa, não dinheiro (é pesquisado à mão).
 4. **Páginas de erro em português, no visual novo (P).** Hoje quem erra um
    endereço vê uma página crua, em inglês. Para quem viaja pouco, parece que o
-   app quebrou. *Ganha:* confiança. *Perde:* nada.
+   app quebrou. No mesmo conserto: quem erra a senha vezes demais recebe o
+   aviso de "muitos acessos" dentro da tela de planejar viagem, que não tem
+   nada a ver (achado do agente `proximos-passos`). *Ganha:* confiança, menos
+   confusão. *Perde:* nada.
 5. **Recusar senhas comuns na criação e na troca (P).** Com uma lista guardada
    no próprio app — nada é enviado para fora. Se um dia o banco for roubado,
    senha comum é a primeira a ser adivinhada a partir do embaralhado.

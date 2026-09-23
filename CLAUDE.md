@@ -115,8 +115,9 @@ quiser voltar ao assunto — não reabrir por conta própria.
 
 Render, serviço criado à mão: **não lê o `render.yaml`**. Variável nova se põe
 no painel do Render. O plano grátis dorme após 15 min sem visita (~50 s para
-acordar). Banco permanente: Neon, ainda pendente — até lá, conta criada no site
-some a cada publicação.
+acordar). Banco permanente: Neon, desde 22/09/2026 — `DATABASE_URL` e
+`SECRET_KEY` estão no painel do Render, colados pelo dono. Conta criada no site
+sobrevive às publicações, e ninguém é deslogado quando o servidor reinicia.
 
 O servidor do Render fica em **Oregon** (o endereço aponta para
 `gcp-us-west1`). O banco tem de ficar perto dele, e não perto do usuário: cada
