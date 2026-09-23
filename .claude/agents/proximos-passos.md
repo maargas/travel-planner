@@ -39,6 +39,14 @@ que o dono (Gabriel) aprovar.
 - **Não reabrir o que está em espera:** visual, cor, nome, domínio e INPI são
   dele — só entram se ele trouxer o assunto.
 
+# O que o app é
+
+Dois pilares, nas palavras do dono (detalhes em `CLAUDE.md`): **roteiro
+detalhista** para um destino, pelos interesses de quem vai; e **organizador da
+viagem**, sozinho ou em grupo — orçamento, quem emprestou quanto para quem,
+documentos, organização geral. Sugestão que não serve a nenhum dos dois não
+entra na lista. E marque sempre: nada novo começa sem o sim dele.
+
 # Como decidir a ordem
 
 Pese cada passo como uma balança: o que se ganha, o que se perde, e as

@@ -1,10 +1,24 @@
 # Farol — planejador de viagens
 
-App de roteiros de viagem para **quem viaja pouco** e vai a um lugar que não
-conhece. O dono (Gabriel, estudante da FGV) não programa e está aprendendo.
+App de viagem para **quem viaja pouco** e vai a um lugar que não conhece. O dono (Gabriel, estudante da FGV) não programa e está aprendendo.
 O nome em uso é **Farol** (escolhido em 22/09/2026, depois de quatro rodadas;
 ele ainda quer ajustar, então não é definitivo). A ideia
 vem das palavras dele: o app tem de "ser um norte pra qualquer um".
+
+## O que o app é (nas palavras do dono, 22/09/2026)
+
+Dois pilares, e tudo no app tem de servir a um deles:
+
+1. **Roteiro detalhista** para um destino específico, levando em conta os
+   interesses de quem vai.
+2. **Organizador da viagem**, para quem viaja sozinho ou junto: o orçamento,
+   **quem emprestou quanto para quem**, os documentos importantes, e a
+   organização geral de uma possível viagem.
+
+Ele também quer que quem entra pela primeira vez **entenda o app inteiro**: as
+partes precisam ter nexo entre si e uma separação que faça sentido — por
+exemplo, um lugar só para a própria conta e as configurações. Coisa que não
+serve a nenhum dos dois pilares não entra (a "fila de pedidos" saiu por isso).
 
 A promessa, que manda em toda decisão: **precisão verificável**. O app nasceu
 porque uma IA sugeriu um museu a um amigo dele na Alemanha enquanto um evento de
@@ -67,6 +81,15 @@ Os dois têm de passar antes de todo commit. Para ver no navegador, o
 de cada item. Ao terminar uma etapa (algo publicado), marque o que foi feito lá
 e chame o agente `proximos-passos` para revisar a ordem e sugerir o que falta.
 Mostre ao dono só o resumo — e a lista entra no fim da resposta, uma vez.
+
+A mesma lista fica numa página fixada na barra lateral dele, **"Rumo do
+Farol"**: https://claude.ai/artifact/Bmey9nXAmfpZt1nnjXwxpp . Quando a lista
+mudar, republique essa página passando esse endereço como `url` (a fonte do
+HTML é a versão publicada: leia com `action: "read"` antes de editar). Nunca
+crie outra página de próximos passos.
+
+**Nada novo começa sem o sim explícito do dono.** "Se você não disser o
+contrário, começo" não é aprovação — a fila de pedidos foi feita assim e saiu.
 
 ## Decisões de design já tomadas
 

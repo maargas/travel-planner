@@ -1,57 +1,80 @@
 # Próximos passos do Farol
 
-A lista viva do que vem depois, em ordem. Cada item diz **por que** está ali e
-o que se ganha e se perde. Quem mantém: o Claude, com a ajuda do agente
-`proximos-passos`, sempre que uma etapa termina. Quem decide a ordem final: o
-Gabriel.
+A lista viva do que vem depois, em ordem, com o porquê e a balança (o que se
+ganha e o que se perde) de cada item. Quem mantém: o Claude, com o agente
+`proximos-passos`. Quem decide: o Gabriel — **nada novo começa sem o sim dele.**
+A mesma lista fica numa página fixada no claude.ai ("Rumo do Farol").
+
+Tudo aqui serve a um dos dois pilares do app (ver `CLAUDE.md`):
+**roteiro detalhista por interesses** e **organizador da viagem** (orçamento,
+quem deve a quem, documentos), para quem vai sozinho ou em grupo.
 
 Tamanho: **P** = uma sessão curta · **M** = uma sessão · **G** = mais de uma.
 
-## Agora, em ordem
+## Decisão em aberto: a estrutura do app
 
-1. **Página da fila, só do dono (P).** Quando um amigo pede um destino, o pedido
-   vai para uma tabela que ninguém vê. Sem esta página, o pedido cai no vazio.
-   *Ganha:* você enxerga cada pedido. *Perde:* nada relevante — precisa só de
-   uma variável `FAROL_DONO` no Render com o seu nome de usuário (não é segredo).
-2. **"Seus pedidos" na conta de cada amigo (M).** O app não pede e-mail, então
-   não tem como avisar ninguém. Mostrar o pedido com a situação (na fila,
-   pesquisando, pronto) é o único jeito de o amigo saber que o roteiro dele saiu.
-   *Ganha:* motivo para ele voltar ao app. *Perde:* você passa a ter de marcar a
-   situação de cada pedido.
-3. **Pesquisar o próximo roteiro de verdade (M).** O site tem um roteiro só.
-   O primeiro pedido de amigo é o candidato natural: resolve a viagem dele e
-   vira a segunda prova do produto. *Ganha:* conteúdo, que é o produto.
-   *Perde:* tempo de conversa, não dinheiro (é pesquisado à mão).
-4. **Páginas de erro em português, no visual novo (P).** Hoje quem erra um
-   endereço vê uma página crua, em inglês. Para quem viaja pouco, parece que o
-   app quebrou. No mesmo conserto: quem erra a senha vezes demais recebe o
-   aviso de "muitos acessos" dentro da tela de planejar viagem, que não tem
-   nada a ver (achado do agente `proximos-passos`). *Ganha:* confiança, menos
-   confusão. *Perde:* nada.
-5. **Recusar senhas comuns na criação e na troca (P).** Com uma lista guardada
-   no próprio app — nada é enviado para fora. Se um dia o banco for roubado,
-   senha comum é a primeira a ser adivinhada a partir do embaralhado.
-   *Ganha:* menos risco. *Perde:* um amigo pode ter de escolher outra senha.
+Hoje as partes não conversam: "Roteiros" mostra Banff, "Planejar" monta um
+roteiro que não fica guardado em lugar nenhum, e seis telas de exemplo
+(Painel, Lugares, Orçamento, Documentos, Viajantes, Ajustes) mostram uma
+viagem inventada a Lisboa. Falta um centro, e a conta não tem lugar próprio.
 
-## Quando o modo real (com a API) voltar
+Três opções, com esboço, na página fixada:
 
-Achados do revisor que só importam no caminho pago, hoje desligado:
-roteiro que vem pela metade sem aviso; erro na segunda rodada que descarta o
-texto; demonstração que corta em 10 dias; carregamento fora da tela no
-celular; comentários desatualizados no código.
+- **A — Tudo mora dentro de uma viagem (recomendada).** Barra: Viagens ·
+  Explorar · Conta. Dentro de cada viagem: Roteiro · Gastos · Documentos ·
+  Pessoas. Com uma viagem só, o app abre direto nela.
+- **B — Uma aba por ferramenta.** Roteiros · Gastos · Documentos · Conta,
+  cada aba misturando todas as viagens.
+- **C — Só a viagem da vez.** O app é sempre a viagem atual, com troca no
+  topo e a conta num ícone no canto.
+
+## Depois da estrutura (propostas, em ordem)
+
+1. **Montar a estrutura escolhida (M).** Navegação nova, "Conta" como lugar
+   próprio (perfil, senha, preferências, sair) e telas vazias que explicam o
+   que vai em cada parte. *Por quê:* todo o resto se pendura nela. *Perde:* as
+   telas de exemplo com dados inventados saem ou viram o "vazio" explicado.
+2. **Criar e guardar uma viagem de verdade (M).** Destino, datas e quem vai
+   (pessoas podem ser só nomes, sem conta). *Por quê:* é o centro; hoje toda
+   tela de viagem é de mentira.
+3. **Gastos e quem deve a quem (M–G).** Lançar um gasto, dividir entre quem
+   participou, ver o saldo de cada um. *Por quê:* pilar 2, e é o que um grupo
+   usa todo dia na viagem. *Perde:* exige cuidado com arredondamento e moedas
+   diferentes.
+4. **Roteiro dentro da viagem (G).** Pedir o roteiro com os interesses e
+   guardá-lo na viagem. *Balança que é decisão sua:* gerar na hora pela API
+   custa dinheiro do console (cerca de US$ 0,11 por roteiro, nas medições de
+   antes); montar em conversa comigo usa o seu plano, não o console, mas não é
+   instantâneo.
+5. **Documentos (M–G).** Guardar passagens e reservas. *Balança:* documento é
+   dado sensível (passaporte), com o mesmo cuidado das senhas; e o plano grátis
+   do Render não guarda arquivos — precisaria de um serviço de arquivos.
+   Decisão sua.
+6. **Viajar junto (G).** Convidar amigos para a mesma viagem, cada um com a
+   sua conta. *Por quê:* sem isso, os gastos ficam só no celular de quem lançou.
+
+## Consertos pequenos (não mudam o rumo)
+
+- **Páginas de erro em português (P).** Hoje, endereço errado mostra página
+  crua em inglês, e quem erra a senha vezes demais recebe o aviso dentro da
+  tela de planejar viagem.
+- **Recusar senhas comuns (P).** Com uma lista guardada no próprio app, sem
+  mandar nada para fora.
 
 ## Em espera — o Gabriel avisa quando quiser
 
-- Ajustes e detalhes do visual (ele aprovou o resultado e disse que volta a isso).
+- Ajustes e detalhes do visual (aprovado; ele volta a isso quando quiser).
 - Cor de destaque: limão, como está, ou o amarelo do farol.
-- Nome, domínio (registro.br) e marca (INPI) — o nome ainda não é fixo.
-- Dioramas em 3D — provavelmente dispensáveis agora que há fotos reais.
+- Nome, domínio e marca (INPI) — o nome ainda não é fixo.
+- Dioramas em 3D — provavelmente dispensáveis com fotos reais.
+- Achados do revisor no caminho pago (só importam se a API voltar).
 
 ## Feito
 
-- 22/09/2026 — Banco permanente no Neon (Oregon, junto do servidor): contas
-  não somem mais a cada publicação. `SECRET_KEY` no Render: ninguém é
-  deslogado quando o servidor reinicia.
-- 22/09/2026 — Página "Sua conta" e troca de senha, com testes que garantem
-  que nenhuma senha aparece em página, banco ou registro do servidor.
+- 22/09/2026 — Fila de pedidos **removida**: não foi pedida e não serve aos
+  dois pilares.
+- 22/09/2026 — Página "Sua conta" e troca de senha, com testes que falham se
+  qualquer senha aparecer em página, banco ou registro do servidor.
+- 22/09/2026 — Banco permanente no Neon (Oregon, junto do servidor) e
+  `SECRET_KEY` no Render: contas não somem e ninguém é deslogado.
 - 22/09/2026 — Visual "Foto e vidro" no celular e "A rota" no computador.
