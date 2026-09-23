@@ -14,8 +14,9 @@ Tamanho: **P** = uma sessão curta · **M** = uma sessão · **G** = mais de uma
 
 ## Decidido
 
-- **Estrutura A** (23/09/2026): barra Viagens · Explorar · Conta; dentro da
-  viagem, Roteiro · Gastos · Documentos · Pessoas. **Montada e publicada.**
+- **Estrutura A** (23/09/2026): barra Início · Viagens · Explorar · Conta;
+  dentro da viagem, Roteiro · Gastos · Documentos · Pessoas. **Montada e
+  publicada.** A página inicial com as fotos abre para todo mundo.
 
 ## Ideia em aberto: a pegada de rede social
 
@@ -31,8 +32,8 @@ os amigos podem ver antes de construir.
    diferentes.
 2. **Amigos e viajar junto (G).** Aba Amigos, amizade dos dois lados, cada
    viagem dizendo quem vê; e chamar um amigo para dentro de uma viagem.
-   *Depende de duas respostas dele:* onde fica (aba própria, recomendado, ou
-   dentro de Explorar) e o que os amigos veem por padrão (destino e mês,
+   *Depende de duas respostas dele:* onde fica (aba própria — a barra fica com
+   cinco —, recomendado, ou dentro de Explorar) e o que os amigos veem por padrão (destino e mês,
    recomendado; nada; ou destino e datas). *Perde:* privacidade é o risco —
    quem viaja deixa a casa vazia.
 3. **Roteiro dentro da viagem (G).** Pedir o roteiro com os interesses e
@@ -61,6 +62,8 @@ os amigos podem ver antes de construir.
 
 ## Feito
 
+- 23/09/2026 — Página inicial com as fotos **de volta para quem está logado**,
+  e a aba Início na barra (eu tinha escondido; ele mandou corrigir).
 - 23/09/2026 — **Estrutura A no ar**: Viagens · Explorar · Conta. Dá para
   criar uma viagem de verdade (destino, datas, quem vai), com as quatro partes
   por dentro; Roteiro, Gastos e Documentos mostram o que vai morar ali. As telas

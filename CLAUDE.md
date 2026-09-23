@@ -22,8 +22,11 @@ serve a nenhum dos dois pilares não entra (a "fila de pedidos" saiu por isso).
 
 Em 23/09/2026 ele acrescentou uma **pegada de rede social**: ver quem é seu
 amigo no app, onde essa pessoa está viajando, qual a próxima viagem. E
-escolheu a estrutura **A — tudo mora dentro de uma viagem** (barra: Viagens ·
-Explorar · Conta; dentro da viagem: Roteiro · Gastos · Documentos · Pessoas).
+escolheu a estrutura **A — tudo mora dentro de uma viagem** (barra: Início ·
+Viagens · Explorar · Conta; dentro da viagem: Roteiro · Gastos · Documentos ·
+Pessoas). A **página inicial com as fotos** é a cara do Farol: abre para todo
+mundo, logado ou não. (Eu cheguei a esconder dela quem estava logado; ele
+mandou corrigir.)
 A estética "Foto e vidro" vale para tudo isso: ele disse que o design é parte
 central da proposta, do site e do app.
 
@@ -148,7 +151,7 @@ quiser voltar ao assunto — não reabrir por conta própria.
 - `viagens.py` — as viagens de cada pessoa (estrutura A): lista, criar,
   as partes de dentro, apagar, e a viagem de exemplo. Uma viagem só existe
   para quem a criou (404 para os outros)
-- `templates/inicio.html` — a página que vende (só para quem não entrou);
+- `templates/inicio.html` — a página inicial, com as fotos (para todo mundo);
   `planejar.html` — o formulário do roteiro; `explorar.html` + `roteiro.html` —
   os roteiros prontos (Banff)
 - `templates/viagens.html`, `viagem_nova.html`, `viagem.html` — a lista, criar

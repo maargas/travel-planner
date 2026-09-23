@@ -569,8 +569,6 @@ MESES = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho",
 @app.route("/")
 def inicio():
     """A página que apresenta o Farol: a promessa, como funciona, a prova."""
-    if contas.usuario_atual():
-        return redirect("/viagens")
     from sqlalchemy import select as _sel, func as _func
     destaque = None
     with db.engine.connect() as cx:

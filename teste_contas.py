@@ -139,7 +139,10 @@ anon = app.test_client()
 html = anon.get("/viagens").get_data(as_text=True)
 check("sem conta, a tela de viagens explica e mostra o exemplo", "Organize a sua viagem" in html and 'href="/exemplo"' in html)
 check("criar viagem exige estar logado", anon.get("/viagens/nova").status_code == 302)
-check("quem entrou abre o app nas viagens, nao na pagina de venda", c.get("/").status_code == 302)
+html = c.get("/").get_data(as_text=True)
+check("quem entrou tambem ve a pagina inicial, com as fotos",
+      "Um plano que chega na hora certa" in html and "/static/fotos/" in html)
+check("e a barra tem a aba Inicio", 'href="/" aria-current="page"' in html or '>Início<' in c.get("/viagens?todas=1").get_data(as_text=True))
 
 r = c.post("/viagens/nova", data={"destino": "Lisboa"})
 check("criar viagem sem o segredo do formulario e recusado", r.status_code == 400)

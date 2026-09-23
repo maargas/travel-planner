@@ -494,7 +494,12 @@
 <!-- Um elemento, duas formas: a barra de vidro no pé do celular, o trilho da
      esquerda no computador. -->
 <nav class="tabbar" aria-label="Navegação principal">
-  <a class="marca side-brand" href="{{ '/viagens' if usuario() else '/' }}">{{ logo(30) }}<span>Farol</span></a>
+  <a class="marca side-brand" href="/">{{ logo(30) }}<span>Farol</span></a>
+
+  <a class="tab" href="/" {% if page == 'inicio' %}aria-current="page"{% endif %}>
+    <span class="tab-ico"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8"></path><path d="M5 10v9a1 1 0 001 1h4v-6h4v6h4a1 1 0 001-1v-9"></path></svg></span>
+    <span>Início</span>
+  </a>
 
   {% set em_viagens = page in ('viagens', 'viagem') %}
   <a class="tab" href="/viagens" {% if em_viagens %}aria-current="page"{% endif %}>
