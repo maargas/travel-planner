@@ -9,22 +9,26 @@ Tamanho: **P** = uma sessão curta · **M** = uma sessão · **G** = mais de uma
 
 ## Agora, em ordem
 
-1. **"Seus pedidos" na conta de cada amigo (M).** O app não pede e-mail, então
+1. **Página da fila, só do dono (P).** Quando um amigo pede um destino, o pedido
+   vai para uma tabela que ninguém vê. Sem esta página, o pedido cai no vazio.
+   *Ganha:* você enxerga cada pedido. *Perde:* nada relevante — precisa só de
+   uma variável `FAROL_DONO` no Render com o seu nome de usuário (não é segredo).
+2. **"Seus pedidos" na conta de cada amigo (M).** O app não pede e-mail, então
    não tem como avisar ninguém. Mostrar o pedido com a situação (na fila,
    pesquisando, pronto) é o único jeito de o amigo saber que o roteiro dele saiu.
    *Ganha:* motivo para ele voltar ao app. *Perde:* você passa a ter de marcar a
    situação de cada pedido.
-2. **Pesquisar o próximo roteiro de verdade (M).** O site tem um roteiro só.
+3. **Pesquisar o próximo roteiro de verdade (M).** O site tem um roteiro só.
    O primeiro pedido de amigo é o candidato natural: resolve a viagem dele e
    vira a segunda prova do produto. *Ganha:* conteúdo, que é o produto.
    *Perde:* tempo de conversa, não dinheiro (é pesquisado à mão).
-3. **Páginas de erro em português, no visual novo (P).** Hoje quem erra um
+4. **Páginas de erro em português, no visual novo (P).** Hoje quem erra um
    endereço vê uma página crua, em inglês. Para quem viaja pouco, parece que o
    app quebrou. No mesmo conserto: quem erra a senha vezes demais recebe o
    aviso de "muitos acessos" dentro da tela de planejar viagem, que não tem
    nada a ver (achado do agente `proximos-passos`). *Ganha:* confiança, menos
    confusão. *Perde:* nada.
-4. **Recusar senhas comuns na criação e na troca (P).** Com uma lista guardada
+5. **Recusar senhas comuns na criação e na troca (P).** Com uma lista guardada
    no próprio app — nada é enviado para fora. Se um dia o banco for roubado,
    senha comum é a primeira a ser adivinhada a partir do embaralhado.
    *Ganha:* menos risco. *Perde:* um amigo pode ter de escolher outra senha.
@@ -45,9 +49,6 @@ celular; comentários desatualizados no código.
 
 ## Feito
 
-- 22/09/2026 — Fila de pedidos em `/fila`, só para o dono (quem está em
-  `FAROL_DONO` no Render): mostra cada pedido e deixa marcar "na fila",
-  "pesquisando" ou "pronto". Para qualquer outra pessoa, a página não existe.
 - 22/09/2026 — Banco permanente no Neon (Oregon, junto do servidor): contas
   não somem mais a cada publicação. `SECRET_KEY` no Render: ninguém é
   deslogado quando o servidor reinicia.

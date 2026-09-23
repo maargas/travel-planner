@@ -18,8 +18,6 @@ os.chdir(RAIZ)
 sys.path.insert(0, RAIZ)
 
 os.environ["MOCK_MODE"] = "1"
-# O visitante de mentira também é o "dono", para dar para ver a fila.
-os.environ["FAROL_DONO"] = "visitante"
 os.environ["DATABASE_URL"] = "sqlite:///" + os.path.join(
     tempfile.gettempdir(), "farol_ver_logado.db").replace("\\", "/")
 
@@ -38,15 +36,6 @@ with db.engine.begin() as cx:
         username="visitante", name="Visitante",
         password_hash=generate_password_hash(secrets.token_urlsafe(32)),
     )).inserted_primary_key[0]
-    # Dois pedidos de exemplo, só neste banco descartável.
-    from datetime import date
-    cx.execute(insert(db.requests_table), [
-        {"user_id": uid, "destination": "Lisboa, Portugal", "start_date": date(2027, 4, 10),
-         "days": 5, "budget_usd": 1500, "interests": "comida local, miradouros",
-         "status": "na fila"},
-        {"user_id": uid, "destination": "Buenos Aires", "start_date": None,
-         "days": 4, "budget_usd": None, "interests": None, "status": "pesquisando"},
-    ])
 
 
 @app.app.before_request

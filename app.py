@@ -2,7 +2,7 @@ import os
 import re
 import secrets
 import sys
-from datetime import date, datetime, timedelta, timezone
+from datetime import date, datetime, timedelta
 from dotenv import load_dotenv
 load_dotenv()
 import anthropic
@@ -96,7 +96,6 @@ app.register_blueprint(contas.bp)
 # formulário de login foi passado com esse nome.)
 app.jinja_env.globals["usuario"] = contas.usuario_atual
 app.jinja_env.globals["csrf_token"] = contas.csrf_token
-app.jinja_env.globals["e_dono"] = contas.e_dono
 # A foto e o trecho de vitrine de cada roteiro, e o registro das fotos com o
 # crédito de cada uma. Ficam no semente.py, junto do catálogo.
 app.jinja_env.globals["vitrine"] = semente.vitrine
@@ -815,58 +814,6 @@ def pedir():
             interests=(request.form.get("interests") or "").strip()[:255],
         ))
     return redirect("/viagens?pedido=1")
-
-
-# O que o dono pode marcar em cada pedido. O amigo vai ver essa mesma palavra
-# quando "Seus pedidos" existir na conta dele.
-SITUACOES = ["na fila", "pesquisando", "pronto"]
-# São Paulo não tem mais horário de verão desde 2019: o fuso é fixo em -3h. O
-# banco guarda a hora em UTC, e sem isto um pedido feito às 22h apareceria com
-# a data do dia seguinte.
-FUSO_BR = timezone(timedelta(hours=-3))
-
-
-@app.route("/fila")
-def fila():
-    """Os pedidos de destino dos amigos, só para o dono do app.
-
-    Para qualquer outra pessoa — inclusive logada — a resposta é "não existe",
-    e não "proibido": não há motivo para contar a ninguém que esta tela existe.
-    A consulta escolhe as colunas uma a uma; o hash da senha nunca é lido aqui.
-    """
-    if not contas.e_dono():
-        abort(404)
-    from sqlalchemy import select as _sel
-    r, u = db.requests_table, db.users
-    with db.engine.connect() as cx:
-        pedidos = cx.execute(
-            _sel(r.c.id, r.c.destination, r.c.start_date, r.c.days, r.c.budget_usd,
-                 r.c.interests, r.c.status, r.c.created_at, u.c.username, u.c.name)
-            .join(u, u.c.id == r.c.user_id)
-            .order_by(r.c.created_at.desc())
-        ).mappings().all()
-    pedidos = [
-        {**p, "pedido_em": (p["created_at"].replace(tzinfo=timezone.utc).astimezone(FUSO_BR)
-                            if p["created_at"] else None)}
-        for p in pedidos
-    ]
-    contagem = {s: sum(1 for p in pedidos if (p["status"] or "na fila") == s) for s in SITUACOES}
-    return render_template("fila.html", pedidos=pedidos, situacoes=SITUACOES, contagem=contagem)
-
-
-@app.post("/fila/<int:pid>")
-def fila_situacao(pid):
-    if not contas.e_dono():
-        abort(404)
-    if not contas.csrf_ok():
-        abort(400)
-    nova = request.form.get("status")
-    if nova not in SITUACOES:
-        abort(400)
-    from sqlalchemy import update as _upd
-    with db.engine.begin() as cx:
-        cx.execute(_upd(db.requests_table).where(db.requests_table.c.id == pid).values(status=nova))
-    return redirect(f"/fila#pedido-{pid}")
 
 
 @app.route("/lugares")

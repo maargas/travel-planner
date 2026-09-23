@@ -226,38 +226,6 @@ html = outro.get("/conta").get_data(as_text=True)
 check("a pagina da conta leva a trocar a senha", 'href="/conta/senha"' in html)
 check("e a aba com o nome leva a conta, nao ao painel de exemplo", 'href="/conta"' in html)
 
-# ── A fila de pedidos, só do dono ───────────────────────────────────────────
-# `outro` está logado como USUARIO desde o teste da senha nova.
-os.environ.pop("FAROL_DONO", None)
-check("sem FAROL_DONO, a fila nao existe para ninguem", outro.get("/fila").status_code == 404)
-check("e quem nao esta logado tambem nao ve a fila", anon.get("/fila").status_code == 404)
-
-terceiro = app.test_client()
-criar(terceiro, "segundo.amigo", nome="Segundo")
-os.environ["FAROL_DONO"] = "@" + USUARIO.upper()   # escrito do jeito que o dono quiser
-check("um amigo logado que nao e o dono nao ve a fila", terceiro.get("/fila").status_code == 404)
-check("nem consegue mudar a situacao de um pedido",
-      terceiro.post("/fila/1", data={"csrf": token(terceiro, "/viagens"), "status": "pronto"}).status_code == 404)
-
-html = outro.get("/fila").get_data(as_text=True)
-check("o dono ve a fila com o pedido", "Lisboa, Portugal" in html and "@" + USUARIO in html)
-check("a fila nao mostra hash de senha", "scrypt:" not in html)
-check("a conta do dono leva a fila", 'href="/fila"' in outro.get("/conta").get_data(as_text=True))
-check("a conta de quem nao e dono nao mostra a fila",
-      'href="/fila"' not in terceiro.get("/conta").get_data(as_text=True))
-
-with db.engine.connect() as cx:
-    pid = cx.execute(select(db.requests_table.c.id)).scalar_one()
-r = outro.post(f"/fila/{pid}", data={"status": "pesquisando"})
-check("mudar situacao sem o segredo do formulario e recusado", r.status_code == 400)
-r = outro.post(f"/fila/{pid}", data={"csrf": token(outro, "/fila"), "status": "sumiu"})
-check("situacao inventada e recusada", r.status_code == 400)
-r = outro.post(f"/fila/{pid}", data={"csrf": token(outro, "/fila"), "status": "pesquisando"})
-with db.engine.connect() as cx:
-    situacao = cx.execute(select(db.requests_table.c.status)).scalar_one()
-check("o dono muda a situacao do pedido", r.status_code == 302 and situacao == "pesquisando")
-os.environ.pop("FAROL_DONO", None)
-
 # ── Senha não vaza ──────────────────────────────────────────────────────────
 # Formulário com senha enviado por GET põe a senha no endereço — e endereço
 # fica no histórico do navegador e no registro do servidor.
