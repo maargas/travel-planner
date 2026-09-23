@@ -169,6 +169,32 @@ check("o formulario de roteiro mudou para /planejar",
 check("quem esta logado tem como sair, tambem no celular",
       'class="conta-rodape"' in c.get("/viagens").get_data(as_text=True))
 
+# ── Trocar a senha ──────────────────────────────────────────────────────────
+NOVA = "outraSenhaBoa456"
+check("trocar senha exige estar logado",
+      anon.get("/conta/senha").status_code == 302)
+
+r = c.post("/conta/senha", data={"atual": SENHA, "nova": NOVA})
+check("trocar senha sem o segredo do formulario e recusado", r.status_code == 400)
+
+r = c.post("/conta/senha", data={"csrf": token(c, "/conta/senha"), "atual": "chuteErrado1", "nova": NOVA})
+check("senha atual errada e recusada",
+      r.status_code == 400 and "atual não confere" in r.get_data(as_text=True))
+
+r = c.post("/conta/senha", data={"csrf": token(c, "/conta/senha"), "atual": SENHA, "nova": "curta"})
+check("senha nova curta e recusada", r.status_code == 400)
+
+r = c.post("/conta/senha", data={"csrf": token(c, "/conta/senha"), "atual": SENHA, "nova": NOVA})
+corpo = r.get_data(as_text=True)
+check("senha trocada", r.status_code == 200 and "Senha trocada" in corpo)
+check("e nenhuma das duas senhas aparece na pagina", SENHA not in corpo and NOVA not in corpo)
+
+outro = app.test_client()
+r = outro.post("/entrar", data={"csrf": token(outro), "usuario": USUARIO, "senha": SENHA})
+check("a senha antiga deixa de funcionar", r.status_code == 400)
+r = outro.post("/entrar", data={"csrf": token(outro), "usuario": USUARIO, "senha": NOVA})
+check("e a nova passa a funcionar", r.status_code == 302)
+
 # ── Resultado ───────────────────────────────────────────────────────────────
 print()
 for label, ok in checks:

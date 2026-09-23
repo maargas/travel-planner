@@ -21,7 +21,7 @@ from functools import wraps
 from flask import (
     Blueprint, render_template, request, redirect, session, url_for, g, abort,
 )
-from sqlalchemy import select, insert
+from sqlalchemy import select, insert, update
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from db import engine, users
@@ -197,3 +197,50 @@ def sair():
         abort(400)
     session.clear()
     return redirect("/")
+
+
+@bp.route("/conta/senha", methods=["GET", "POST"])
+@precisa_login
+def trocar_senha():
+    """Trocar a senha, sabendo a atual.
+
+    Pedir a atual impede que alguém com o celular destravado de outra pessoa
+    troque a senha dela e fique com a conta.
+
+    Limite conhecido: outros aparelhos em que a pessoa já entrou continuam
+    logados. A sessão mora num cookie assinado, e não no banco, então não há
+    uma lista de sessões para apagar. Derrubar todas exigiria um contador na
+    tabela de usuários — fica para quando houver motivo.
+    """
+    eu = usuario_atual()
+    if request.method == "POST":
+        if not csrf_ok():
+            return render_template("senha.html", erro="A página expirou. Tente de novo."), 400
+
+        atual = request.form.get("atual") or ""
+        nova = request.form.get("nova") or ""
+
+        with engine.connect() as cx:
+            guardado = cx.execute(
+                select(users.c.password_hash).where(users.c.id == eu["id"])
+            ).scalar_one()
+        if not check_password_hash(guardado, atual):
+            return render_template("senha.html", erro="A senha atual não confere."), 400
+        if len(nova) < MIN_SENHA:
+            return render_template("senha.html",
+                                   erro=f"A senha nova precisa ter pelo menos {MIN_SENHA} caracteres."), 400
+        if nova == atual:
+            return render_template("senha.html",
+                                   erro="A senha nova precisa ser diferente da atual."), 400
+
+        with engine.begin() as cx:
+            cx.execute(update(users).where(users.c.id == eu["id"])
+                       .values(password_hash=generate_password_hash(nova)))
+
+        # Sessão nova neste aparelho, como no login.
+        session.clear()
+        session["uid"] = eu["id"]
+        session.permanent = True
+        return render_template("senha.html", feito=True)
+
+    return render_template("senha.html")

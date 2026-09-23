@@ -316,6 +316,8 @@
       font-weight: 700; cursor: pointer;
     }
     .conta-sair:hover { color: var(--t-text); border-color: var(--t-text); }
+    .conta-link { display: inline-block; margin-top: 0.25rem; font-size: 0.71875rem; font-weight: 700; color: var(--t-muted); }
+    .conta-link:hover { color: var(--t-text); }
 
     /* No celular, o único lugar de sair da conta: no pé de toda página. */
     .conta-rodape {
@@ -473,6 +475,7 @@
     {% if usuario() %}
       <div class="conta-nome">{{ usuario().name }}</div>
       <div class="conta-usuario">@{{ usuario().username }}</div>
+      <a class="conta-link" href="/conta/senha">Trocar senha</a>
       <form method="POST" action="/sair" style="margin-top:0.5rem;">
         <input type="hidden" name="csrf" value="{{ csrf_token() }}">
         <button class="conta-sair" type="submit">Sair</button>

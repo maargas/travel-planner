@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% set page = 'senha' %}
+{% block title %}Trocar senha — Farol{% endblock %}
+
+{% block head_extra %}
+<style>
+  .troca { max-width: 26rem; margin: 0 auto; padding: 1.75rem 0 1rem; }
+  .troca h1 { font-size: 1.75rem; margin-bottom: 0.375rem; }
+  .troca .sub { font-size: 0.875rem; color: var(--t-muted); margin-bottom: 1.25rem; line-height: 1.5; }
+
+  .campos { display: flex; flex-direction: column; gap: 0.875rem; }
+  .campo { display: flex; flex-direction: column; gap: 0.375rem; }
+  .campo label { font-size: 0.75rem; font-weight: 700; }
+  .campo input {
+    width: 100%; background: var(--t-surface-2);
+    border: 1px solid var(--t-border); border-radius: var(--t-pill);
+    color: var(--t-text); font-family: inherit; font-size: 1rem;
+    padding: 0.75rem 1rem; caret-color: var(--navy);
+  }
+  .campo input:focus-visible { outline: none; border-color: var(--navy); box-shadow: 0 0 0 3px var(--t-accent-soft); }
+  .dica { font-size: 0.71875rem; color: var(--t-muted); line-height: 1.45; }
+
+  .erro, .feito {
+    display: flex; align-items: flex-start; gap: 0.5rem;
+    border-radius: var(--t-radius); padding: 0.75rem 0.9375rem;
+    margin-bottom: 1rem; font-size: 0.8125rem; line-height: 1.45;
+  }
+  .erro { background: var(--t-danger-bg); color: var(--t-danger); font-weight: 600; }
+  .feito { background: var(--t-accent-soft); color: #33501a; }
+  .troca .btn { width: 100%; margin-top: 1.25rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="troca">
+  <h1>Trocar senha</h1>
+  <p class="sub">Conta <b>@{{ usuario().username }}</b>. Use uma senha que você não usa em
+     nenhum outro site — o mais fácil é deixar o navegador sugerir uma e guardá-la.</p>
+
+  {% if feito %}
+    <div class="feito" role="status">
+      <span aria-hidden="true">✅</span>
+      <span><b>Senha trocada.</b> Da próxima vez que entrar, use a nova.</span>
+    </div>
+    <a class="btn btn-escuro" href="/viagens">Voltar aos roteiros</a>
+  {% else %}
+    {% if erro %}
+    <div class="erro" role="alert"><span aria-hidden="true">⚠️</span><span>{{ erro }}</span></div>
+    {% endif %}
+
+    <form class="card" method="POST" action="/conta/senha" autocomplete="on">
+      <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+      {# O gerenciador de senhas do navegador precisa saber de qual conta é a
+         senha nova; este campo escondido diz. #}
+      <input type="text" name="usuario" value="{{ usuario().username }}"
+             autocomplete="username" hidden readonly>
+
+      <div class="campos">
+        <div class="campo">
+          <label for="atual">Senha atual</label>
+          <input type="password" id="atual" name="atual" required autocomplete="current-password">
+        </div>
+        <div class="campo">
+          <label for="nova">Senha nova</label>
+          <input type="password" id="nova" name="nova" required minlength="8" autocomplete="new-password">
+          <span class="dica">Pelo menos 8 caracteres. Ao tocar neste campo, o Chrome e o
+            Safari costumam oferecer uma senha forte, que eles mesmos guardam.</span>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" type="submit">Trocar senha</button>
+    </form>
+  {% endif %}
+</div>
+{% endblock %}

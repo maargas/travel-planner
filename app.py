@@ -105,6 +105,9 @@ app.jinja_env.globals["foto"] = semente.FOTOS.get
 # limite por endereço é a defesa mais simples que existe contra ele.
 limiter.limit("10 per hour")(app.view_functions["contas.entrar"])
 limiter.limit("5 per hour")(app.view_functions["contas.criar_conta"])
+# Trocar a senha pede a atual, então é outro lugar onde dá para ficar testando
+# senha atrás de senha — mesmo limite do login.
+limiter.limit("10 per hour")(app.view_functions["contas.trocar_senha"])
 
 MODEL = os.environ.get("PLANNER_MODEL", "claude-sonnet-5")
 
