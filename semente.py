@@ -61,6 +61,28 @@ FOTOS = {
         "autor": "Febe Vanermen",
         "alt": "Lake Louise ao nascer do sol, com a geleira Victoria ao fundo",
     },
+    # `posicao` diz que parte da foto fica à vista quando ela é cortada para
+    # caber na tela (a foto vertical numa tela larga, por exemplo).
+    "jeronimos": {
+        "arquivo": "jeronimos-deidda",
+        "lugar": "Mosteiro dos Jerónimos",
+        "autor": "Vanessa Deidda",
+        "alt": "A torre do Mosteiro dos Jerónimos, em pedra clara, contra o céu azul",
+        "posicao": "center 35%",
+    },
+    "louvre": {
+        "arquivo": "louvre-nozina",
+        "lugar": "Museu do Louvre",
+        "autor": "Tomáš Nožina",
+        "alt": "A pirâmide de vidro do Louvre num dia de sol",
+        "posicao": "center 55%",
+    },
+    "iguacu": {
+        "arquivo": "iguacu-dallcol",
+        "lugar": "Cataratas do Iguaçu",
+        "autor": "Marcus Dall Col",
+        "alt": "As Cataratas do Iguaçu vistas do lado brasileiro, com um arco-íris sobre o rio",
+    },
 }
 
 # O que a vitrine mostra de cada roteiro além do texto: a foto da capa e um
@@ -91,6 +113,87 @@ VITRINE = {
         ],
     },
 }
+
+
+# A capa da página inicial: várias fotos, cada uma com um trecho de roteiro
+# desenhado por cima. Banff é trecho do roteiro publicado (conferido contra o
+# .md, pela VITRINE acima). Os outros são exemplos só da capa: cada horário,
+# etiqueta e deslocamento foi conferido nas páginas de `fontes`, na data de
+# `conferido_em`. Horário e dia de fechamento mudam — reconferir antes de mexer.
+#
+# `chegada` é o deslocamento até a primeira parada, quando ele importa.
+# `~` marca minuto estimado. (A capa só troca as fotos, sozinha — o dono não
+# quis botão de lugar nem de ônibus/carro nela.)
+CAPA = [
+    {
+        "id": "banff", "foto": "moraine", "foto_cel": "louise",
+        "lugar": "Banff, Canadá", "dia": "Dia 2", "roteiro": "banff-julho-2027",
+        "conferido_em": date(2026, 9, 24),
+        "trecho": VITRINE["banff-julho-2027"]["trecho"],
+        "fontes": ["conteudo/banff.md"],
+    },
+    {
+        "id": "lisboa", "foto": "jeronimos",
+        "lugar": "Belém, Lisboa", "dia": "Uma manhã (de terça a domingo)",
+        "conferido_em": date(2026, 9, 24),
+        "trecho": [
+                {"hora": "09:00", "lugar": "Pastéis de Belém", "etiqueta": "abre às 8h, todo dia",
+                 "tipo": "ok"},
+                {"ida": "~5 min a pé"},
+                {"hora": "09:30", "lugar": "Mosteiro dos Jerónimos", "etiqueta": "fecha às segundas",
+                 "tipo": "info"},
+                {"ida": "~15 min a pé"},
+                {"hora": "11:30", "lugar": "Torre de Belém",
+                 "etiqueta": "60 entradas a cada meia hora", "tipo": "info"},
+        ],
+        "fontes": [
+            "https://mosteirojeronimos.torrebelem.gov.pt/visitar",
+            "https://observador.pt/2026/05/26/torre-de-belem-reabre-apos-um-ano-de-obras-com-entradas-limitadas-a-900-por-dia-para-reduzir-filas/",
+            "https://pasteisdebelem.pt/contactos/",
+        ],
+    },
+    {
+        "id": "paris", "foto": "louvre",
+        "lugar": "Paris, França", "dia": "Uma quarta-feira",
+        "conferido_em": date(2026, 9, 24),
+        "trecho": [
+                {"hora": "09:00", "lugar": "Museu do Louvre", "etiqueta": "fecha às terças",
+                 "tipo": "info"},
+                {"ida": "~15 min a pé, pela Pont Royal"},
+                {"hora": "14:00", "lugar": "Musée d'Orsay",
+                 "etiqueta": "fecha às segundas · reserve o horário", "tipo": "info"},
+        ],
+        "fontes": [
+            "https://www.louvre.fr/en/visit/hours-admission",
+            "https://www.musee-orsay.fr/en/visit/admission-opening-times-tickets",
+            "https://www.musee-orsay.fr/fr/visiter",
+        ],
+    },
+    {
+        "id": "foz", "foto": "iguacu",
+        "lugar": "Foz do Iguaçu, Brasil", "dia": "Um dia de semana",
+        "conferido_em": date(2026, 9, 24),
+        "chegada": "~40 min de ônibus do centro (linha 120)",
+        "trecho": [
+            {"hora": "09:00", "lugar": "Cataratas do Iguaçu", "etiqueta": "abre às 9h em dia útil",
+             "tipo": "ok"},
+            {"ida": "ônibus do parque até a entrada + ~5 min a pé"},
+            {"hora": "14:00", "lugar": "Parque das Aves", "etiqueta": "entrada até 16h30 (inverno)",
+             "tipo": "estimativa"},
+        ],
+        "fontes": [
+            "https://cataratasdoiguacu.com.br/",
+            "https://www.parquedasaves.com.br/blog/parque-das-aves-foz-do-iguacu-novo-horario/",
+            "https://www.viajenaviagem.com/destino/foz-do-iguacu/como-se-locomover/",
+        ],
+    },
+]
+
+
+def capa():
+    """Os exemplos da capa, já com as fotos resolvidas."""
+    return [{**c, "foto": FOTOS[c["foto"]], "foto_cel": FOTOS[c.get("foto_cel", c["foto"])]}
+            for c in CAPA]
 
 
 def vitrine(slug):

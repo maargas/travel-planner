@@ -126,13 +126,23 @@ nome concreto que vira símbolo (a referência é a marca Caju).
   diz só o que o roteiro diz ("aberto sempre", "horário estimado").
 - Foto: sempre do lugar de verdade, em dois tamanhos (1600 e `-800`), com o
   crédito visível na tela e em `static/fotos/CREDITOS.md`.
+- **A capa troca de foto sozinha** (24/09/2026): Banff, Belém (Lisboa), Paris e
+  Foz do Iguaçu, cada foto com um trecho de roteiro desenhado por cima
+  (`semente.CAPA`). Banff é o roteiro publicado; os outros foram conferidos nas
+  fontes oficiais listadas em `fontes`, com `conferido_em`. **Sem botões na
+  capa** — nem de lugar, nem de ônibus/carro: ele pediu "só muda as fotos".
+- **Carro**: o formulário de roteiro pergunta "A pé e transporte público" ou
+  "Carro"; o pedido ao roteiro real e o de demonstração mudam com a escolha.
 
 ## Marca
 
 **Farol**, por ora. Ele disse que o nome "ainda não é fixo" e que avisa quando
 quiser voltar ao assunto — não reabrir por conta própria.
 
-- Símbolo: farol gordinho, torre vermelha com faixa creme, lanterna amarela,
+- **A logo vai mudar** (ele, 24/09/2026: "as cores não tem nada haver com o
+  site"). Três caminhos em marinho e limão na página fixada — farol limpo
+  (recomendado), o facho, o F aceso. Até ele escolher, fica a atual.
+- Símbolo atual: farol gordinho, torre vermelha com faixa creme, lanterna amarela,
   cúpula e pedra azul-marinho, facho aceso para os dois lados. Fonte da verdade:
   `static/farol.svg`. Cores: vermelho `#c8382e`, amarelo `#ffc93c`, marinho
   `#1f3a5f`, creme `#fff6e6`.

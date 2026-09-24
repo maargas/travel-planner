@@ -102,6 +102,7 @@ app.jinja_env.globals["csrf_token"] = contas.csrf_token
 # crédito de cada uma. Ficam no semente.py, junto do catálogo.
 app.jinja_env.globals["vitrine"] = semente.vitrine
 app.jinja_env.globals["foto"] = semente.FOTOS.get
+app.jinja_env.globals["capa_exemplos"] = semente.capa
 app.jinja_env.globals["minhas_viagens"] = viagens_mod.minhas_viagens
 app.jinja_env.globals["ABAS_VIAGEM"] = viagens_mod.ABAS
 app.jinja_env.filters["periodo"] = lambda v: viagens_mod.periodo(v["ida"], v["volta"])
@@ -178,7 +179,7 @@ def search_tool():
     return {"type": tool_type, "name": "web_search", "max_uses": SEARCHES}
 
 
-def build_prompt(destination, start_date, days, budget, style, interests):
+def build_prompt(destination, start_date, days, budget, style, interests, transporte="publico"):
     end_date = ""
     try:
         d = date.fromisoformat(start_date)
@@ -187,9 +188,19 @@ def build_prompt(destination, start_date, days, budget, style, interests):
         end_date = start_date
 
     interests_line = f"Traveller's interests: {interests}." if interests else ""
+    if transporte == "carro":
+        transport_line = (
+            "Transport: the traveller will have a car. Give every leg in driving minutes, say where "
+            "to park and what it costs (marked estimate unless read on a page), and flag any place "
+            "private cars cannot reach or where parking runs out early, with the way around it.")
+    else:
+        transport_line = (
+            "Transport: the traveller will NOT have a car. Use walking and public transport only, "
+            "and give the line or route and the minutes for every leg.")
 
     return f"""Plan a trip to {destination}, {start_date} to {end_date} ({days} days).
 Budget: ${budget} total. Style: {style}. {interests_line}
+{transport_line}
 
 You have a small, fixed number of web searches. Spend them well, in this order:
 1. Events on these exact dates that match the traveller's interests — a once-a-year event beats any permanent attraction. Search the interest, the city and the month together.
@@ -303,7 +314,24 @@ DEMO_DAYS = [
 ]
 
 
-def demo_itinerary(destination, start_date, days, budget, interests):
+# De carro, o que muda no roteiro de demonstração: os trechos longos viram
+# minutos dirigindo, e o bate e volta sai de carro em vez de trem. As
+# caminhadas curtas ficam — ninguém tira o carro para andar 8 minutos.
+DEMO_CARRO = {
+    "20 min de metrô, 5 paradas": "15 min de carro · estacionamento pago perto do parque",
+    "10 min de bonde ou ônibus": "8 min de carro",
+    "50 min de trem": "45 min de carro · saia antes do trânsito",
+    "trem de volta, 50 min": "volta de carro, 45 min",
+    "Estação central": "Saída de carro",
+    "primeiro trem 08:00": "antes do trânsito da manhã",
+    "Sai cedo de propósito: o último trem de volta costuma ser antes das 20h.":
+        "Sai cedo para pegar a estrada vazia e estacionar perto do centro da cidade vizinha.",
+    "Volta antes do escuro e com folga em relação ao último trem.":
+        "Volta antes do escuro, sem pressa na estrada.",
+}
+
+
+def demo_itinerary(destination, start_date, days, budget, interests, transporte="publico"):
     try:
         total_days = max(1, min(int(days), 10))
     except (ValueError, TypeError):
@@ -331,12 +359,21 @@ def demo_itinerary(destination, start_date, days, budget, interests):
         f"nessas datas e reorganizaria os dias se achasse algum que valesse a pena."
     )
 
+    carro = transporte == "carro"
     parts = [
         "## Heads up",
         "",
         f"**Este é um roteiro de demonstração para {destination}.**",
         interest_line,
         "",
+    ]
+    if carro:
+        parts += [
+            "Você escolheu ir **de carro**: no roteiro real, cada trecho vem em minutos dirigindo, "
+            "com onde estacionar e quanto custa — e o aviso de onde carro não entra.",
+            "",
+        ]
+    parts += [
         "É aqui que aparece o aviso que muda a viagem: um festival que lota a cidade, "
         "um museu fechado justamente no seu dia, uma obra que fechou a atração principal.",
         "",
@@ -362,6 +399,8 @@ def demo_itinerary(destination, start_date, days, budget, interests):
         parts += [f"## Dia {i + 1}{weekday} · {title}", ""]
 
         for entry in schedule:
+            if carro:
+                entry = tuple(DEMO_CARRO.get(x, x) for x in entry)
             if entry[0] == "leg":
                 parts += [f"↓ *{entry[1]}*", ""]
             else:
@@ -613,11 +652,12 @@ def plan():
     budget = request.form.get("budget", "").strip()
     style = request.form.get("style", "balanced").strip()
     interests = request.form.get("interests", "").strip()
+    transporte = "carro" if request.form.get("transporte") == "carro" else "publico"
 
     today, latest = date_bounds()
     form_values = dict(
         destination=destination, start_date=start_date, days=days,
-        budget=budget, style=style, interests=interests,
+        budget=budget, style=style, interests=interests, transporte=transporte,
         today=today.isoformat(), max_date=latest.isoformat(), demo=MOCK_MODE,
     )
 
@@ -631,7 +671,7 @@ def plan():
     if MOCK_MODE:
         return render_template(
             "planejar.html",
-            itinerary=demo_itinerary(destination, start_date, days, budget, interests),
+            itinerary=demo_itinerary(destination, start_date, days, budget, interests, transporte),
             sources=MOCK_SOURCES,
             **form_values,
         )
@@ -654,7 +694,7 @@ def plan():
         )
 
         messages = [{"role": "user", "content": build_prompt(
-            destination, start_date, days, budget, style, interests
+            destination, start_date, days, budget, style, interests, transporte
         )}]
         saved = save_path_for(destination)
         parts, sources, stop = [], {}, None

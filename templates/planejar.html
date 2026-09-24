@@ -302,6 +302,15 @@
         </div>
 
         <div class="field">
+          <label id="transporte-label">Como você vai se locomover?</label>
+          <div class="pills" role="group" aria-labelledby="transporte-label">
+            <button type="button" class="pill pill-transporte" data-transporte="publico">A pé e transporte público</button>
+            <button type="button" class="pill pill-transporte" data-transporte="carro">Carro</button>
+          </div>
+          <input type="hidden" name="transporte" id="transporte" value="{{ transporte or 'publico' }}">
+        </div>
+
+        <div class="field">
           <label id="style-label">Estilo</label>
           <div class="pills" role="group" aria-labelledby="style-label">
             <button type="button" class="pill" data-style="mochilão">Mochilão</button>
@@ -393,7 +402,17 @@
 {% block scripts %}
 <script>
   const styleInput = document.getElementById('style');
-  const pills = document.querySelectorAll('.pill');
+  const pills = document.querySelectorAll('.pill[data-style]');
+
+  // A pé e transporte público, ou carro: muda os trechos do roteiro.
+  const transporteInput = document.getElementById('transporte');
+  const pillsTransporte = document.querySelectorAll('.pill-transporte');
+  function setTransporte(v) {
+    transporteInput.value = v;
+    pillsTransporte.forEach(p => p.setAttribute('aria-pressed', String(p.dataset.transporte === v)));
+  }
+  pillsTransporte.forEach(p => p.addEventListener('click', () => setTransporte(p.dataset.transporte)));
+  setTransporte(transporteInput.value);
 
   function setStyle(value) {
     styleInput.value = value;

@@ -18,6 +18,22 @@ Tamanho: **P** = uma sessão curta · **M** = uma sessão · **G** = mais de uma
   dentro da viagem, Roteiro · Gastos · Documentos · Pessoas. **Montada e
   publicada.** A página inicial com as fotos abre para todo mundo.
 
+## Decisão em aberto: a logo nova
+
+As cores do farol (vermelho, amarelo, creme) não conversam com o site. Três
+caminhos em marinho e limão na página fixada: **farol limpo** (recomendado — o
+mesmo farol, mais simples), **o facho** (só a luz) e **o F aceso** (a letra
+com facho; depende do nome).
+
+## Ideias das marcas (com esboço na página fixada)
+
+- **A busca sobre a foto** (Airbnb): "Para onde? · Quando? · Quem vai?" em
+  vidro na capa, criando a viagem. O caminho mais curto entre ver e usar.
+- **"Encontre a sua viagem"** (Shoe Finder da On): perguntas curtas —
+  interesses, tempo, como vai se locomover — que sugerem destinos.
+- **A história numa frase** (Nike): contar na capa o museu sugerido na semana
+  da Fórmula 1, que é por que o Farol existe.
+
 ## Ideia em aberto: a pegada de rede social
 
 Ideia dele (23/09/2026): ver quem é seu amigo no app, onde está viajando, qual a
@@ -62,6 +78,11 @@ os amigos podem ver antes de construir.
 
 ## Feito
 
+- 24/09/2026 — **A capa troca de foto sozinha**: Banff, Belém, Paris e Foz do
+  Iguaçu, cada uma com um trecho de roteiro conferido em fonte oficial. E a
+  **opção de carro** no formulário de roteiro.
+- 24/09/2026 — Pesquisa de marcas (Apple, On, Nike, Airbnb, Polarsteps) e três
+  caminhos para a logo nova, na página fixada.
 - 23/09/2026 — Página inicial com as fotos **de volta para quem está logado**,
   e a aba Início na barra (eu tinha escondido; ele mandou corrigir).
 - 23/09/2026 — **Estrutura A no ar**: Viagens · Explorar · Conta. Dá para

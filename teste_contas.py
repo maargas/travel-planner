@@ -249,6 +249,36 @@ check("toda foto esta na lista de creditos",
 check("e o fotografo aparece na capa",
       all(semente.FOTOS[k]["autor"] in html for k in ("louise", "moraine", "moraine-nublado")))
 
+# A capa com vários exemplos: cada um conferido numa fonte, e o de Banff
+# ligado ao roteiro publicado. O carro aparece onde há um jeito diferente de ir.
+exemplos = semente.CAPA
+check("a capa tem varios exemplos, e cada um diz onde foi conferido",
+      len(exemplos) >= 3 and all(e["fontes"] and e["conferido_em"] for e in exemplos))
+check("toda parada da capa tem hora, lugar e etiqueta; todo trecho entre elas, o como",
+      all((p.get("hora") and p.get("lugar") and p.get("etiqueta")) or p.get("ida")
+          for e in exemplos for p in e["trecho"]))
+check("o trecho de Banff na capa e o mesmo do roteiro publicado",
+      exemplos[0]["trecho"] is semente.VITRINE["banff-julho-2027"]["trecho"])
+html = anon.get("/").get_data(as_text=True)
+check("a capa mostra todos os exemplos, com o credito de cada foto",
+      all(e["lugar"].split(",")[0] in html for e in exemplos)
+      and all(semente.FOTOS[e["foto"]]["autor"] in html for e in exemplos))
+check("a capa so troca as fotos, sem botao de lugar nem de onibus/carro",
+      html.count('class="slide') == len(exemplos) and "data-modo" not in html and "data-ir" not in html)
+
+# O formulário de roteiro com carro: o de demonstração muda os trechos, e o
+# pedido ao roteiro real avisa que há carro.
+dados = {"destination": "Lisboa", "start_date": (__import__("datetime").date.today()
+         + __import__("datetime").timedelta(days=30)).isoformat(), "days": "4", "budget": "900"}
+com_carro = anon.post("/plan", data={**dados, "transporte": "carro"}).get_data(as_text=True)
+sem_carro = anon.post("/plan", data=dados).get_data(as_text=True)
+check("roteiro de carro troca o trem pelo carro",
+      "45 min de carro" in com_carro and "50 min de trem" not in com_carro)
+check("e sem carro continua de trem", "50 min de trem" in sem_carro)
+check("o pedido ao roteiro real diz que ha carro",
+      "will have a car" in appmod.build_prompt("Lisboa", "2027-04-10", 4, 900, "x", "", "carro")
+      and "will NOT have a car" in appmod.build_prompt("Lisboa", "2027-04-10", 4, 900, "x", ""))
+
 check("o formulario de roteiro mudou para /planejar",
       'action="/plan"' in anon.get("/planejar").get_data(as_text=True))
 check("quem esta logado tem a conta a um toque, tambem no celular",
